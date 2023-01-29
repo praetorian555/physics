@@ -13,19 +13,23 @@ target_include_directories(physics PRIVATE ${PROJECT_SOURCE_DIR}/src)
 # Setup library dependencies
 target_link_libraries(physics PUBLIC math)
 
+if (PHYSICS_RENDER)
+    target_link_libraries(physics PUBLIC rndr)
+endif ()
+
 # IDEs should put the headers in a nice place
 set_target_properties(physics PROPERTIES FOLDER Physics)
 source_group(
-  TREE "${PROJECT_SOURCE_DIR}/include"
-  PREFIX "API"
-  FILES ${PUBLIC_SOURCE_LIST})
+        TREE "${PROJECT_SOURCE_DIR}/include"
+        PREFIX "API"
+        FILES ${PUBLIC_SOURCE_LIST})
 source_group(
-  TREE "${PROJECT_SOURCE_DIR}/src"
-  PREFIX "Implementation"
-  FILES ${PRIVATE_SOURCE_LIST})
+        TREE "${PROJECT_SOURCE_DIR}/src"
+        PREFIX "Implementation"
+        FILES ${PRIVATE_SOURCE_LIST})
 if (PHYSICS_UNITY)
-  source_group(
-    TREE "${PROJECT_BINARY_DIR}/src/CMakeFiles/physics.dir/Unity"
-    PREFIX "Unity"
-    FILES ${UNITY_SOURCE_LIST})
-endif()
+    source_group(
+            TREE "${PROJECT_BINARY_DIR}/src/CMakeFiles/physics.dir/Unity"
+            PREFIX "Unity"
+            FILES ${UNITY_SOURCE_LIST})
+endif ()
