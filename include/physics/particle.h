@@ -19,21 +19,21 @@ public:
     void Integrate(real DeltaSeconds);
 
     void SetPosition(const math::Point3& Position);
-    math::Point3 GetPosition() const;
+    [[nodiscard]] math::Point3 GetPosition() const;
 
     void SetVelocity(const math::Vector3& Velocity);
-    math::Vector3 GetVelocity() const;
+    [[nodiscard]] math::Vector3 GetVelocity() const;
 
     void SetAcceleration(const math::Vector3& Acceleration);
-    math::Vector3 GetAcceleration() const;
+    [[nodiscard]] math::Vector3 GetAcceleration() const;
 
     void SetMass(real Mass);
     void SetInverseMass(real InverseMass);
-    real GetMass() const;
-    real GetInverseMass() const;
+    [[nodiscard]] real GetMass() const;
+    [[nodiscard]] real GetInverseMass() const;
 
     void SetDamping(real Damping);
-    real GetDamping() const;
+    [[nodiscard]] real GetDamping() const;
 
 protected:
     math::Point3 m_Position;
@@ -42,11 +42,11 @@ protected:
 
     // Represents value 1 / mass since we often need objects with infinite mass (immovable objects)
     // which then have inverse mass of 0.
-    real m_InverseMass;
+    real m_InverseMass = PHYSICS_REALC(0.0);
 
     // Simple representation of the drag force used to avoid numerical inaccuracies that can lead to
     // objects accelerating of their own accord.
-    real m_Damping;
+    real m_Damping = PHYSICS_REALC(0.99);
 };
 
 }  // namespace physics
