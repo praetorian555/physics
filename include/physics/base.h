@@ -16,3 +16,5 @@ using real = float;
 #else
 #define PHYSICS_REALC(Value) Value##f
 #endif
+
+#define PHYSICS_UNUSED(X) (void)(X)
