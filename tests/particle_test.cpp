@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "physics/particle.h"
+#include "physics/particleforcegenerator.h"
 
 TEST_CASE("Default", "Particle")
 {
@@ -75,4 +76,25 @@ TEST_CASE("Force", "Particle")
     REQUIRE(Particle.GetAcceleration() ==
             math::Vector3(PHYSICS_REALC(5.0), PHYSICS_REALC(7.0), PHYSICS_REALC(9.0)));
     REQUIRE(Particle.GetForceAccumulator() == math::Vector3());
+}
+
+TEST_CASE("Gravity", "Particle")
+{
+    physics::Particle Particle;
+    Particle.SetMass(PHYSICS_REALC(1.0));
+    Particle.SetDamping(PHYSICS_REALC(0.5));
+    Particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
+    physics::ParticleGravity Gravity(math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
+    REQUIRE(Gravity.GetGravity() ==
+            math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
+    Gravity.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
+    Particle.Integrate(PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetPosition() ==
+            math::Point3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
+    REQUIRE(Particle.GetVelocity() ==
+            math::Vector3(PHYSICS_REALC(2.5), PHYSICS_REALC(3.5), PHYSICS_REALC(4.5)));
+    REQUIRE(Particle.GetAcceleration() ==
+            math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
 }
