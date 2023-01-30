@@ -1,8 +1,24 @@
-//
-// Created by Marko on 29/01/2023.
-//
+#pragma once
 
-#ifndef PHYSICS_RENDERER_H
-#define PHYSICS_RENDERER_H
+#include <memory>
 
-#endif //PHYSICS_RENDERER_H
+#include "rndr/render/graphicscontext.h"
+
+namespace physics
+{
+
+class Renderer
+{
+public:
+    Renderer(rndr::GraphicsContext* Context, int WindowWidth, int WindowHeight);
+    ~Renderer() = default;
+
+    void Resize(int Width, int Height);
+
+private:
+    rndr::GraphicsContext* m_GraphicsContext;
+    int m_Width = 0;
+    int m_Height = 0;
+};
+
+}  // namespace physics
