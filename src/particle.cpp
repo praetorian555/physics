@@ -25,11 +25,14 @@ void physics::Particle::Integrate(real DeltaSeconds)
 
     // Update the position based on the velocity during the previous frame.
     // We are ignoring the factor that depends on the acceleration since the values of acceleration
-    // are usually small and additionally multipled by square of time will result in negligable
+    // are usually small and additionally multiply by square of time will result in negligible
     // position change.
     m_Position += m_Velocity * DeltaSeconds;
 
-    // TODO(Marko): Calculate the acceleration based on the forces applied to the particle
+    if (!m_OverrideForces)
+    {
+        m_Acceleration = m_ForceAccumulator * m_InverseMass;
+    }
 
     // Update the velocity based on the acceleration.
     m_Velocity += m_Acceleration * DeltaSeconds;
@@ -37,7 +40,8 @@ void physics::Particle::Integrate(real DeltaSeconds)
     // Apply drag force.
     m_Velocity *= PHYSICS_POW(m_Damping, DeltaSeconds);
 
-    // TODO(Marko): Clear the force accumulator
+    ClearAccumulator();
+    m_OverrideForces = false;
 }
 
 void physics::Particle::SetPosition(const math::Point3& Position)
@@ -63,6 +67,7 @@ math::Vector3 physics::Particle::GetVelocity() const
 void physics::Particle::SetAcceleration(const math::Vector3& Acceleration)
 {
     m_Acceleration = Acceleration;
+    m_OverrideForces = true;
 }
 
 math::Vector3 physics::Particle::GetAcceleration() const
@@ -101,4 +106,19 @@ void physics::Particle::SetDamping(real Damping)
 physics::real physics::Particle::GetDamping() const
 {
     return m_Damping;
+}
+
+void physics::Particle::ClearAccumulator()
+{
+    m_ForceAccumulator = math::Vector3{};
+}
+
+void physics::Particle::AddForce(const math::Vector3& Force)
+{
+    m_ForceAccumulator += Force;
+}
+
+const math::Vector3& physics::Particle::GetForceAccumulator() const
+{
+    return m_ForceAccumulator;
 }

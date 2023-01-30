@@ -50,3 +50,26 @@ TEST_CASE("Integration", "Particle")
     REQUIRE(Particle.GetAcceleration() ==
             math::Vector3(PHYSICS_REALC(7.0), PHYSICS_REALC(8.0), PHYSICS_REALC(9.0)));
 }
+
+TEST_CASE("Force", "Particle")
+{
+    // Write a test for AddForce in Particle.
+    physics::Particle Particle;
+    Particle.SetMass(PHYSICS_REALC(1.0));
+    Particle.SetDamping(PHYSICS_REALC(0.5));
+    Particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
+    Particle.AddForce(math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
+    Particle.AddForce(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(5.0), PHYSICS_REALC(7.0), PHYSICS_REALC(9.0)));
+
+    // Write a test for Integrate in Particle but with a force accumulator.
+    Particle.Integrate(PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetPosition() ==
+            math::Point3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
+    REQUIRE(Particle.GetVelocity() ==
+            math::Vector3(PHYSICS_REALC(4.5), PHYSICS_REALC(6.0), PHYSICS_REALC(7.5)));
+    REQUIRE(Particle.GetAcceleration() ==
+            math::Vector3(PHYSICS_REALC(5.0), PHYSICS_REALC(7.0), PHYSICS_REALC(9.0)));
+    REQUIRE(Particle.GetForceAccumulator() == math::Vector3());
+}
