@@ -60,7 +60,7 @@ if (NOT TARGET math)
     FetchContent_Declare(
             math
             GIT_REPOSITORY https://github.com/praetorian555/math
-            GIT_TAG cadf02be7873adf18ea0764a0f516ae6391fed2e
+            GIT_TAG main
     )
     set(MATH_UNITY ${PHYSICS_UNITY} CACHE BOOL "" FORCE)
     set(MATH_SANITIZER ${PHYSICS_SANITIZER} CACHE BOOL "" FORCE)
@@ -72,7 +72,7 @@ if (NOT TARGET rndr AND PHYSICS_RENDER)
     FetchContent_Declare(
             rndr
             GIT_REPOSITORY https://github.com/praetorian555/rndr
-            GIT_TAG 8da69154dd739d922e884f94b6ddcff1baea8def
+            GIT_TAG master
     )
 
     set(RNDR_UNITY ${PHYSICS_UNITY} CACHE BOOL "" FORCE)
