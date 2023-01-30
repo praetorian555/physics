@@ -10,6 +10,7 @@ TEST_CASE("Default", "Particle")
     REQUIRE(Particle.GetAcceleration() == math::Vector3());
     REQUIRE(Particle.GetDamping() == PHYSICS_REALC(0.99));
     REQUIRE(Particle.GetInverseMass() == PHYSICS_REALC(0.0));
+    REQUIRE(Particle.HasFiniteMass() == false);
 }
 
 TEST_CASE("Setters", "Particle")
@@ -31,6 +32,7 @@ TEST_CASE("Setters", "Particle")
     REQUIRE(Particle.GetMass() == PHYSICS_REALC(1.0));
     Particle.SetInverseMass(PHYSICS_REALC(2.0));
     REQUIRE(Particle.GetInverseMass() == PHYSICS_REALC(2.0));
+    REQUIRE(Particle.HasFiniteMass() == true);
 }
 
 TEST_CASE("Integration", "Particle")
@@ -49,6 +51,7 @@ TEST_CASE("Integration", "Particle")
             math::Vector3(PHYSICS_REALC(5.5), PHYSICS_REALC(6.5), PHYSICS_REALC(7.5)));
     REQUIRE(Particle.GetAcceleration() ==
             math::Vector3(PHYSICS_REALC(7.0), PHYSICS_REALC(8.0), PHYSICS_REALC(9.0)));
+    REQUIRE(Particle.HasFiniteMass() == true);
 }
 
 TEST_CASE("Force", "Particle")

@@ -97,6 +97,11 @@ physics::real physics::Particle::GetInverseMass() const
     return m_InverseMass;
 }
 
+bool physics::Particle::HasFiniteMass() const
+{
+    return m_InverseMass != PHYSICS_REALC(0.0);
+}
+
 void physics::Particle::SetDamping(real Damping)
 {
     assert(Damping >= PHYSICS_REALC(0.0) && Damping <= PHYSICS_REALC(1.0));

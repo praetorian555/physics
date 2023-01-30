@@ -32,6 +32,8 @@ public:
     [[nodiscard]] real GetMass() const;
     [[nodiscard]] real GetInverseMass() const;
 
+    bool HasFiniteMass() const;
+
     void SetDamping(real Damping);
     [[nodiscard]] real GetDamping() const;
 
