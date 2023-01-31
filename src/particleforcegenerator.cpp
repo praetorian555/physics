@@ -36,7 +36,7 @@ void physics::ParticleGravity::UpdateForce(physics::Particle& Particle, float De
     {
         return;
     }
-    Particle.AddForce(m_Gravity * Particle.GetMass());
+    Particle.AddForce(m_Gravity * Particle.GetInverseMass());
 }
 
 void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
