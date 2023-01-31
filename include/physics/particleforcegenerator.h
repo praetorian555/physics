@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "math/vector3.h"
+
 #include "physics/base.h"
 
 namespace physics

@@ -1,5 +1,7 @@
 #include "physics/particleforcegenerator.h"
 
+#include "physics/particle.h"
+
 void physics::ParticleForceRegistry::Add(physics::Particle* Particle,
                                          physics::ParticleForceGenerator* ForceGenerator)
 {
