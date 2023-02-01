@@ -3,13 +3,6 @@
 #include <cassert>
 #include <cmath>
 
-// TODO(Marko): Move this to math library
-#ifdef PHYSICS_REAL_AS_DOUBLE
-#define PHYSICS_POW(A, B) std::pow(A, B)
-#else
-#define PHYSICS_POW(A, B) std::powf(A, B)
-#endif
-
 void physics::Particle::Integrate(real DeltaSeconds)
 {
     if (DeltaSeconds <= PHYSICS_REALC(0.0))
@@ -38,7 +31,7 @@ void physics::Particle::Integrate(real DeltaSeconds)
     m_Velocity += m_Acceleration * DeltaSeconds;
 
     // Apply drag force.
-    m_Velocity *= PHYSICS_POW(m_Damping, DeltaSeconds);
+    m_Velocity *= math::Power(m_Damping, DeltaSeconds);
 
     ClearAccumulator();
     m_OverrideForces = false;
