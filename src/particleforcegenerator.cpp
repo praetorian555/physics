@@ -54,3 +54,15 @@ void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, float Delta
 
     Particle.AddForce(DragForce);
 }
+
+void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+{
+    PHYSICS_UNUSED(DeltaSeconds);
+
+    math::Vector3 LengthVector = Particle.GetPosition() - m_Other->GetPosition();
+    const real Length = LengthVector.Length();
+    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    LengthVector = math::Normalize(LengthVector);
+
+    Particle.AddForce(-LengthVector * SpringForce);
+}
