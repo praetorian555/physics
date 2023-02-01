@@ -10,10 +10,12 @@ project(
 option(PHYSICS_UNITY "Enable unity builds" ON)
 option(PHYSICS_SANITIZER "Enable address sanitizer" ON)
 option(PHYSICS_RENDER "Enable built-in renderer" ON)
+option(PHYSICS_REAL_AS_DOUBLE "Use double-precision floating point numbers" OFF)
 
 message(STATUS "PHYSICS_UNITY ${PHYSICS_UNITY}")
 message(STATUS "PHYSICS_SANITIZER ${PHYSICS_SANITIZER}")
 message(STATUS "PHYSICS_RENDER ${PHYSICS_RENDER}")
+message(STATUS "PHYSICS_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE}")
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -64,6 +66,7 @@ if (NOT TARGET math)
     )
     set(MATH_UNITY ${PHYSICS_UNITY} CACHE BOOL "" FORCE)
     set(MATH_SANITIZER ${PHYSICS_SANITIZER} CACHE BOOL "" FORCE)
+    set(MATH_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE} CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(math)
     set_target_properties(math PROPERTIES FOLDER Extern)
 endif ()

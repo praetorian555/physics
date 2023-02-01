@@ -12,6 +12,9 @@ target_include_directories(physics PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 # Setup library dependencies
 target_link_libraries(physics PUBLIC math)
+if (PHYSICS_REAL_AS_DOUBLE)
+    target_compile_definitions(physics PUBLIC PHYSICS_REAL_AS_DOUBLE)
+endif ()
 
 if (PHYSICS_RENDER)
     target_link_libraries(physics PUBLIC rndr)

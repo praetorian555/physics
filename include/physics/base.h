@@ -1,20 +1,13 @@
 #pragma once
 
+#include "math/base.h"
+
 namespace physics
 {
-#ifdef PHYSICS_REAL_AS_DOUBLE
-// TODO(Marko): To make this work we need to add support for double to math library
-using real = double;
-#else
-using real = float;
-#endif
+using real = math::real;
 }  // namespace physics
 
 // Used to represent a constant of type real
-#ifdef PHYSICS_REAL_AS_DOUBLE
-#define PHYSICS_REALC(Value) Value
-#else
-#define PHYSICS_REALC(Value) Value##f
-#endif
+#define PHYSICS_REALC(X) MATH_REALC(X)
 
 #define PHYSICS_UNUSED(X) (void)(X)
