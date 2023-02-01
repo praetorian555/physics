@@ -193,3 +193,38 @@ TEST_CASE("Spring", "Particle")
     SpringGen.SetRestLength(PHYSICS_REALC(4.0));
     REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(4.0));
 }
+
+TEST_CASE("AnchoredSpring", "Particle")
+{
+    // Write a test for ParticleAnchoredSpring in Particle.
+    physics::Particle Particle;
+    Particle.SetMass(PHYSICS_REALC(1.0));
+    Particle.SetDamping(PHYSICS_REALC(0.5));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    physics::ParticleAnchoredSpring SpringGen(
+        math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)),
+        PHYSICS_REALC(2.0),
+        PHYSICS_REALC(2.0));
+    REQUIRE(SpringGen.GetAnchor() ==
+            math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
+    REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(2.0));
+    REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(2.0));
+    SpringGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
+    Particle.Integrate(PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetPosition() ==
+            math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    REQUIRE(Particle.GetVelocity() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(2.0)));
+    REQUIRE(Particle.GetAcceleration() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
+    SpringGen.SetAnchor(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(2.0)));
+    REQUIRE(SpringGen.GetAnchor() ==
+            math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(2.0)));
+    SpringGen.SetSpringConstant(PHYSICS_REALC(4.0));
+    REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(4.0));
+    SpringGen.SetRestLength(PHYSICS_REALC(4.0));
+    REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(4.0));
+}

@@ -66,3 +66,15 @@ void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, float Del
 
     Particle.AddForce(-LengthVector * SpringForce);
 }
+
+void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+{
+    PHYSICS_UNUSED(DeltaSeconds);
+
+    math::Vector3 LengthVector = Particle.GetPosition() - m_Anchor;
+    const real Length = LengthVector.Length();
+    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    LengthVector = math::Normalize(LengthVector);
+
+    Particle.AddForce(-LengthVector * SpringForce);
+}

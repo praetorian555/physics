@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "math/point3.h"
 #include "math/vector3.h"
 
 #include "physics/base.h"
@@ -98,6 +99,31 @@ public:
 
 private:
     Particle* m_Other;
+    real m_SpringConstant;
+    real m_RestLength;
+};
+
+// Applies a spring force to the particle. Other side of the spring is anchored to a point. Can be
+// applied to multiple particles.
+class ParticleAnchoredSpring : public ParticleForceGenerator
+{
+public:
+    ParticleAnchoredSpring(const math::Point3& Anchor, real SpringConstant, real RestLength)
+        : m_Anchor(Anchor), m_SpringConstant(SpringConstant), m_RestLength(RestLength)
+    {
+    }
+
+    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+
+    void SetAnchor(const math::Point3& Anchor) { m_Anchor = Anchor; }
+    [[nodiscard]] const math::Point3& GetAnchor() const { return m_Anchor; }
+    void SetSpringConstant(real SpringConstant) { m_SpringConstant = SpringConstant; }
+    [[nodiscard]] real GetSpringConstant() const { return m_SpringConstant; }
+    void SetRestLength(real RestLength) { m_RestLength = RestLength; }
+    [[nodiscard]] real GetRestLength() const { return m_RestLength; }
+
+private:
+    math::Point3 m_Anchor;
     real m_SpringConstant;
     real m_RestLength;
 };
