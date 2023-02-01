@@ -128,4 +128,29 @@ private:
     real m_RestLength;
 };
 
+// Applies a spring force to the particle only if the spring is longer then the resting length.
+// Other side of the spring is also connected to a particle. Can be used on multiple particles.
+class ParticleBungee : public ParticleForceGenerator
+{
+public:
+    ParticleBungee(Particle* Other, real SpringConstant, real RestLength)
+        : m_Other(Other), m_SpringConstant(SpringConstant), m_RestLength(RestLength)
+    {
+    }
+
+    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+
+    void SetOther(Particle* Other) { m_Other = Other; }
+    [[nodiscard]] Particle* GetOther() const { return m_Other; }
+    void SetSpringConstant(real SpringConstant) { m_SpringConstant = SpringConstant; }
+    [[nodiscard]] real GetSpringConstant() const { return m_SpringConstant; }
+    void SetRestLength(real RestLength) { m_RestLength = RestLength; }
+    [[nodiscard]] real GetRestLength() const { return m_RestLength; }
+
+private:
+    Particle* m_Other;
+    real m_SpringConstant;
+    real m_RestLength;
+};
+
 }  // namespace physics

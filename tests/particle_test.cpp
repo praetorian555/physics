@@ -166,12 +166,14 @@ TEST_CASE("Spring", "Particle")
     Particle1.SetMass(PHYSICS_REALC(1.0));
     Particle1.SetDamping(PHYSICS_REALC(0.5));
     Particle1.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
-    Particle1.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle1.SetVelocity(
+        math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     physics::Particle Particle2;
     Particle2.SetMass(PHYSICS_REALC(1.0));
     Particle2.SetDamping(PHYSICS_REALC(0.5));
     Particle2.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
-    Particle2.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle2.SetVelocity(
+        math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     physics::ParticleSpring SpringGen(&Particle1, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(SpringGen.GetOther() == &Particle1);
     REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(2.0));
@@ -204,8 +206,7 @@ TEST_CASE("AnchoredSpring", "Particle")
     Particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     physics::ParticleAnchoredSpring SpringGen(
         math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)),
-        PHYSICS_REALC(2.0),
-        PHYSICS_REALC(2.0));
+        PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(SpringGen.GetAnchor() ==
             math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
     REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(2.0));
@@ -227,4 +228,44 @@ TEST_CASE("AnchoredSpring", "Particle")
     REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(4.0));
     SpringGen.SetRestLength(PHYSICS_REALC(4.0));
     REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(4.0));
+}
+
+TEST_CASE("BungeeSpring", "Particle")
+{
+    // Write a test for ParticleBungeeSpring in Particle.
+    physics::Particle Particle;
+    Particle.SetMass(PHYSICS_REALC(1.0));
+    Particle.SetDamping(PHYSICS_REALC(0.5));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    physics::Particle Particle2;
+    Particle2.SetMass(PHYSICS_REALC(1.0));
+    Particle2.SetDamping(PHYSICS_REALC(0.5));
+    Particle2.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
+    Particle2.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    physics::ParticleBungee SpringGen(&Particle, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
+    REQUIRE(SpringGen.GetOther() == &Particle);
+    REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(2.0));
+    REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(2.0));
+    SpringGen.UpdateForce(Particle2, PHYSICS_REALC(1.0));
+    REQUIRE(Particle2.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(-4.0)));
+    Particle2.Integrate(PHYSICS_REALC(1.0));
+    REQUIRE(Particle2.GetPosition() ==
+            math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
+    REQUIRE(Particle2.GetVelocity() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(-2.0)));
+    REQUIRE(Particle2.GetAcceleration() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(-4.0)));
+
+    SpringGen.SetOther(&Particle2);
+    REQUIRE(SpringGen.GetOther() == &Particle2);
+    SpringGen.SetSpringConstant(PHYSICS_REALC(4.0));
+    REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(4.0));
+    SpringGen.SetRestLength(PHYSICS_REALC(4.0));
+    REQUIRE(SpringGen.GetRestLength() == PHYSICS_REALC(4.0));
+    SpringGen.SetOther(&Particle);
+    SpringGen.UpdateForce(Particle2, PHYSICS_REALC(1.0));
+    REQUIRE(Particle2.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 }

@@ -78,3 +78,20 @@ void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, f
 
     Particle.AddForce(-LengthVector * SpringForce);
 }
+
+void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+{
+    PHYSICS_UNUSED(DeltaSeconds);
+
+    math::Vector3 LengthVector = Particle.GetPosition() - m_Other->GetPosition();
+    const real Length = LengthVector.Length();
+    if (Length <= m_RestLength)
+    {
+        return;
+    }
+
+    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    LengthVector = math::Normalize(LengthVector);
+
+    Particle.AddForce(-LengthVector * SpringForce);
+}
