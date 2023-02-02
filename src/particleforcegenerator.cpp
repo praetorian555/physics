@@ -95,3 +95,31 @@ void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, float Del
 
     Particle.AddForce(-LengthVector * SpringForce);
 }
+
+void physics::ParticleBuoyancy::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+{
+    PHYSICS_UNUSED(DeltaSeconds);
+
+    // Current depth of the particle.
+    const real Depth = Particle.GetPosition().Y;
+
+    // If we are completely out of the water, do nothing.
+    if (Depth >= m_WaterHeight + m_MaxDepth)
+    {
+        return;
+    }
+
+    // If we are fully submerged, apply the maximum buoyancy force.
+    if (Depth <= m_WaterHeight - m_MaxDepth)
+    {
+        math::Vector3 Force = math::Vector3::Zero;
+        Force.Y = m_Volume * m_LiquidDensity;
+        Particle.AddForce(Force);
+        return;
+    }
+
+    const real SubmergedAmount = (Depth - m_MaxDepth - m_WaterHeight) / (2 * m_MaxDepth);
+    math::Vector3 Force = math::Vector3::Zero;
+    Force.Y = m_Volume * m_LiquidDensity * SubmergedAmount;
+    Particle.AddForce(Force);
+}

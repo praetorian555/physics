@@ -153,4 +153,40 @@ private:
     real m_RestLength;
 };
 
+// Applies a buoyancy force to the particle if it is submerged in water. Assumes that water plane is
+// parallel to XZ plane.
+class ParticleBuoyancy : public ParticleForceGenerator
+{
+public:
+    // @brief Creates a new ParticleBuoyancy force generator.
+    // @param MaxDepth The maximum depth of the object before it generates maximum buoyancy force.
+    // @param Volume The volume of the object.
+    // @param WaterHeight The height of the water plane above Y=0. The plane will be parallel to the
+    // XZ plane.
+    // @param LiquidDensity The density of the liquid.
+    ParticleBuoyancy(real MaxDepth, real Volume, real WaterHeight, real LiquidDensity)
+        : m_MaxDepth(MaxDepth),
+          m_Volume(Volume),
+          m_WaterHeight(WaterHeight),
+          m_LiquidDensity(LiquidDensity)
+    {
+    }
+
+    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+
+    void SetMaxDepth(real MaxDepth) { m_MaxDepth = MaxDepth; }
+    [[nodiscard]] real GetMaxDepth() const { return m_MaxDepth; }
+    void SetVolume(real Volume) { m_Volume = Volume; }
+    [[nodiscard]] real GetVolume() const { return m_Volume; }
+    void SetWaterHeight(real WaterHeight) { m_WaterHeight = WaterHeight; }
+    [[nodiscard]] real GetWaterHeight() const { return m_WaterHeight; }
+    void SetLiquidDensity(real LiquidDensity) { m_LiquidDensity = LiquidDensity; }
+    [[nodiscard]] real GetLiquidDensity() const { return m_LiquidDensity; }
+
+private:
+    real m_MaxDepth;
+    real m_Volume;
+    real m_WaterHeight;
+    real m_LiquidDensity;
+};
 }  // namespace physics

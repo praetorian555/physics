@@ -242,7 +242,8 @@ TEST_CASE("BungeeSpring", "Particle")
     Particle2.SetMass(PHYSICS_REALC(1.0));
     Particle2.SetDamping(PHYSICS_REALC(0.5));
     Particle2.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
-    Particle2.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle2.SetVelocity(
+        math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     physics::ParticleBungee SpringGen(&Particle, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(SpringGen.GetOther() == &Particle);
     REQUIRE(SpringGen.GetSpringConstant() == PHYSICS_REALC(2.0));
@@ -268,4 +269,60 @@ TEST_CASE("BungeeSpring", "Particle")
     SpringGen.UpdateForce(Particle2, PHYSICS_REALC(1.0));
     REQUIRE(Particle2.GetForceAccumulator() ==
             math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+}
+
+TEST_CASE("Buoyancy", "Particle")
+{
+    physics::Particle Particle;
+    Particle.SetMass(PHYSICS_REALC(1.0));
+    Particle.SetDamping(PHYSICS_REALC(0.5));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+
+    physics::ParticleBuoyancy BuoyancyGen(PHYSICS_REALC(2.0), PHYSICS_REALC(2.0),
+                                          PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
+    REQUIRE(BuoyancyGen.GetMaxDepth() == PHYSICS_REALC(2.0));
+    REQUIRE(BuoyancyGen.GetVolume() == PHYSICS_REALC(2.0));
+    REQUIRE(BuoyancyGen.GetWaterHeight() == PHYSICS_REALC(2.0));
+    REQUIRE(BuoyancyGen.GetLiquidDensity() == PHYSICS_REALC(2.0));
+
+    // Fully out of the water
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(5.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(4.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
+
+    // Fully submerged
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(-2.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(4.0), PHYSICS_REALC(0.0)));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(-4.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(8.0), PHYSICS_REALC(0.0)));
+
+    // Partially submerged
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(2.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(6.0), PHYSICS_REALC(0.0)));
+    Particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(1.0), PHYSICS_REALC(0.0)));
+    BuoyancyGen.UpdateForce(Particle, PHYSICS_REALC(1.0));
+    REQUIRE(Particle.GetForceAccumulator() ==
+            math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(3.0), PHYSICS_REALC(0.0)));
+
+    // Write tests for other functions in physics::ParticleBuoyancy.
+    BuoyancyGen.SetLiquidDensity(PHYSICS_REALC(4.0));
+    REQUIRE(BuoyancyGen.GetLiquidDensity() == PHYSICS_REALC(4.0));
+    BuoyancyGen.SetMaxDepth(PHYSICS_REALC(4.0));
+    REQUIRE(BuoyancyGen.GetMaxDepth() == PHYSICS_REALC(4.0));
+    BuoyancyGen.SetVolume(PHYSICS_REALC(4.0));
+    REQUIRE(BuoyancyGen.GetVolume() == PHYSICS_REALC(4.0));
+    BuoyancyGen.SetWaterHeight(PHYSICS_REALC(4.0));
+    REQUIRE(BuoyancyGen.GetWaterHeight() == PHYSICS_REALC(4.0));
 }
