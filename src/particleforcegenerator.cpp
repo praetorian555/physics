@@ -61,7 +61,7 @@ void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, float Del
 
     math::Vector3 LengthVector = Particle.GetPosition() - m_Other->GetPosition();
     const real Length = LengthVector.Length();
-    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
     LengthVector = math::Normalize(LengthVector);
 
     Particle.AddForce(-LengthVector * SpringForce);
@@ -73,7 +73,7 @@ void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, f
 
     math::Vector3 LengthVector = Particle.GetPosition() - m_Anchor;
     const real Length = LengthVector.Length();
-    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
     LengthVector = math::Normalize(LengthVector);
 
     Particle.AddForce(-LengthVector * SpringForce);
@@ -90,7 +90,7 @@ void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, float Del
         return;
     }
 
-    const real SpringForce = m_SpringConstant * math::Abs(Length - m_RestLength);
+    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
     LengthVector = math::Normalize(LengthVector);
 
     Particle.AddForce(-LengthVector * SpringForce);
@@ -118,7 +118,7 @@ void physics::ParticleBuoyancy::UpdateForce(physics::Particle& Particle, float D
         return;
     }
 
-    const real SubmergedAmount = (Depth - m_MaxDepth - m_WaterHeight) / (2 * m_MaxDepth);
+    const real SubmergedAmount = (m_MaxDepth + m_WaterHeight - Depth) / (2 * m_MaxDepth);
     math::Vector3 Force = math::Vector3::Zero;
     Force.Y = m_Volume * m_LiquidDensity * SubmergedAmount;
     Particle.AddForce(Force);
