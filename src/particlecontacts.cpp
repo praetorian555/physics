@@ -79,7 +79,27 @@ void physics::ParticleContact::ResolveVelocity(physics::real DeltaSeconds)
         return;
     }
 
-    const real NewSeparatingVelocity = -SeparatingVelocity * m_Restitution;
+    real NewSeparatingVelocity = -SeparatingVelocity * m_Restitution;
+
+    math::Vector3 LastFrameAcceleration = m_MainParticle->GetAcceleration();
+    if (m_OtherParticle != nullptr)
+    {
+        LastFrameAcceleration -= m_OtherParticle->GetAcceleration();
+    }
+    const real LastFrameSeparatingVelocity =
+        math::Dot(LastFrameAcceleration * DeltaSeconds, m_ContactNormal);
+
+    // Remove negative separating velocity due to acceleration of the last frame. This helps to
+    // remove rest contact jitter.
+    if (LastFrameSeparatingVelocity < PHYSICS_REALC(0.0))
+    {
+        NewSeparatingVelocity += m_Restitution * LastFrameSeparatingVelocity;
+        if (NewSeparatingVelocity < PHYSICS_REALC(0.0))
+        {
+            NewSeparatingVelocity = PHYSICS_REALC(0.0);
+        }
+    }
+
     const real DeltaVelocity = NewSeparatingVelocity - SeparatingVelocity;
 
     real TotalInverseMass = m_MainParticle->GetInverseMass();

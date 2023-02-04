@@ -106,6 +106,19 @@ TEST_CASE("Resolve", "ParticleContact")
         delete Contact;
     }
 
+    SECTION("Resolve velocity with rest contact")
+    {
+        physics::Particle Particle1;
+        Particle1.SetInverseMass(2.0f);
+        Particle1.SetVelocity(math::Vector3{0, 0, -1});
+        Particle1.SetAcceleration(math::Vector3{0, 0, -1});
+        physics::ParticleContact* Contact =
+            physics::ParticleContact::Create(&Particle1, 1.0f, 1.0f, math::Vector3{0, 0, 1});
+        Contact->Resolve(1.0f);
+        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        delete Contact;
+    }
+
     SECTION("Resolve interpenetration")
     {
         physics::Particle Particle1;
@@ -135,7 +148,6 @@ TEST_CASE("Resolve", "ParticleContact")
         REQUIRE(Particle2.GetPosition() == math::Point3{0, 0, 5.0f});
         delete Contact;
     }
-
 
     SECTION("Resolve interpenetration when not touching")
     {
