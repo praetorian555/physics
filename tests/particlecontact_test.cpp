@@ -164,3 +164,50 @@ TEST_CASE("Resolve", "ParticleContact")
         delete Contact;
     }
 }
+
+TEST_CASE("ParticleResolver", "Particle")
+{
+    SECTION("Resolve contact")
+    {
+        physics::Particle Particle1;
+        Particle1.SetInverseMass(2.0f);
+        Particle1.SetVelocity(math::Vector3{0, 0, 1});
+        physics::Particle Particle2;
+        Particle2.SetPosition(math::Point3{0, 0, 5});
+        Particle2.SetInverseMass(4.0f);
+        Particle2.SetVelocity(math::Vector3{0, 0, -1});
+        physics::ParticleContact* Contact =
+            physics::ParticleContact::Create(&Particle1, &Particle2, 0.5f, 1.0f);
+        physics::ParticleContactResolver Resolver(1);
+        physics::ParticleContact* Contacts[] = {Contact};
+        Resolver.ResolveContacts(Contacts, 1.0f);
+        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        delete Contact;
+    }
+    SECTION("Choose smallest separating velocity")
+    {
+        physics::Particle Particle1;
+        Particle1.SetInverseMass(2.0f);
+        Particle1.SetVelocity(math::Vector3{0, 0, 1});
+        physics::Particle Particle2;
+        Particle2.SetPosition(math::Point3{0, 0, 5});
+        Particle2.SetInverseMass(4.0f);
+        Particle2.SetVelocity(math::Vector3{0, 0, -1});
+        physics::Particle Particle3;
+        Particle3.SetPosition(math::Point3{0, 0, -1});
+        Particle3.SetInverseMass(2.0f);
+        Particle3.SetVelocity(math::Vector3{0, 0, PHYSICS_REALC(0.5)});
+        physics::ParticleContact* Contact1 =
+            physics::ParticleContact::Create(&Particle1, &Particle2, 0.5f, 1.0f);
+        physics::ParticleContact* Contact2 =
+            physics::ParticleContact::Create(&Particle3, &Particle2, 0.5f, 1.0f);
+        physics::ParticleContact* Contacts[] = {Contact1, Contact2};
+        physics::ParticleContactResolver Resolver(1);
+        Resolver.ResolveContacts(Contacts, 1.0f);
+        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        delete Contact1;
+        delete Contact2;
+    }
+}

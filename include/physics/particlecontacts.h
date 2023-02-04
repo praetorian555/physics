@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+
 #include "physics/base.h"
 
 #include "math/vector3.h"
@@ -57,19 +59,40 @@ public:
     // @param DeltaSeconds - The time step.
     void Resolve(real DeltaSeconds);
 
+    [[nodiscard]] real CalculateSeparatingVelocity() const;
+
 protected:
     ParticleContact() = default;
 
     void ResolveVelocity(real DeltaSeconds);
     void ResolveInterpenetration(real DeltaSeconds);
 
-    [[nodiscard]] real CalculateSeparatingVelocity() const;
-
     Particle* m_MainParticle = nullptr;
     Particle* m_OtherParticle = nullptr;
     real m_Restitution = PHYSICS_REALC(1.0);
     real m_Penetration = PHYSICS_REALC(0.0);
     math::Vector3 m_ContactNormal;
+};
+
+// Used to resolve a set of particle contacts for both penetration and velocity.
+class ParticleContactResolver
+{
+public:
+    ParticleContactResolver(uint32_t Iterations) : m_Iterations(Iterations) {}
+
+    void SetIterations(uint32_t Iterations) { m_Iterations = Iterations; }
+    [[nodiscard]] uint32_t GetIterations() const { return m_Iterations; }
+
+    [[nodiscard]] uint32_t GetIterationsUsed() const { return m_IterationsUsed; }
+
+    // Resolves a set of particle contacts for both penetration and velocity.
+    // @param Contacts - The contacts to resolve.
+    // @param DeltaSeconds - The time step.
+    void ResolveContacts(std::span<ParticleContact*> Contacts, real DeltaSeconds);
+
+private:
+    uint32_t m_Iterations = 0;
+    uint32_t m_IterationsUsed = 0;
 };
 
 }  // namespace physics

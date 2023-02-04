@@ -181,3 +181,39 @@ physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
 
     return math::Dot(RelativeVelocity, m_ContactNormal);
 }
+
+void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact*> Contacts,
+                                                       physics::real DeltaSeconds)
+{
+    if (Contacts.empty())
+    {
+        return;
+    }
+
+    m_IterationsUsed = 0;
+    while (m_IterationsUsed < m_Iterations)
+    {
+        real SmallestSeparatingVelocity = math::kInfinity;
+        ParticleContact* SmallestContact = nullptr;
+        for (ParticleContact* Contact : Contacts)
+        {
+            const real SeparatingVelocity = Contact->CalculateSeparatingVelocity();
+            const bool IsActualContact = SeparatingVelocity < PHYSICS_REALC(0.0) ||
+                                         Contact->GetPenetration() > PHYSICS_REALC(0.0);
+            if (SeparatingVelocity < SmallestSeparatingVelocity && IsActualContact)
+            {
+                SmallestSeparatingVelocity = SeparatingVelocity;
+                SmallestContact = Contact;
+            }
+        }
+        // No contacts left to resolve.
+        if (SmallestContact == nullptr)
+        {
+            break;
+        }
+
+        SmallestContact->Resolve(DeltaSeconds);
+
+        m_IterationsUsed++;
+    }
+}
