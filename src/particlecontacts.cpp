@@ -6,7 +6,8 @@
 
 physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* MainParticle,
                                                            physics::Particle* OtherParticle,
-                                                           physics::real Restitution)
+                                                           physics::real Restitution,
+                                                           physics::real Penetration)
 {
     if (MainParticle == nullptr || OtherParticle == nullptr)
     {
@@ -24,6 +25,7 @@ physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* Ma
     NewContact->m_MainParticle = MainParticle;
     NewContact->m_OtherParticle = OtherParticle;
     NewContact->m_Restitution = Restitution;
+    NewContact->m_Penetration = Penetration;
     NewContact->m_ContactNormal = MainParticle->GetPosition() - OtherParticle->GetPosition();
     NewContact->m_ContactNormal = math::Normalize(NewContact->m_ContactNormal);
 
@@ -32,6 +34,7 @@ physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* Ma
 
 physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* MainParticle,
                                                            physics::real Restitution,
+                                                           physics::real Penetration,
                                                            const math::Vector3& ContactNormal)
 {
     if (MainParticle == nullptr)
@@ -52,6 +55,7 @@ physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* Ma
     NewContact->m_MainParticle = MainParticle;
     NewContact->m_OtherParticle = nullptr;
     NewContact->m_Restitution = Restitution;
+    NewContact->m_Penetration = Penetration;
     NewContact->m_ContactNormal = math::Normalize(ContactNormal);
 
     return NewContact;
@@ -112,6 +116,39 @@ void physics::ParticleContact::ResolveVelocity(physics::real DeltaSeconds)
 void physics::ParticleContact::ResolveInterpenetration(physics::real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
+
+    // There is no interpenetration, so do nothing.
+    if (m_Penetration <= PHYSICS_REALC(0.0))
+    {
+        return;
+    }
+
+    real TotalInverseMass = m_MainParticle->GetInverseMass();
+    if (m_OtherParticle != nullptr)
+    {
+        TotalInverseMass += m_OtherParticle->GetInverseMass();
+    }
+
+    // Both particles are immovable objects, so do nothing.
+    if (TotalInverseMass <= PHYSICS_REALC(0.0))
+    {
+        return;
+    }
+
+    const math::Vector3 MovePerInverseMass = m_ContactNormal * (m_Penetration / TotalInverseMass);
+
+    const math::Vector3 MainDeltaMovement = MovePerInverseMass * m_MainParticle->GetInverseMass();
+    math::Vector3 OtherDeltaMovement = math::Vector3::Zero;
+    if (m_OtherParticle != nullptr)
+    {
+        OtherDeltaMovement = -MovePerInverseMass * m_OtherParticle->GetInverseMass();
+    }
+
+    m_MainParticle->SetPosition(m_MainParticle->GetPosition() + MainDeltaMovement);
+    if (m_OtherParticle != nullptr)
+    {
+        m_OtherParticle->SetPosition(m_OtherParticle->GetPosition() + OtherDeltaMovement);
+    }
 }
 
 physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
