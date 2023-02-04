@@ -204,10 +204,15 @@ TEST_CASE("ParticleResolver", "Particle")
             physics::ParticleContact::Create(&Particle3, &Particle2, 0.5f, 1.0f);
         physics::ParticleContact* Contacts[] = {Contact1, Contact2};
         physics::ParticleContactResolver Resolver(1);
+        REQUIRE(Resolver.GetIterations() == 1);
         Resolver.ResolveContacts(Contacts, 1.0f);
+        REQUIRE(Resolver.GetIterationsUsed() == 1);
         REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
         REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
         delete Contact1;
         delete Contact2;
+
+        Resolver.SetIterations(3);
+        REQUIRE(Resolver.GetIterations() == 3);
     }
 }

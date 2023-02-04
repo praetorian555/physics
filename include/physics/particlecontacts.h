@@ -78,7 +78,7 @@ protected:
 class ParticleContactResolver
 {
 public:
-    ParticleContactResolver(uint32_t Iterations) : m_Iterations(Iterations) {}
+    explicit ParticleContactResolver(uint32_t Iterations) : m_Iterations(Iterations) {}
 
     void SetIterations(uint32_t Iterations) { m_Iterations = Iterations; }
     [[nodiscard]] uint32_t GetIterations() const { return m_Iterations; }
