@@ -37,6 +37,23 @@ physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
     }
 }
 
+physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
+                                          physics::Particle* OtherParticle,
+                                          physics::real Restitution,
+                                          physics::real Penetration,
+                                          const math::Vector3& ContactNormal)
+    : m_MainParticle(MainParticle),
+      m_OtherParticle(OtherParticle),
+      m_Restitution(Restitution),
+      m_Penetration(Penetration),
+      m_ContactNormal(ContactNormal)
+{
+    if (m_ContactNormal != math::Vector3::Zero)
+    {
+        m_ContactNormal = math::Normalize(m_ContactNormal);
+    }
+}
+
 bool physics::ParticleContact::IsValid() const
 {
     if (m_MainParticle == nullptr)
@@ -253,5 +270,45 @@ uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> Contacts, uint
     ParticleContact* Contact = Contacts.data();
     *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, m_Restitution,
                                CurrentLength - m_MaxLength);
+    return 1;
+}
+
+physics::ParticleRod::ParticleRod(physics::Particle* FirstParticle,
+                                  physics::Particle* SecondParticle,
+                                  physics::real Length)
+    : ParticleLink(FirstParticle, SecondParticle), m_Length(Length)
+{
+}
+
+uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> Contacts,
+                                          uint32_t Limit)
+{
+    PHYSICS_UNUSED(Limit);
+
+    if (Contacts.empty())
+    {
+        return 0;
+    }
+
+    const real CurrentLength = GetCurrentLength();
+    if (CurrentLength == m_Length)
+    {
+        return 0;
+    }
+
+    math::Vector3 Normal =
+        math::Normalize(m_SecondParticle->GetPosition() - m_FirstParticle->GetPosition());
+    ParticleContact* Contact = Contacts.data();
+    if (CurrentLength > m_Length)
+    {
+        *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, PHYSICS_REALC(0.0),
+                                   CurrentLength - m_Length, Normal);
+    }
+    else
+    {
+        *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, PHYSICS_REALC(0.0),
+                                   m_Length - CurrentLength, -Normal);
+    }
+
     return 1;
 }

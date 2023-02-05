@@ -39,6 +39,12 @@ public:
                     real Penetration,
                     const math::Vector3& ContactNormal);
 
+    ParticleContact(Particle* MainParticle,
+                    Particle* OtherParticle,
+                    real Restitution,
+                    real Penetration,
+                    const math::Vector3& ContactNormal);
+
     ParticleContact() = default;
     ~ParticleContact() = default;
     ParticleContact(const ParticleContact&) = default;
@@ -160,6 +166,21 @@ public:
 protected:
     real m_MaxLength = PHYSICS_REALC(0.0);
     real m_Restitution = PHYSICS_REALC(0.0);
+};
+
+// A link that generates a contact if its length changes.
+class ParticleRod : public ParticleLink
+{
+public:
+    ParticleRod(Particle* FirstParticle, Particle* SecondParticle, real Length);
+
+    void SetLength(real Length) { m_Length = Length; }
+    [[nodiscard]] real GetLength() const { return m_Length; }
+
+    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) override;
+
+private:
+    real m_Length = PHYSICS_REALC(0.0);
 };
 
 }  // namespace physics
