@@ -179,7 +179,7 @@ physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
     return math::Dot(RelativeVelocity, m_ContactNormal);
 }
 
-void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact> Contacts,
+void physics::ParticleContactResolver::ResolveContacts(Span<ParticleContact> Contacts,
                                                        physics::real DeltaSeconds)
 {
     if (Contacts.empty())
@@ -235,7 +235,7 @@ physics::ParticleCable::ParticleCable(physics::Particle* FirstParticle,
       m_Restitution(Restitution)
 {
 }
-uint32_t physics::ParticleCable::AddContact(std::span<ParticleContact> Contacts, uint32_t Limit)
+uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> Contacts, uint32_t Limit)
 {
     PHYSICS_UNUSED(Limit);
 

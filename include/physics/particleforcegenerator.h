@@ -1,11 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "math/point3.h"
 #include "math/vector3.h"
 
-#include "physics/base.h"
+#include "physics/containers.h"
 
 namespace physics
 {
@@ -40,7 +38,7 @@ public:
     void UpdateForces(float DeltaSeconds);
 
 private:
-    std::vector<Entry> m_Entries;
+    Array<Entry> m_Entries;
 };
 
 // Applies a gravitational force to the particle. Can be used on multiple particles.

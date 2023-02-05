@@ -1,8 +1,6 @@
 #pragma once
 
-#include <span>
-
-#include "physics/base.h"
+#include "physics/containers.h"
 
 #include "math/vector3.h"
 
@@ -92,7 +90,7 @@ public:
     // Resolves a set of particle contacts for both penetration and velocity.
     // @param Contacts - The contacts to resolve.
     // @param DeltaSeconds - The time step.
-    void ResolveContacts(std::span<ParticleContact> Contacts, real DeltaSeconds);
+    void ResolveContacts(Span<ParticleContact> Contacts, real DeltaSeconds);
 
 private:
     uint32_t m_Iterations = 0;
@@ -111,7 +109,7 @@ public:
     // @param Contacts - The array of contacts to fill.
     // @param Limit - The maximum number of contacts to write.
     // @return - The number of contacts that have been written.
-    virtual uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) = 0;
+    virtual uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) = 0;
 };
 
 // Base class used to link to particles together. It generates contact when the constraint of the
@@ -128,7 +126,7 @@ public:
     // @param Contact - The contact to fill.
     // @param Limit - The maximum number of contacts to write.
     // @return - Returns 1 in case of a success, 0 otherwise.
-    virtual uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) = 0;
+    virtual uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) = 0;
 
     void SetFirstParticle(Particle* Particle) { m_FirstParticle = Particle; }
     void SetSecondParticle(Particle* Particle) { m_SecondParticle = Particle; }
@@ -157,7 +155,7 @@ public:
     [[nodiscard]] real GetMaxLength() const { return m_MaxLength; }
     [[nodiscard]] real GetRestitution() const { return m_Restitution; }
 
-    [[nodiscard]] uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) override;
+    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) override;
 
 protected:
     real m_MaxLength = PHYSICS_REALC(0.0);
