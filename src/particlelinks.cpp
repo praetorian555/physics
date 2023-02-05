@@ -22,10 +22,8 @@ physics::ParticleCable::ParticleCable(physics::Particle* FirstParticle,
       m_Restitution(Restitution)
 {
 }
-uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> Contacts, uint32_t Limit)
+uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> Contacts)
 {
-    PHYSICS_UNUSED(Limit);
-
     if (Contacts.empty())
     {
         return 0;
@@ -50,11 +48,8 @@ physics::ParticleRod::ParticleRod(physics::Particle* FirstParticle,
 {
 }
 
-uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> Contacts,
-                                          uint32_t Limit)
+uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> Contacts)
 {
-    PHYSICS_UNUSED(Limit);
-
     if (Contacts.empty())
     {
         return 0;
@@ -66,7 +61,7 @@ uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact
         return 0;
     }
 
-    math::Vector3 Normal =
+    const math::Vector3 Normal =
         math::Normalize(m_SecondParticle->GetPosition() - m_FirstParticle->GetPosition());
     ParticleContact* Contact = Contacts.data();
     if (CurrentLength > m_Length)

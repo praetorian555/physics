@@ -17,7 +17,7 @@ TEST_CASE("Cable", "ParticleContact")
     {
         physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Cable.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 1);
         REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
         REQUIRE(Contacts[0].GetOtherParticle() == &Particle2);
@@ -30,7 +30,7 @@ TEST_CASE("Cable", "ParticleContact")
     {
         physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Cable.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 1);
         REQUIRE(Contacts[0].IsValid());
         REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
@@ -44,7 +44,7 @@ TEST_CASE("Cable", "ParticleContact")
         Particle2.SetPosition(math::Point3{0, 0, 3});
         physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Cable.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 0);
         REQUIRE(!Contacts[0].IsValid());
         REQUIRE(Contacts[0].GetMainParticle() == nullptr);
@@ -58,7 +58,7 @@ TEST_CASE("Cable", "ParticleContact")
         Particle2.SetPosition(math::Point3{0, 0, 4});
         physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Cable.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 1);
         REQUIRE(Contacts[0].IsValid());
         REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
@@ -97,7 +97,7 @@ TEST_CASE("Rod", "Particle")
     {
         physics::ParticleRod Rod(&Particle1, &Particle2, 4.0f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Rod.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Rod.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 1);
         REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
         REQUIRE(Contacts[0].GetOtherParticle() == &Particle2);
@@ -110,7 +110,7 @@ TEST_CASE("Rod", "Particle")
         Particle2.SetPosition(math::Point3{0, 0, 3});
         physics::ParticleRod Rod(&Particle1, &Particle2, 4.0f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Rod.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Rod.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 1);
         REQUIRE(Contacts[0].IsValid());
         REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
@@ -124,7 +124,7 @@ TEST_CASE("Rod", "Particle")
         Particle2.SetPosition(math::Point3{0, 0, 4});
         physics::ParticleRod Rod(&Particle1, &Particle2, 4.0f);
         physics::StackArray<physics::ParticleContact, 1> Contacts;
-        const uint32_t AddedContactsCount = Rod.AddContact(Contacts, 1);
+        const uint32_t AddedContactsCount = Rod.AddContact(Contacts);
         REQUIRE(AddedContactsCount == 0);
         REQUIRE(!Contacts[0].IsValid());
         REQUIRE(Contacts[0].GetMainParticle() == nullptr);

@@ -17,9 +17,8 @@ public:
     // Fills the given contact structure with the contact needed to keep the link from being
     // violated.
     // @param Contact - The contact to fill.
-    // @param Limit - The maximum number of contacts to write.
     // @return - Returns 1 in case of a success, 0 otherwise.
-    virtual uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) = 0;
+    virtual uint32_t AddContact(Span<ParticleContact> Contacts) = 0;
 
     void SetFirstParticle(Particle* Particle) { m_FirstParticle = Particle; }
     void SetSecondParticle(Particle* Particle) { m_SecondParticle = Particle; }
@@ -48,7 +47,7 @@ public:
     [[nodiscard]] real GetMaxLength() const { return m_MaxLength; }
     [[nodiscard]] real GetRestitution() const { return m_Restitution; }
 
-    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) override;
+    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts) override;
 
 protected:
     real m_MaxLength = PHYSICS_REALC(0.0);
@@ -64,7 +63,7 @@ public:
     void SetLength(real Length) { m_Length = Length; }
     [[nodiscard]] real GetLength() const { return m_Length; }
 
-    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) override;
+    [[nodiscard]] uint32_t AddContact(Span<ParticleContact> Contacts) override;
 
 private:
     real m_Length = PHYSICS_REALC(0.0);

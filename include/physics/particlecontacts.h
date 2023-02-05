@@ -113,9 +113,8 @@ public:
     // maximum number of contacts that can be written to the array. The method returns the number
     // of contacts that have been written.
     // @param Contacts - The array of contacts to fill.
-    // @param Limit - The maximum number of contacts to write.
     // @return - The number of contacts that have been written.
-    virtual uint32_t AddContact(Span<ParticleContact> Contacts, uint32_t Limit) = 0;
+    virtual uint32_t AddContact(Span<ParticleContact> Contacts) = 0;
 };
 
 }  // namespace physics

@@ -41,10 +41,10 @@ public:
     void AddForce(const math::Vector3& Force);
     [[nodiscard]] const math::Vector3& GetForceAccumulator() const;
 
-protected:
     // Clears the force accumulator. Called after each integration step.
     void ClearAccumulator();
 
+protected:
     math::Point3 m_Position;
     math::Vector3 m_Velocity;
 
