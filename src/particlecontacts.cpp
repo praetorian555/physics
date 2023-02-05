@@ -1,64 +1,61 @@
 #include "physics/particlecontacts.h"
 
-#include <cassert>
-
 #include "physics/particle.h"
 
-physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* MainParticle,
-                                                           physics::Particle* OtherParticle,
-                                                           physics::real Restitution,
-                                                           physics::real Penetration)
+physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
+                                          physics::Particle* OtherParticle,
+                                          physics::real Restitution,
+                                          physics::real Penetration)
+    : m_MainParticle(MainParticle),
+      m_OtherParticle(OtherParticle),
+      m_Restitution(Restitution),
+      m_Penetration(Penetration)
 {
-    if (MainParticle == nullptr || OtherParticle == nullptr)
+    if (m_MainParticle == nullptr || m_OtherParticle == nullptr)
     {
-        return nullptr;
+        m_ContactNormal = math::Vector3::Zero;
     }
-    if (Restitution < PHYSICS_REALC(0.0) || Restitution > PHYSICS_REALC(1.0))
+    else
     {
-        return nullptr;
+        m_ContactNormal = MainParticle->GetPosition() - OtherParticle->GetPosition();
+        m_ContactNormal = math::Normalize(m_ContactNormal);
     }
-    assert(!math::IsNaN(Restitution));
-    assert(!MainParticle->GetPosition().HasNaNs());
-    assert(!OtherParticle->GetPosition().HasNaNs());
-
-    ParticleContact* NewContact = new ParticleContact();
-    NewContact->m_MainParticle = MainParticle;
-    NewContact->m_OtherParticle = OtherParticle;
-    NewContact->m_Restitution = Restitution;
-    NewContact->m_Penetration = Penetration;
-    NewContact->m_ContactNormal = MainParticle->GetPosition() - OtherParticle->GetPosition();
-    NewContact->m_ContactNormal = math::Normalize(NewContact->m_ContactNormal);
-
-    return NewContact;
 }
 
-physics::ParticleContact* physics::ParticleContact::Create(physics::Particle* MainParticle,
-                                                           physics::real Restitution,
-                                                           physics::real Penetration,
-                                                           const math::Vector3& ContactNormal)
+physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
+                                          physics::real Restitution,
+                                          physics::real Penetration,
+                                          const math::Vector3& ContactNormal)
+    : m_MainParticle(MainParticle),
+      m_Restitution(Restitution),
+      m_Penetration(Penetration),
+      m_ContactNormal(ContactNormal)
 {
-    if (MainParticle == nullptr)
+    if (m_ContactNormal != math::Vector3::Zero)
     {
-        return nullptr;
+        m_ContactNormal = math::Normalize(m_ContactNormal);
     }
-    if (Restitution < PHYSICS_REALC(0.0) || Restitution > PHYSICS_REALC(1.0))
-    {
-        return nullptr;
-    }
-    if (ContactNormal == math::Vector3::Zero)
-    {
-        return nullptr;
-    }
-    assert(!ContactNormal.HasNaNs());
+}
 
-    ParticleContact* NewContact = new ParticleContact();
-    NewContact->m_MainParticle = MainParticle;
-    NewContact->m_OtherParticle = nullptr;
-    NewContact->m_Restitution = Restitution;
-    NewContact->m_Penetration = Penetration;
-    NewContact->m_ContactNormal = math::Normalize(ContactNormal);
-
-    return NewContact;
+bool physics::ParticleContact::IsValid() const
+{
+    if (m_MainParticle == nullptr)
+    {
+        return false;
+    }
+    if (m_ContactNormal == math::Vector3::Zero)
+    {
+        return false;
+    }
+    if (m_Restitution < PHYSICS_REALC(0.0) || m_Restitution > PHYSICS_REALC(1.0))
+    {
+        return false;
+    }
+    if (math::IsNaN(m_Penetration) || math::IsNaN(m_Restitution) || m_ContactNormal.HasNaNs())
+    {
+        return false;
+    }
+    return true;
 }
 
 void physics::ParticleContact::Resolve(physics::real DeltaSeconds)
@@ -182,7 +179,7 @@ physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
     return math::Dot(RelativeVelocity, m_ContactNormal);
 }
 
-void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact*> Contacts,
+void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact> Contacts,
                                                        physics::real DeltaSeconds)
 {
     if (Contacts.empty())
@@ -195,15 +192,15 @@ void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact
     {
         real SmallestSeparatingVelocity = math::kInfinity;
         ParticleContact* SmallestContact = nullptr;
-        for (ParticleContact* Contact : Contacts)
+        for (ParticleContact& Contact : Contacts)
         {
-            const real SeparatingVelocity = Contact->CalculateSeparatingVelocity();
+            const real SeparatingVelocity = Contact.CalculateSeparatingVelocity();
             const bool IsActualContact = SeparatingVelocity < PHYSICS_REALC(0.0) ||
-                                         Contact->GetPenetration() > PHYSICS_REALC(0.0);
+                                         Contact.GetPenetration() > PHYSICS_REALC(0.0);
             if (SeparatingVelocity < SmallestSeparatingVelocity && IsActualContact)
             {
                 SmallestSeparatingVelocity = SeparatingVelocity;
-                SmallestContact = Contact;
+                SmallestContact = &Contact;
             }
         }
         // No contacts left to resolve.

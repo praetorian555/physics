@@ -25,11 +25,10 @@ public:
     // @param Restitution - The coefficient of restitution of the contact. Limited to range [0, 1].
     // @param Penetration - The penetration of the contact. If value is zero then the particles are
     //                      touching. Sign should match the direction of the contact normal.
-    // @return - The new contact or nullptr in case of an error.
-    static ParticleContact* Create(Particle* MainParticle,
-                                   Particle* OtherParticle,
-                                   real Restitution,
-                                   real Penetration);
+    ParticleContact(Particle* MainParticle,
+                    Particle* OtherParticle,
+                    real Restitution,
+                    real Penetration);
 
     // Creates a new contact between the MainParticle and the immovable object.
     // @param MainParticle - The main particle in the contact. Can't be nullptr.
@@ -37,16 +36,22 @@ public:
     // @param Penetration - The penetration of the contact. If value is zero then the particles are
     //                      touching. Sign should match the direction of the contact normal.
     // @param ContactNormal - The contact normal. Can't be zero vector.
-    static ParticleContact* Create(Particle* MainParticle,
-                                   real Restitution,
-                                   real Penetration,
-                                   const math::Vector3& ContactNormal);
+    ParticleContact(Particle* MainParticle,
+                    real Restitution,
+                    real Penetration,
+                    const math::Vector3& ContactNormal);
 
     ~ParticleContact() = default;
     ParticleContact(const ParticleContact&) = default;
     ParticleContact(ParticleContact&&) = default;
     ParticleContact& operator=(const ParticleContact&) = default;
     ParticleContact& operator=(ParticleContact&&) = default;
+
+    // Checks if the contact is valid. A contact is valid: if the main particle is not nullptr,
+    // normal is not a zero vector, and restitution is in the range [0, 1]. Also, no real values are
+    // NANs.
+    // @return True if the contact is valid, false otherwise.
+    [[nodiscard]] bool IsValid() const;
 
     [[nodiscard]] Particle* GetMainParticle() const { return m_MainParticle; }
     [[nodiscard]] Particle* GetOtherParticle() const { return m_OtherParticle; }
@@ -88,7 +93,7 @@ public:
     // Resolves a set of particle contacts for both penetration and velocity.
     // @param Contacts - The contacts to resolve.
     // @param DeltaSeconds - The time step.
-    void ResolveContacts(std::span<ParticleContact*> Contacts, real DeltaSeconds);
+    void ResolveContacts(std::span<ParticleContact> Contacts, real DeltaSeconds);
 
 private:
     uint32_t m_Iterations = 0;
