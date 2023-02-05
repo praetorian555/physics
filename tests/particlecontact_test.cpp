@@ -147,7 +147,7 @@ TEST_CASE("Resolve", "ParticleContact")
     }
 }
 
-TEST_CASE("ParticleResolver", "Particle")
+TEST_CASE("ParticleResolver", "ParticleContact")
 {
     SECTION("Resolve contact")
     {
@@ -190,5 +190,71 @@ TEST_CASE("ParticleResolver", "Particle")
 
         Resolver.SetIterations(3);
         REQUIRE(Resolver.GetIterations() == 3);
+    }
+}
+
+TEST_CASE("Cable", "ParticleContact")
+{
+    physics::Particle Particle1;
+    Particle1.SetInverseMass(2.0f);
+    Particle1.SetVelocity(math::Vector3{0, 0, 1});
+    physics::Particle Particle2;
+    Particle2.SetPosition(math::Point3{0, 0, 5});
+    Particle2.SetInverseMass(4.0f);
+    Particle2.SetVelocity(math::Vector3{0, 0, -1});
+
+    SECTION("Generate contact for stretched cable")
+    {
+        physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
+        physics::ParticleContact Contacts[1];
+        uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        REQUIRE(AddedContactsCount == 1);
+        REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
+        REQUIRE(Contacts[0].GetOtherParticle() == &Particle2);
+        REQUIRE(Contacts[0].GetContactNormal() == math::Vector3{0, 0, -1});
+        REQUIRE(Contacts[0].GetPenetration() == 1.0f);
+        REQUIRE(Contacts[0].GetRestitution() == 0.5f);
+    }
+
+    SECTION("Generate contact for stretched cable")
+    {
+        physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
+        physics::ParticleContact Contacts[1];
+        uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        REQUIRE(AddedContactsCount == 1);
+        REQUIRE(Contacts[0].IsValid());
+        REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
+        REQUIRE(Contacts[0].GetOtherParticle() == &Particle2);
+        REQUIRE(Contacts[0].GetContactNormal() == math::Vector3{0, 0, -1});
+        REQUIRE(Contacts[0].GetPenetration() == 1.0f);
+        REQUIRE(Contacts[0].GetRestitution() == 0.5f);
+    }
+    SECTION("Generate contact for relaxed cable")
+    {
+        Particle2.SetPosition(math::Point3{0, 0, 3});
+        physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
+        physics::ParticleContact Contacts[1];
+        uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        REQUIRE(AddedContactsCount == 0);
+        REQUIRE(!Contacts[0].IsValid());
+        REQUIRE(Contacts[0].GetMainParticle() == nullptr);
+        REQUIRE(Contacts[0].GetOtherParticle() == nullptr);
+        REQUIRE(Contacts[0].GetContactNormal() == math::Vector3::Zero);
+        REQUIRE(Contacts[0].GetPenetration() == 0.0f);
+        REQUIRE(Contacts[0].GetRestitution() == 0.0f);
+    }
+    SECTION("Generate contact for max length cable")
+    {
+        Particle2.SetPosition(math::Point3{0, 0, 4});
+        physics::ParticleCable Cable(&Particle1, &Particle2, 4.0f, 0.5f);
+        physics::ParticleContact Contacts[1];
+        uint32_t AddedContactsCount = Cable.AddContact(Contacts, 1);
+        REQUIRE(AddedContactsCount == 1);
+        REQUIRE(Contacts[0].IsValid());
+        REQUIRE(Contacts[0].GetMainParticle() == &Particle1);
+        REQUIRE(Contacts[0].GetOtherParticle() == &Particle2);
+        REQUIRE(Contacts[0].GetContactNormal() == math::Vector3{0, 0, -1});
+        REQUIRE(Contacts[0].GetPenetration() == 0.0f);
+        REQUIRE(Contacts[0].GetRestitution() == 0.5f);
     }
 }

@@ -41,6 +41,7 @@ public:
                     real Penetration,
                     const math::Vector3& ContactNormal);
 
+    ParticleContact() = default;
     ~ParticleContact() = default;
     ParticleContact(const ParticleContact&) = default;
     ParticleContact(ParticleContact&&) = default;
@@ -67,16 +68,14 @@ public:
     [[nodiscard]] real CalculateSeparatingVelocity() const;
 
 protected:
-    ParticleContact() = default;
-
     void ResolveVelocity(real DeltaSeconds);
     void ResolveInterpenetration(real DeltaSeconds);
 
     Particle* m_MainParticle = nullptr;
     Particle* m_OtherParticle = nullptr;
-    real m_Restitution = PHYSICS_REALC(1.0);
+    real m_Restitution = PHYSICS_REALC(0.0);
     real m_Penetration = PHYSICS_REALC(0.0);
-    math::Vector3 m_ContactNormal;
+    math::Vector3 m_ContactNormal = math::Vector3::Zero;
 };
 
 // Used to resolve a set of particle contacts for both penetration and velocity.
@@ -98,6 +97,71 @@ public:
 private:
     uint32_t m_Iterations = 0;
     uint32_t m_IterationsUsed = 0;
+};
+
+// Base class used to generate contacts.
+class ParticleContactGenerator
+{
+public:
+    virtual ~ParticleContactGenerator() = default;
+
+    // Fills the given contact array with the generated contacts. The limit parameter defines the
+    // maximum number of contacts that can be written to the array. The method returns the number
+    // of contacts that have been written.
+    // @param Contacts - The array of contacts to fill.
+    // @param Limit - The maximum number of contacts to write.
+    // @return - The number of contacts that have been written.
+    virtual uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) = 0;
+};
+
+// Base class used to link to particles together. It generates contact when the constraint of the
+// link is violated. Used as a base class for the ParticleCable and ParticleRod classes. It can also
+// be used for springs that have extension limit.
+class ParticleLink
+{
+public:
+    ParticleLink(Particle* FirstParticle, Particle* SecondParticle);
+    virtual ~ParticleLink() = default;
+
+    // Fills the given contact structure with the contact needed to keep the link from being
+    // violated.
+    // @param Contact - The contact to fill.
+    // @param Limit - The maximum number of contacts to write.
+    // @return - Returns 1 in case of a success, 0 otherwise.
+    virtual uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) = 0;
+
+    void SetFirstParticle(Particle* Particle) { m_FirstParticle = Particle; }
+    void SetSecondParticle(Particle* Particle) { m_SecondParticle = Particle; }
+    [[nodiscard]] Particle* GetFirstParticle() const { return m_FirstParticle; }
+    [[nodiscard]] Particle* GetSecondParticle() const { return m_SecondParticle; }
+
+protected:
+    // Returns the current length of the link.
+    [[nodiscard]] virtual real GetCurrentLength() const;
+
+    Particle* m_FirstParticle = nullptr;
+    Particle* m_SecondParticle = nullptr;
+};
+
+// A link that generates a contact if it is overextended.
+class ParticleCable : public ParticleLink
+{
+public:
+    ParticleCable(Particle* FirstParticle,
+                  Particle* SecondParticle,
+                  real MaxLength,
+                  real Restitution);
+
+    void SetMaxLength(real MaxLength) { m_MaxLength = MaxLength; }
+    void SetRestitution(real Restitution) { m_Restitution = Restitution; }
+    [[nodiscard]] real GetMaxLength() const { return m_MaxLength; }
+    [[nodiscard]] real GetRestitution() const { return m_Restitution; }
+
+    [[nodiscard]] uint32_t AddContact(std::span<ParticleContact> Contacts, uint32_t Limit) override;
+
+protected:
+    real m_MaxLength = PHYSICS_REALC(0.0);
+    real m_Restitution = PHYSICS_REALC(0.0);
 };
 
 }  // namespace physics

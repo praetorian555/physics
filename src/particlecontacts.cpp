@@ -214,3 +214,44 @@ void physics::ParticleContactResolver::ResolveContacts(std::span<ParticleContact
         m_IterationsUsed++;
     }
 }
+
+physics::ParticleLink::ParticleLink(physics::Particle* FirstParticle,
+                                    physics::Particle* SecondParticle)
+    : m_FirstParticle(FirstParticle), m_SecondParticle(SecondParticle)
+{
+}
+
+physics::real physics::ParticleLink::GetCurrentLength() const
+{
+    return math::Distance(m_FirstParticle->GetPosition(), m_SecondParticle->GetPosition());
+}
+
+physics::ParticleCable::ParticleCable(physics::Particle* FirstParticle,
+                                      physics::Particle* SecondParticle,
+                                      physics::real MaxLength,
+                                      physics::real Restitution)
+    : ParticleLink(FirstParticle, SecondParticle),
+      m_MaxLength(MaxLength),
+      m_Restitution(Restitution)
+{
+}
+uint32_t physics::ParticleCable::AddContact(std::span<ParticleContact> Contacts, uint32_t Limit)
+{
+    PHYSICS_UNUSED(Limit);
+
+    if (Contacts.empty())
+    {
+        return 0;
+    }
+
+    const real CurrentLength = GetCurrentLength();
+    if (CurrentLength < m_MaxLength)
+    {
+        return 0;
+    }
+
+    ParticleContact* Contact = Contacts.data();
+    *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, m_Restitution,
+                               CurrentLength - m_MaxLength);
+    return 1;
+}
