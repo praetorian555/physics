@@ -21,10 +21,19 @@ public:
     [[nodiscard]] real GetMass() const;
     [[nodiscard]] real GetInverseMass() const;
 
-    void SetInertiaTensor(const math::Matrix4x4& InertiaTensor);
-    void SetInverseInertiaTensor(const math::Matrix4x4& InverseInertiaTensor);
-    [[nodiscard]] math::Matrix4x4 GetInertiaTensor() const;
-    [[nodiscard]] math::Matrix4x4 GetInverseInertiaTensor() const;
+    /**
+     * Sets the inertia tensor of the body in the body space.
+     * @param InertiaTensor Inertia tensor of the body in the body space.
+     */
+    void SetInertiaTensor(const math::Transform& InertiaTensor);
+    void SetInverseInertiaTensor(const math::Transform& InverseInertiaTensor);
+
+    /**
+     * Gets the inertia tensor of the body in the body space.
+     * @return Returns the inertia tensor of the body in the body space.
+     */
+    [[nodiscard]] math::Transform GetInertiaTensor() const;
+    [[nodiscard]] math::Transform GetInverseInertiaTensor() const;
 
     void SetDamping(real Damping);
     [[nodiscard]] real GetDamping() const;
@@ -48,14 +57,18 @@ public:
     [[nodiscard]] const math::Transform& GetTransform() const;
 
     /**
+     * Get the inverse inertia tensor of the rigid body in the world space.
+     * @return Returns the inverse inertia tensor.
+     */
+    [[nodiscard]] const math::Transform& GetInverseInertiaTensorWorld() const;
+
+    /**
      * Calculates derived data from the body's state. This is also called automatically by the
      * integration methods.
      */
     void CalculateDerivedData();
 
 protected:
-    void CalculateTransformMatrix();
-
     /** Holds linear position of the rigid body in the world space. */
     math::Point3 m_Position;
 
@@ -81,7 +94,7 @@ protected:
      * matrix can't be degenerated (all values on the main diagonal must be different from 0). As
      * long as the tensor is finite, it will be invertible.
      */
-    math::Matrix4x4 m_InverseInertiaTensor;
+    math::Transform m_InverseInertiaTensorLocal;
 
     /**
      * Simple representation of the drag force used to avoid numerical inaccuracies that can lead
@@ -94,6 +107,12 @@ protected:
      * based on the position and orientation.
      */
     math::Transform m_ToWorldSpace;
+
+    /**
+     * Inverse inertia tensor of the rigid body in the world space. Cached value calculated based on
+     * the inverse inertia tensor in the body space and the orientation of the rigid body.
+     */
+    math::Transform m_InverseInertiaTensorWorld;
 };
 
 }  // namespace physics

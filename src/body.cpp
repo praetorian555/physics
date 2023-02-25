@@ -27,24 +27,24 @@ physics::real physics::RigidBody::GetInverseMass() const
     return m_InverseMass;
 }
 
-void physics::RigidBody::SetInertiaTensor(const math::Matrix4x4& InertiaTensor)
+void physics::RigidBody::SetInertiaTensor(const math::Transform& InertiaTensor)
 {
-    m_InverseInertiaTensor = InertiaTensor.Inverse();
+    m_InverseInertiaTensorLocal = {InertiaTensor.GetInverse(), InertiaTensor.GetMatrix()};
 }
 
-void physics::RigidBody::SetInverseInertiaTensor(const math::Matrix4x4& InverseInertiaTensor)
+void physics::RigidBody::SetInverseInertiaTensor(const math::Transform& InverseInertiaTensor)
 {
-    m_InverseInertiaTensor = InverseInertiaTensor;
+    m_InverseInertiaTensorLocal = InverseInertiaTensor;
 }
 
-math::Matrix4x4 physics::RigidBody::GetInertiaTensor() const
+math::Transform physics::RigidBody::GetInertiaTensor() const
 {
-    return m_InverseInertiaTensor.Inverse();
+    return {m_InverseInertiaTensorLocal.GetInverse(), m_InverseInertiaTensorLocal.GetMatrix()};
 }
 
-math::Matrix4x4 physics::RigidBody::GetInverseInertiaTensor() const
+math::Transform physics::RigidBody::GetInverseInertiaTensor() const
 {
-    return m_InverseInertiaTensor;
+    return m_InverseInertiaTensorLocal;
 }
 
 void physics::RigidBody::SetDamping(physics::real Damping)
@@ -102,12 +102,13 @@ const math::Transform& physics::RigidBody::GetTransform() const
     return m_ToWorldSpace;
 }
 
-void physics::RigidBody::CalculateDerivedData()
+const math::Transform& physics::RigidBody::GetInverseInertiaTensorWorld() const
 {
-    CalculateTransformMatrix();
+    return m_InverseInertiaTensorWorld;
 }
 
-void physics::RigidBody::CalculateTransformMatrix()
+void physics::RigidBody::CalculateDerivedData()
 {
     m_ToWorldSpace = math::Translate(m_Position) * math::Rotate(m_Orientation);
+    m_InverseInertiaTensorWorld = math::Rotate(m_Orientation) * m_InverseInertiaTensorLocal;
 }
