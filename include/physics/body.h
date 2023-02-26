@@ -68,6 +68,34 @@ public:
      */
     void CalculateDerivedData();
 
+    /**
+     * Clears the accumulated forces and torques. Always called at the end of the integration step.
+     */
+    void ClearAccumulators();
+
+    /**
+     * Applies the force to the rigid body's center of mass.
+     * @param Force Force to apply in world space.
+     */
+    void AddForce(const math::Vector3& Force);
+
+    /**
+     * Applies the force to the rigid body at the given point.
+     * @param Force Force to apply in world space.
+     * @param Point Point of application in world space.
+     */
+    void AddForceAtPoint(const math::Vector3& Force, const math::Point3& Point);
+
+    /**
+     * Applies the force to the rigid body at the given point.
+     * @param Force Force to apply in world space.
+     * @param Point Point of application in body space.
+     */
+    void AddForceAtLocalPoint(const math::Vector3& Force, const math::Point3& Point);
+
+    const math::Vector3& GetAccumulatedForce() const;
+    const math::Vector3& GetAccumulatedTorque() const;
+
 protected:
     /** Holds linear position of the rigid body in the world space. */
     math::Point3 m_Position;
@@ -113,6 +141,9 @@ protected:
      * the inverse inertia tensor in the body space and the orientation of the rigid body.
      */
     math::Transform m_InverseInertiaTensorWorld;
+
+    math::Vector3 m_ForceAccumulator;
+    math::Vector3 m_TorqueAccumulator;
 };
 
 }  // namespace physics

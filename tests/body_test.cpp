@@ -56,3 +56,34 @@ TEST_CASE("DerivedData", "Body")
     REQUIRE(Body.GetTransform() == math::Translate(Position) * math::Rotate(Orientation));
     REQUIRE(Body.GetInverseInertiaTensorWorld() == math::Rotate(Orientation) * InverseInertiaTensor);
 }
+
+TEST_CASE("AddForce", "Body")
+{
+    {
+        physics::RigidBody Body;
+        const math::Vector3 Force = {1, 2, 3};
+        Body.AddForce(Force);
+        REQUIRE(Body.GetAccumulatedForce() == Force);
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+        Body.ClearAccumulators();
+        REQUIRE(Body.GetAccumulatedForce() == math::Vector3::Zero);
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetPosition({1, 2, 3});
+        const math::Vector3 Force = {1, 1, 1};
+        Body.AddForceAtPoint(Force, {0, 0, 0});
+        REQUIRE(Body.GetAccumulatedForce() == Force);
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{1, -2, 1});
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetPosition({1, 2, 3});
+        Body.CalculateDerivedData();
+        const math::Vector3 Force = {1, 1, 1};
+        Body.AddForceAtLocalPoint(Force, {-1, -2, -3});
+        REQUIRE(Body.GetAccumulatedForce() == Force);
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{1, -2, 1});
+    }
+}

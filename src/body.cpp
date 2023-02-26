@@ -112,3 +112,37 @@ void physics::RigidBody::CalculateDerivedData()
     m_ToWorldSpace = math::Translate(m_Position) * math::Rotate(m_Orientation);
     m_InverseInertiaTensorWorld = math::Rotate(m_Orientation) * m_InverseInertiaTensorLocal;
 }
+
+void physics::RigidBody::ClearAccumulators()
+{
+    m_ForceAccumulator = math::Vector3::Zero;
+    m_TorqueAccumulator = math::Vector3::Zero;
+}
+
+void physics::RigidBody::AddForce(const math::Vector3& Force)
+{
+    m_ForceAccumulator += Force;
+}
+
+void physics::RigidBody::AddForceAtPoint(const math::Vector3& Force, const math::Point3& Point)
+{
+    const math::Vector3 PointVector = Point - m_Position;
+    m_ForceAccumulator += Force;
+    m_TorqueAccumulator = math::Cross(PointVector, Force);
+}
+
+void physics::RigidBody::AddForceAtLocalPoint(const math::Vector3& Force, const math::Point3& Point)
+{
+    const math::Point3 WorldPoint = m_ToWorldSpace(Point);
+    AddForceAtPoint(Force, WorldPoint);
+}
+
+const math::Vector3& physics::RigidBody::GetAccumulatedForce() const
+{
+    return m_ForceAccumulator;
+}
+
+const math::Vector3& physics::RigidBody::GetAccumulatedTorque() const
+{
+    return m_TorqueAccumulator;
+}
