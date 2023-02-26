@@ -94,7 +94,7 @@ TEST_CASE("AddForce", "Body")
     }
 }
 
-TEST_CASE("Gravity", "Body")
+TEST_CASE("BodyGravity", "Body")
 {
     physics::RigidBody Body;
     Body.SetMass(5);
