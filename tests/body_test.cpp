@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "physics/body.h"
+#include "physics/forcegenerator.h"
 
 TEST_CASE("GettersAndSetters", "Body")
 {
@@ -55,7 +56,8 @@ TEST_CASE("DerivedData", "Body")
     REQUIRE(Body.GetInverseInertiaTensorWorld() == math::Transform{});
     Body.CalculateDerivedData();
     REQUIRE(Body.GetTransform() == math::Translate(Position) * math::Rotate(Orientation));
-    REQUIRE(Body.GetInverseInertiaTensorWorld() == math::Rotate(Orientation) * InverseInertiaTensor);
+    REQUIRE(Body.GetInverseInertiaTensorWorld() ==
+            math::Rotate(Orientation) * InverseInertiaTensor);
 }
 
 TEST_CASE("AddForce", "Body")
@@ -65,6 +67,9 @@ TEST_CASE("AddForce", "Body")
         const math::Vector3 Force = {1, 2, 3};
         Body.AddForce(Force);
         REQUIRE(Body.GetAccumulatedForce() == Force);
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+        Body.AddForce(Force);
+        REQUIRE(Body.GetAccumulatedForce() == Force * 2);
         REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
         Body.ClearAccumulators();
         REQUIRE(Body.GetAccumulatedForce() == math::Vector3::Zero);
@@ -87,4 +92,17 @@ TEST_CASE("AddForce", "Body")
         REQUIRE(Body.GetAccumulatedForce() == Force);
         REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{1, -2, 1});
     }
+}
+
+TEST_CASE("Gravity", "Body")
+{
+    physics::RigidBody Body;
+    Body.SetMass(5);
+    physics::Gravity Gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
+    Gravity.UpdateForce(Body, 1);
+    REQUIRE(Body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
+    REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+
+    Gravity.SetGravity({0, PHYSICS_REALC(5.0), 0});
+    REQUIRE(Gravity.GetGravity() == math::Vector3{0, PHYSICS_REALC(5.0), 0});
 }
