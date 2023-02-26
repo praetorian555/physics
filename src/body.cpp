@@ -27,6 +27,11 @@ physics::real physics::RigidBody::GetInverseMass() const
     return m_InverseMass;
 }
 
+bool physics::RigidBody::HasFiniteMass() const
+{
+    return m_InverseMass != MATH_REALC(0.0);
+}
+
 void physics::RigidBody::SetInertiaTensor(const math::Transform& InertiaTensor)
 {
     m_InverseInertiaTensorLocal = {InertiaTensor.GetInverse(), InertiaTensor.GetMatrix()};

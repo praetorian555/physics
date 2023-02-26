@@ -12,6 +12,7 @@ TEST_CASE("GettersAndSetters", "Body")
     Body.SetInverseMass(10);
     REQUIRE(Body.GetMass() == PHYSICS_REALC(0.1));
     REQUIRE(Body.GetInverseMass() == 10);
+    REQUIRE(Body.HasFiniteMass() == true);
 
     math::Transform InertiaTensor = math::Scale(5);
     Body.SetInertiaTensor(InertiaTensor);

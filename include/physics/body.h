@@ -21,6 +21,8 @@ public:
     [[nodiscard]] real GetMass() const;
     [[nodiscard]] real GetInverseMass() const;
 
+    bool HasFiniteMass() const;
+
     /**
      * Sets the inertia tensor of the body in the body space.
      * @param InertiaTensor Inertia tensor of the body in the body space.
