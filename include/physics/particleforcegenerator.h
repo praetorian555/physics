@@ -17,7 +17,7 @@ public:
     virtual ~ParticleForceGenerator() = default;
 
     // Calculates and applies the force to the given particle.
-    virtual void UpdateForce(Particle& Particle, float DeltaSeconds) = 0;
+    virtual void UpdateForce(Particle& Particle, real DeltaSeconds) = 0;
 };
 
 // Used to track which force generators are applied to which particles.
@@ -35,7 +35,7 @@ public:
     void Remove(Particle* Particle, ParticleForceGenerator* ForceGenerator);
     void Clear();
 
-    void UpdateForces(float DeltaSeconds);
+    void UpdateForces(real DeltaSeconds);
 
 private:
     Array<Entry> m_Entries;
@@ -47,7 +47,7 @@ class ParticleGravity : public ParticleForceGenerator
 public:
     explicit ParticleGravity(const math::Vector3& Gravity) : m_Gravity(Gravity) {}
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetGravity(const math::Vector3& Gravity) { m_Gravity = Gravity; }
     [[nodiscard]] const math::Vector3& GetGravity() const { return m_Gravity; }
@@ -64,7 +64,7 @@ public:
     // speed.
     ParticleDrag(real K1, real K2) : m_K1(K1), m_K2(K2) {}
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetK1(real K1) { m_K1 = K1; }
     void SetK2(real K2) { m_K2 = K2; }
@@ -86,7 +86,7 @@ public:
     {
     }
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetOther(Particle* Other) { m_Other = Other; }
     [[nodiscard]] Particle* GetOther() const { return m_Other; }
@@ -111,7 +111,7 @@ public:
     {
     }
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetAnchor(const math::Point3& Anchor) { m_Anchor = Anchor; }
     [[nodiscard]] const math::Point3& GetAnchor() const { return m_Anchor; }
@@ -136,7 +136,7 @@ public:
     {
     }
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetOther(Particle* Other) { m_Other = Other; }
     [[nodiscard]] Particle* GetOther() const { return m_Other; }
@@ -170,7 +170,7 @@ public:
     {
     }
 
-    void UpdateForce(Particle& Particle, float DeltaSeconds) override;
+    void UpdateForce(Particle& Particle, real DeltaSeconds) override;
 
     void SetMaxDepth(real MaxDepth) { m_MaxDepth = MaxDepth; }
     [[nodiscard]] real GetMaxDepth() const { return m_MaxDepth; }

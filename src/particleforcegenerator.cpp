@@ -20,7 +20,7 @@ void physics::ParticleForceRegistry::Clear()
     m_Entries.clear();
 }
 
-void physics::ParticleForceRegistry::UpdateForces(float DeltaSeconds)
+void physics::ParticleForceRegistry::UpdateForces(real DeltaSeconds)
 {
     for (const Entry& Entry : m_Entries)
     {
@@ -28,7 +28,7 @@ void physics::ParticleForceRegistry::UpdateForces(float DeltaSeconds)
     }
 }
 
-void physics::ParticleGravity::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleGravity::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
@@ -39,7 +39,7 @@ void physics::ParticleGravity::UpdateForce(physics::Particle& Particle, float De
     Particle.AddForce(m_Gravity * Particle.GetInverseMass());
 }
 
-void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
@@ -55,7 +55,7 @@ void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, float Delta
     Particle.AddForce(DragForce);
 }
 
-void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
@@ -67,7 +67,7 @@ void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, float Del
     Particle.AddForce(-LengthVector * SpringForce);
 }
 
-void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
@@ -79,7 +79,7 @@ void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, f
     Particle.AddForce(-LengthVector * SpringForce);
 }
 
-void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
@@ -96,7 +96,7 @@ void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, float Del
     Particle.AddForce(-LengthVector * SpringForce);
 }
 
-void physics::ParticleBuoyancy::UpdateForce(physics::Particle& Particle, float DeltaSeconds)
+void physics::ParticleBuoyancy::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
 {
     PHYSICS_UNUSED(DeltaSeconds);
 
