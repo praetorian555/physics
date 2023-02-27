@@ -106,3 +106,49 @@ TEST_CASE("BodyGravity", "Body")
     Gravity.SetGravity({0, PHYSICS_REALC(5.0), 0});
     REQUIRE(Gravity.GetGravity() == math::Vector3{0, PHYSICS_REALC(5.0), 0});
 }
+
+TEST_CASE("BodySpring", "Body")
+{
+    {
+        physics::RigidBody OtherBody;
+        const math::Point3 ConnectionPoint = {1, 2, 3};
+        const math::Point3 OtherConnectionPoint = {4, 5, 6};
+        physics::Spring S(ConnectionPoint, &OtherBody, OtherConnectionPoint, 5, 10);
+        REQUIRE(S.GetConnectionPointLocal() == ConnectionPoint);
+        REQUIRE(S.GetOtherConnectionPointLocal() == OtherConnectionPoint);
+        REQUIRE(S.GetOtherBody() == &OtherBody);
+        REQUIRE(S.GetSpringConstant() == 5);
+        REQUIRE(S.GetRestLength() == 10);
+
+        S.SetRestLength(20);
+        REQUIRE(S.GetRestLength() == 20);
+        S.SetSpringConstant(10);
+        REQUIRE(S.GetSpringConstant() == 10);
+        S.SetConnectionPointLocal({0, 0, 0});
+        REQUIRE(S.GetConnectionPointLocal() == math::Point3::Zero);
+        S.SetOtherConnectionPointLocal({0, 0, 0});
+        REQUIRE(S.GetOtherConnectionPointLocal() == math::Point3::Zero);
+        S.SetOtherBody(nullptr);
+        REQUIRE(S.GetOtherBody() == nullptr);
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetPosition({1, 2, 3});
+        Body.CalculateDerivedData();
+        physics::RigidBody OtherBody;
+        OtherBody.SetPosition({1, 5, 7});
+        OtherBody.CalculateDerivedData();
+        const math::Point3 ConnectionPoint = {0, 0, 0};
+        physics::Spring S(ConnectionPoint, &OtherBody, ConnectionPoint, 5, 10);
+        S.UpdateForce(Body, 1);
+        REQUIRE(Body.GetAccumulatedForce().X == 0);
+        REQUIRE(Body.GetAccumulatedForce().Z == -20);
+
+#if PHYSICS_REAL_AS_DOUBLE
+        constexpr physics::real kEpsilon = PHYSICS_REALC(1e-6);
+#else
+        constexpr physics::real kEpsilon = PHYSICS_REALC(1e-3);
+#endif
+        REQUIRE(math::IsEqual(Body.GetAccumulatedForce().Y, -15, kEpsilon));
+    }
+}
