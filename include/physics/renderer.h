@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#if PHYSICS_RENDER
+
 #include "rndr/render/graphicscontext.h"
 
 namespace physics
@@ -22,3 +24,5 @@ private:
 };
 
 }  // namespace physics
+
+#endif
