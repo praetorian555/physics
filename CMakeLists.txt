@@ -108,6 +108,5 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_test(NAME main_test COMMAND physics_test)
 
     # Examples
-    add_subdirectory(examples/fireworks)
 
 endif ()
