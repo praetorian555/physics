@@ -95,8 +95,8 @@ public:
      */
     void AddForceAtLocalPoint(const math::Vector3& Force, const math::Point3& Point);
 
-    const math::Vector3& GetAccumulatedForce() const;
-    const math::Vector3& GetAccumulatedTorque() const;
+    [[nodiscard]] const math::Vector3& GetAccumulatedForce() const;
+    [[nodiscard]] const math::Vector3& GetAccumulatedTorque() const;
 
 protected:
     /** Holds linear position of the rigid body in the world space. */
