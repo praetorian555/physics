@@ -39,6 +39,8 @@ public:
 
     void SetDamping(real Damping);
     [[nodiscard]] real GetDamping() const;
+    void SetAngularDamping(real AngularDamping);
+    [[nodiscard]] real GetAngularDamping() const;
 
     void SetPosition(const math::Point3& Position);
     [[nodiscard]] const math::Point3& GetPosition() const;
@@ -131,6 +133,12 @@ protected:
      * to objects accelerating of their own accord.
      */
     real m_Damping = PHYSICS_REALC(0.99);
+
+    /**
+     * Simple representation of the angular drag force used to avoid numerical inaccuracies that
+     * can lead to objects accelerating of their own accord.
+     */
+    real m_AngularDamping = PHYSICS_REALC(0.99);
 
     /**
      * Holds transform used to move from body space to world space. Cached value calculated

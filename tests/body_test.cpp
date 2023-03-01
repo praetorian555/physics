@@ -26,6 +26,9 @@ TEST_CASE("GettersAndSetters", "Body")
     Body.SetDamping(5);
     REQUIRE(Body.GetDamping() == 5);
 
+    Body.SetAngularDamping(10);
+    REQUIRE(Body.GetAngularDamping() == 10);
+
     math::Point3 Position = {1, 2, 3};
     Body.SetPosition(Position);
     REQUIRE(Body.GetPosition() == Position);

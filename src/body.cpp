@@ -151,3 +151,13 @@ const math::Vector3& physics::RigidBody::GetAccumulatedTorque() const
 {
     return m_TorqueAccumulator;
 }
+
+physics::real physics::RigidBody::GetAngularDamping() const
+{
+    return m_AngularDamping;
+}
+
+void physics::RigidBody::SetAngularDamping(physics::real AngularDamping)
+{
+    m_AngularDamping = AngularDamping;
+}
