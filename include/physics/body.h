@@ -55,6 +55,14 @@ public:
     [[nodiscard]] const math::Vector3& GetAngularVelocity() const;
 
     /**
+     * Sets the linear acceleration of the rigid body in the world space. This will be added
+     * to the acceleration by the forces during the integration step.
+     * @param Acceleration Linear acceleration of the rigid body in the world space.
+     */
+    void SetAcceleration(const math::Vector3& Acceleration);
+    [[nodiscard]] const math::Vector3& GetAcceleration() const;
+
+    /**
      * Get the transform matrix that transforms from body space to world space.
      * @return Returns the transform matrix.
      */
@@ -112,6 +120,12 @@ protected:
 
     /** Holds angular velocity of the rigid body in the world space. */
     math::Vector3 m_AngularVelocity;
+
+    /**
+     * Holds linear acceleration of the rigid body in the world space set by the user. Not a result
+     * of force accumulator.
+     */
+    math::Vector3 m_Acceleration;
 
     /**
      * Represents value 1 / mass since we often need objects with infinite mass (immovable objects)

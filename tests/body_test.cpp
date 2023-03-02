@@ -44,6 +44,10 @@ TEST_CASE("GettersAndSetters", "Body")
     math::Vector3 AngularVelocity = {1, 2, 3};
     Body.SetAngularVelocity(AngularVelocity);
     REQUIRE(Body.GetAngularVelocity() == AngularVelocity);
+
+    math::Vector3 Acceleration = {1, 2, 3};
+    Body.SetAcceleration(Acceleration);
+    REQUIRE(Body.GetAcceleration() == Acceleration);
 }
 
 TEST_CASE("DerivedData", "Body")

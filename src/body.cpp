@@ -62,6 +62,16 @@ physics::real physics::RigidBody::GetDamping() const
     return m_Damping;
 }
 
+physics::real physics::RigidBody::GetAngularDamping() const
+{
+    return m_AngularDamping;
+}
+
+void physics::RigidBody::SetAngularDamping(physics::real AngularDamping)
+{
+    m_AngularDamping = AngularDamping;
+}
+
 void physics::RigidBody::SetPosition(const math::Point3& Position)
 {
     m_Position = Position;
@@ -100,6 +110,16 @@ void physics::RigidBody::SetVelocity(const math::Vector3& Velocity)
 const math::Vector3& physics::RigidBody::GetVelocity() const
 {
     return m_Velocity;
+}
+
+void physics::RigidBody::SetAcceleration(const math::Vector3& Acceleration)
+{
+    m_Acceleration = Acceleration;
+}
+
+const math::Vector3& physics::RigidBody::GetAcceleration() const
+{
+    return m_Acceleration;
 }
 
 const math::Transform& physics::RigidBody::GetTransform() const
@@ -150,14 +170,4 @@ const math::Vector3& physics::RigidBody::GetAccumulatedForce() const
 const math::Vector3& physics::RigidBody::GetAccumulatedTorque() const
 {
     return m_TorqueAccumulator;
-}
-
-physics::real physics::RigidBody::GetAngularDamping() const
-{
-    return m_AngularDamping;
-}
-
-void physics::RigidBody::SetAngularDamping(physics::real AngularDamping)
-{
-    m_AngularDamping = AngularDamping;
 }
