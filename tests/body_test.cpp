@@ -159,3 +159,64 @@ TEST_CASE("BodySpring", "Body")
         REQUIRE(math::IsEqual(Body.GetAccumulatedForce().Y, -15, kEpsilon));
     }
 }
+
+TEST_CASE("BodyIntegration", "Body")
+{
+    {
+        physics::RigidBody Body;
+        Body.SetMass(2);
+        Body.SetDamping(0.5);
+        Body.SetPosition({1, 2, 3});
+        Body.SetVelocity({1, 2, 3});
+        Body.AddForce({1, 2, 3});
+        Body.Integrate(1);
+        REQUIRE(Body.GetVelocity() ==
+                math::Vector3{PHYSICS_REALC(0.75), PHYSICS_REALC(1.5), PHYSICS_REALC(2.25)});
+        REQUIRE(Body.GetPosition() ==
+                math::Point3{PHYSICS_REALC(1.75), PHYSICS_REALC(3.5), PHYSICS_REALC(5.25)});
+        REQUIRE(Body.GetAccumulatedForce() == math::Vector3::Zero);
+        REQUIRE(Body.GetTransform() == math::Translate(Body.GetPosition()));
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetMass(2);
+        Body.SetDamping(0.5);
+        Body.SetPosition({1, 2, 3});
+        Body.SetVelocity({1, 2, 3});
+        Body.AddForceAtPoint({1, 2, 3}, {1, 1, 1});
+        Body.Integrate(1);
+        REQUIRE(Body.GetVelocity() ==
+                math::Vector3{PHYSICS_REALC(0.75), PHYSICS_REALC(1.5), PHYSICS_REALC(2.25)});
+        REQUIRE(Body.GetPosition() ==
+                math::Point3{PHYSICS_REALC(1.75), PHYSICS_REALC(3.5), PHYSICS_REALC(5.25)});
+        REQUIRE(Body.GetAccumulatedForce() == math::Vector3::Zero);
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetMass(2);
+        Body.SetDamping(0.5);
+        Body.SetPosition({1, 2, 3});
+        Body.SetVelocity({1, 2, 3});
+        Body.AddForceAtLocalPoint({1, 2, 3}, {1, 1, 1});
+        Body.Integrate(1);
+        REQUIRE(Body.GetVelocity() ==
+                math::Vector3{PHYSICS_REALC(0.75), PHYSICS_REALC(1.5), PHYSICS_REALC(2.25)});
+        REQUIRE(Body.GetPosition() ==
+                math::Point3{PHYSICS_REALC(1.75), PHYSICS_REALC(3.5), PHYSICS_REALC(5.25)});
+        REQUIRE(Body.GetAccumulatedForce() == math::Vector3::Zero);
+    }
+    {
+        physics::RigidBody Body;
+        Body.SetInverseInertiaTensor(math::Scale(3));
+        Body.CalculateDerivedData();
+        Body.SetAngularDamping(0.5);
+        Body.SetOrientation(math::Quaternion::FromAxisAngleDegrees({0, 0, 1}, 90));
+        Body.AddForceAtPoint({1, 2, 3}, {1, 1, 1});
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{1, -2, 1});
+        Body.Integrate(1);
+        REQUIRE(Body.GetAngularVelocity() == math::Vector3{PHYSICS_REALC(1.5), -3, PHYSICS_REALC(1.5)});
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+
+        // TODO(Marko): Figure out how to test orientation change.
+    }
+}

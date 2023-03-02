@@ -108,6 +108,13 @@ public:
     [[nodiscard]] const math::Vector3& GetAccumulatedForce() const;
     [[nodiscard]] const math::Vector3& GetAccumulatedTorque() const;
 
+    /**
+     * Updates the rigid body's position, orientation, velocity and angular velocity based on the
+     * accumulated forces and torques.
+     * @param DeltaSeconds Time step.
+     */
+    void Integrate(real DeltaSeconds);
+
 protected:
     /** Holds linear position of the rigid body in the world space. */
     math::Point3 m_Position;

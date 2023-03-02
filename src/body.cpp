@@ -171,3 +171,27 @@ const math::Vector3& physics::RigidBody::GetAccumulatedTorque() const
 {
     return m_TorqueAccumulator;
 }
+
+void physics::RigidBody::Integrate(physics::real DeltaSeconds)
+{
+    math::Vector3 TotalAcceleration = m_Acceleration;
+    TotalAcceleration += m_ForceAccumulator * m_InverseMass;
+
+    const math::Vector3 AngularAcceleration = m_InverseInertiaTensorWorld(m_TorqueAccumulator);
+
+    m_Velocity += TotalAcceleration * DeltaSeconds;
+    m_AngularVelocity += AngularAcceleration * DeltaSeconds;
+
+    // Apply drag.
+    m_Velocity *= math::Power(m_Damping, DeltaSeconds);
+    m_AngularVelocity *= math::Power(m_AngularDamping, DeltaSeconds);
+
+    m_Position += m_Velocity * DeltaSeconds;
+    const math::Quaternion AngularVelocityQuaternion(m_AngularVelocity.X, m_AngularVelocity.Y,
+                                                     m_AngularVelocity.Z, PHYSICS_REALC(0.0));
+    m_Orientation +=
+        AngularVelocityQuaternion * m_Orientation * (PHYSICS_REALC(0.5) * DeltaSeconds);
+
+    CalculateDerivedData();
+    ClearAccumulators();
+}
