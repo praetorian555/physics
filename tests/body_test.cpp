@@ -211,12 +211,17 @@ TEST_CASE("BodyIntegration", "Body")
         Body.CalculateDerivedData();
         Body.SetAngularDamping(0.5);
         Body.SetOrientation(math::Quaternion::FromAxisAngleDegrees({0, 0, 1}, 90));
-        Body.AddForceAtPoint({1, 2, 3}, {1, 1, 1});
-        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{1, -2, 1});
+        Body.AddForceAtPoint({0, 1, 0}, {1, 0, 0});
+        REQUIRE(Body.GetAccumulatedTorque() == math::Vector3{0, 0, 1});
         Body.Integrate(1);
-        REQUIRE(Body.GetAngularVelocity() == math::Vector3{PHYSICS_REALC(1.5), -3, PHYSICS_REALC(1.5)});
+        REQUIRE(Body.GetAngularVelocity() == math::Vector3{0, 0, PHYSICS_REALC(1.5)});
         REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
 
-        // TODO(Marko): Figure out how to test orientation change.
+        const math::Quaternion Orientation = Body.GetOrientation();
+        const math::Vector3 Axis = math::Normalize(Orientation.Vec);
+        physics::real Angle = std::acos(Orientation.W) * 2;
+        Angle = math::Degrees(Angle);
+        REQUIRE(Axis == math::Vector3{0, 0, 1});
+        REQUIRE(Angle > 90);
     }
 }
