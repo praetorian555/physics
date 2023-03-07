@@ -4,6 +4,7 @@
 #include "math/vector3.h"
 
 #include "physics/base.h"
+#include "physics/containers.h"
 
 namespace physics
 {
@@ -24,6 +25,29 @@ public:
      * @param DeltaSeconds Time since last frame.
      */
     virtual void UpdateForce(RigidBody& Body, real DeltaSeconds) = 0;
+};
+
+/**
+ * Used to track which force generators are applied to which rigid bodies.
+ */
+class ForceRegistry
+{
+protected:
+    struct Entry
+    {
+        RigidBody* Body;
+        ForceGenerator* ForceGenerator;
+    };
+
+public:
+    void Add(RigidBody* Body, ForceGenerator* ForceGenerator);
+    void Remove(RigidBody* Body, ForceGenerator* ForceGenerator);
+    void Clear();
+
+    void UpdateForces(real DeltaSeconds);
+
+protected:
+    Array<Entry> m_Entries;
 };
 
 /**

@@ -1,6 +1,36 @@
 #include "physics/forcegenerator.h"
 
+#include <cassert>
+
 #include "physics/body.h"
+
+void physics::ForceRegistry::Add(physics::RigidBody* Body, physics::ForceGenerator* ForceGenerator)
+{
+    assert(Body != nullptr);
+    assert(ForceGenerator != nullptr);
+
+    m_Entries.push_back({Body, ForceGenerator});
+}
+
+void physics::ForceRegistry::Remove(physics::RigidBody* Body,
+                                    physics::ForceGenerator* ForceGenerator)
+{
+    std::erase_if(m_Entries, [Body, ForceGenerator](const Entry& Entry)
+                  { return Entry.Body == Body && Entry.ForceGenerator == ForceGenerator; });
+}
+
+void physics::ForceRegistry::Clear()
+{
+    m_Entries.clear();
+}
+
+void physics::ForceRegistry::UpdateForces(physics::real DeltaSeconds)
+{
+    for (const Entry& Entry : m_Entries)
+    {
+        Entry.ForceGenerator->UpdateForce(*Entry.Body, DeltaSeconds);
+    }
+}
 
 void physics::Gravity::UpdateForce(RigidBody& Body, real DeltaSeconds)
 {

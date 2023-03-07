@@ -160,6 +160,27 @@ TEST_CASE("BodySpring", "Body")
     }
 }
 
+TEST_CASE("BodyForceRegistry", "Body")
+{
+    physics::RigidBody Body;
+    Body.SetMass(5);
+    physics::ForceRegistry Registry;
+    physics::Gravity Gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
+    Registry.Add(&Body, &Gravity);
+    Registry.UpdateForces(1);
+    REQUIRE(Body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
+    REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+    Registry.Remove(&Body, &Gravity);
+    Registry.UpdateForces(1);
+    REQUIRE(Body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
+    REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+    Registry.Add(&Body, &Gravity);
+    Registry.Clear();
+    Registry.UpdateForces(1);
+    REQUIRE(Body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
+    REQUIRE(Body.GetAccumulatedTorque() == math::Vector3::Zero);
+}
+
 TEST_CASE("BodyIntegration", "Body")
 {
     {
