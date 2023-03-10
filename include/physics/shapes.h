@@ -20,6 +20,7 @@ struct Shape
 {
     ShapeType Type;
 
+    Shape(ShapeType Type) : Type(Type) {}
     virtual ~Shape() = default;
 
     /**
@@ -28,6 +29,8 @@ struct Shape
      * @return Returns true if the shapes overlap, false otherwise.
      */
     [[nodiscard]] virtual bool Overlaps(const Shape& Other) const = 0;
+    [[nodiscard]] virtual real GetSurfaceArea() const = 0;
+    [[nodiscard]] virtual real GetVolume() const = 0;
 };
 
 struct AABox : public Shape
@@ -35,7 +38,12 @@ struct AABox : public Shape
     math::Vector3 Min;
     math::Vector3 Max;
 
+    AABox();
+    AABox(const math::Vector3& Min, const math::Vector3& Max);
+
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] real GetSurfaceArea() const override;
+    [[nodiscard]] real GetVolume() const override;
 };
 
 struct Sphere final : public Shape
@@ -43,7 +51,11 @@ struct Sphere final : public Shape
     math::Vector3 Center;
     real Radius;
 
+    Sphere(const math::Vector3& Center, real Radius);
+
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] real GetSurfaceArea() const override;
+    [[nodiscard]] real GetVolume() const override;
 };
 
 bool Overlaps(const AABox& A, const AABox& B);

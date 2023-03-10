@@ -2,6 +2,13 @@
 
 #include <cassert>
 
+physics::AABox::AABox(const math::Vector3& Min, const math::Vector3& Max)
+    : Shape(ShapeType::AABox), Min(Min), Max(Max)
+{
+}
+
+physics::AABox::AABox() : Shape(ShapeType::AABox) {}
+
 bool physics::AABox::Overlaps(const Shape& Other) const
 {
     switch (Other.Type)
@@ -16,6 +23,23 @@ bool physics::AABox::Overlaps(const Shape& Other) const
     return false;
 }
 
+physics::real physics::AABox::GetVolume() const
+{
+    const math::Vector3 Diagonal = Max - Min;
+    return Diagonal.X * Diagonal.Y * Diagonal.Z;
+}
+
+physics::real physics::AABox::GetSurfaceArea() const
+{
+    const math::Vector3 Diagonal = Max - Min;
+    return 2 * Diagonal.X * Diagonal.Y + 2 * Diagonal.X * Diagonal.Z + 2 * Diagonal.Y * Diagonal.Z;
+}
+
+physics::Sphere::Sphere(const math::Vector3& Center, physics::real Radius)
+    : Shape(ShapeType::Sphere), Center(Center), Radius(Radius)
+{
+}
+
 bool physics::Sphere::Overlaps(const physics::Shape& Other) const
 {
     switch (Other.Type)
@@ -28,6 +52,18 @@ bool physics::Sphere::Overlaps(const physics::Shape& Other) const
             assert(false);
     }
     return false;
+}
+
+physics::real physics::Sphere::GetSurfaceArea() const
+{
+    constexpr real kConstant = PHYSICS_REALC(4.0) * math::kPi;
+    return kConstant * Radius * Radius;
+}
+
+physics::real physics::Sphere::GetVolume() const
+{
+    constexpr real kConstant = PHYSICS_REALC(4.0) / PHYSICS_REALC(3.0) * math::kPi;
+    return kConstant * Radius * Radius * Radius;
 }
 
 bool physics::Overlaps(const AABox& A, const AABox& B)
