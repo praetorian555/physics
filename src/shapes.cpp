@@ -204,10 +204,12 @@ bool physics::Overlaps(const physics::Plane& A, const physics::AABox& B)
 
 bool physics::Overlaps(const physics::Sphere& A, const physics::Plane& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    if (!A.IsValid() || !B.IsValid())
+    {
+        return false;
+    }
+    const real Distance = math::Dot(A.Center, B.Normal) - B.Distance;
+    return math::Abs(Distance) <= A.Radius;
 }
 
 bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)

@@ -169,3 +169,42 @@ TEST_CASE("ShapesPlaneIntersection")
         REQUIRE(!P1.Overlaps(P2));
     }
 }
+
+TEST_CASE("ShapesSpherePlane")
+{
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 1}, 0);
+        REQUIRE(S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 1}, 2);
+        REQUIRE(!S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 1}, -2);
+        REQUIRE(!S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 1}, 1);
+        REQUIRE(S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 1}, -1);
+        REQUIRE(S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 1);
+        const physics::Plane P({0, 0, 0}, 0);
+        REQUIRE(!S.Overlaps(P));
+    }
+    {
+        const physics::Sphere S({0, 0, 0}, 0);
+        const physics::Plane P({0, 0, 1}, 0);
+        REQUIRE(!S.Overlaps(P));
+    }
+}

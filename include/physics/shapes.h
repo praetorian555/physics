@@ -97,13 +97,54 @@ struct Plane : public Shape
     [[nodiscard]] real GetVolume() const override { return 0; }
 };
 
+/**
+ * Checks if the given axis-aligned boxes overlap.
+ * @param A The first box.
+ * @param B The second box.
+ * @return Returns true if the boxes overlap, false otherwise.
+ */
 bool Overlaps(const AABox& A, const AABox& B);
+
+/**
+ * Checks if the given spheres overlap.
+ * @param A The first sphere.
+ * @param B The second sphere.
+ * @return Returns true if the spheres overlap, false otherwise.
+ */
 bool Overlaps(const Sphere& A, const Sphere& B);
+
+/**
+ * Checks if the given planes overlap.
+ * @param A The first plane.
+ * @param B The second plane.
+ * @return Returns true if the planes overlap, false otherwise.
+ */
 bool Overlaps(const Plane& A, const Plane& B);
+
+/**
+ * Checks if the given sphere overlaps with the given axis-aligned box.
+ * @param A The sphere.
+ * @param B The box.
+ * @return Returns true if the sphere overlaps with the box, false otherwise.
+ */
 bool Overlaps(const AABox& A, const Sphere& B);
 bool Overlaps(const Sphere& A, const AABox& B);
+
+/**
+ * Checks if the given plane overlaps with the given axis-aligned box.
+ * @param A The plane.
+ * @param B The box.
+ * @return Returns true if the plane overlaps with the box, false otherwise.
+ */
 bool Overlaps(const AABox& A, const Plane& B);
 bool Overlaps(const Plane& A, const AABox& B);
+
+/**
+ * Checks if the given plane overlaps with the given sphere.
+ * @param A The plane.
+ * @param B The sphere.
+ * @return Returns true if the plane overlaps with the sphere, false otherwise.
+ */
 bool Overlaps(const Sphere& A, const Plane& B);
 bool Overlaps(const Plane& A, const Sphere& B);
 
