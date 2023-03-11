@@ -191,10 +191,21 @@ bool physics::Overlaps(const Sphere& A, const AABox& B)
 
 bool physics::Overlaps(const physics::AABox& A, const physics::Plane& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    if (!A.IsValid() || !B.IsValid())
+    {
+        return false;
+    }
+
+    const math::Vector3& Center = (A.Max + A.Min) * PHYSICS_REALC(0.5);
+    const math::Vector3& Extents = A.Max - Center;
+
+    // We need to project the extents onto the normal of the plane and find the largest possible
+    // projection. This is why we need to take the absolute value of each component of the normal.
+    const real Radius = Extents.X * math::Abs(B.Normal.X) + Extents.Y * math::Abs(B.Normal.Y) +
+                        Extents.Z * math::Abs(B.Normal.Z);
+    const real Distance = math::Dot(Center, B.Normal) - B.Distance;
+
+    return math::Abs(Distance) <= Radius;
 }
 
 bool physics::Overlaps(const physics::Plane& A, const physics::AABox& B)

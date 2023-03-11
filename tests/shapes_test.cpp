@@ -208,3 +208,92 @@ TEST_CASE("ShapesSpherePlane")
         REQUIRE(!S.Overlaps(P));
     }
 }
+
+TEST_CASE("ShapesAABoxPlane")
+{
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 0, 0}, 0);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 0, 0}, 2);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 0, 0}, 1);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 0, 0}, -1);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 0, 0}, 5);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, 0}, 0);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {0, 0, 0});
+        const physics::Plane P({1, 0, 0}, 0);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 1, 0}, 0);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 1, 0}, 2);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 1, 0}, 1);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 1, 0}, -1);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 1, 0}, 5);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, -1}, 0);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, -1}, -2);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, -1}, -1);
+        REQUIRE(B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, -1}, 1);
+        REQUIRE(!B.Overlaps(P));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({0, 0, -1}, -5);
+        REQUIRE(!B.Overlaps(P));
+    }
+}
