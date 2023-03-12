@@ -177,11 +177,8 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Plane& B)
 
 bool physics::Overlaps(const AABox& A, const Sphere& B)
 {
-    // TODO: Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    assert(false && "Not implemented");
-    return false;
+    const real SquareDistance = physics::SquareDistance(B.Center, A);
+    return SquareDistance <= B.Radius * B.Radius;
 }
 
 bool physics::Overlaps(const Sphere& A, const AABox& B)

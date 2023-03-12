@@ -298,6 +298,35 @@ TEST_CASE("ShapesAABoxPlane")
     }
 }
 
+TEST_CASE("OverlapsAABoxSphere")
+{
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Sphere S({0, 0, 0}, 1);
+        REQUIRE(B.Overlaps(S));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Sphere S({-1, -1, -1}, 2);
+        REQUIRE(B.Overlaps(S));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Sphere S({-1, -1, -1}, 1);
+        REQUIRE(!B.Overlaps(S));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Sphere S({-2, 0, 0}, 1);
+        REQUIRE(!B.Overlaps(S));
+    }
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Sphere S({1, 1, 1}, 1);
+        REQUIRE(B.Overlaps(S));
+    }
+}
+
 TEST_CASE("DistancePointPlane")
 {
     {
