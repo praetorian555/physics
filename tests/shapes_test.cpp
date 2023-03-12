@@ -322,6 +322,59 @@ TEST_CASE("DistancePointPlane")
     }
 }
 
+TEST_CASE("DistancePointAABox")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        REQUIRE(physics::Distance(P, B) == 0);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({1, 1, 1}, {2, 2, 2});
+        REQUIRE(physics::Distance(P, B) == math::Sqrt(3));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({-1, -1, -1}, {2, 2, 2});
+        REQUIRE(physics::Distance(P, B) == 0);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({-2, -2, -2}, {-1, -1, -1});
+        REQUIRE(physics::Distance(P, B) == math::Sqrt(3));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({1, -2, -2}, {2, 2, 2});
+        REQUIRE(physics::Distance(P, B) == 1);
+    }
+}
+
+TEST_CASE("DistancePointSphere")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({0, 0, 0}, 1);
+        REQUIRE(physics::Distance(P, S) == 0);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({1, 1, 1}, 1);
+        REQUIRE(physics::Distance(P, S) == (math::Sqrt(3) - 1));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({-1, -1, -1}, 1);
+        REQUIRE(physics::Distance(P, S) == (math::Sqrt(3) - 1));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({1, 1, 1}, 2);
+        REQUIRE(physics::Distance(P, S) == 0);
+    }
+}
+
 TEST_CASE("ClosestPointPointPlane")
 {
     {
@@ -343,5 +396,58 @@ TEST_CASE("ClosestPointPointPlane")
         const math::Vector3 P(0, 0, 0);
         const physics::Plane P2({0, 0, -1}, 1);
         REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, -1));
+    }
+}
+
+TEST_CASE("ClosestPointPointAABox")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(0, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({1, 1, 1}, {2, 2, 2});
+        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(1, 1, 1));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({-1, -1, -1}, {2, 2, 2});
+        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(0, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({-2, -2, -2}, {-1, -1, -1});
+        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(-1, -1, -1));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::AABox B({1, -5, -5}, {5, 5, 5});
+        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(1, 0, 0));
+    }
+}
+
+TEST_CASE("ClosestPointPointSphere")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({0, 0, 0}, 1);
+        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({1, 0, 0}, 1);
+        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({-2, 0, 0}, 1);
+        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(-1, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Sphere S({1, 1, 1}, 2);
+        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
     }
 }

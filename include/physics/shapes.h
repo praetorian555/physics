@@ -157,6 +157,22 @@ bool Overlaps(const Plane& A, const Sphere& B);
 math::Vector3 ClosestPoint(const math::Vector3& Point, const Plane& Plane);
 
 /**
+ * Find the closest point on the axis-aligned box to the given point.
+ * @param Point Point to find the closest point on the box to.
+ * @param Box Axis-aligned box to find the closest point on.
+ * @return Returns the closest point on the axis-aligned box to the given point.
+ */
+math::Vector3 ClosestPoint(const math::Vector3& Point, const AABox& Box);
+
+/**
+ * Find the closest point on the sphere to the given point.
+ * @param Point Point to find the closest point on the sphere to.
+ * @param Sphere Sphere to find the closest point on.
+ * @return Returns the closest point on the sphere to the given point.
+ */
+math::Vector3 ClosestPoint(const math::Vector3& Point, const Sphere& Sphere);
+
+/**
  * Find the distance from the given point to the plane.
  * @param Point Point to find the distance to the plane.
  * @param Plane Plane to find the distance to.
@@ -164,5 +180,29 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const Plane& Plane);
  * is on the negative side of the plane.
  */
 real Distance(const math::Vector3& Point, const Plane& Plane);
+
+/**
+ * Find the distance from the given point to the axis-aligned box.
+ * @param Point Point to find the distance to the box.
+ * @param Box Axis-aligned box to find the distance to.
+ * @return Returns the distance from the point to the axis-aligned box.
+ */
+real Distance(const math::Vector3& Point, const AABox& Box);
+
+/**
+ * Find the distance from the given point to the sphere.
+ * @param Point Point to find the distance to the sphere.
+ * @param Sphere Sphere to find the distance to.
+ * @return Returns the distance from the point to the sphere.
+ */
+real Distance(const math::Vector3& Point, const Sphere& Sphere);
+
+/**
+ * Find the square distance from the given point to the axis-aligned box.
+ * @param Point Point to find the square distance to the box.
+ * @param Box Axis-aligned box to find the square distance to.
+ * @return Returns the square distance from the point to the axis-aligned box.
+ */
+real SquareDistance(const math::Vector3& Point, const AABox& Box);
 
 }  // namespace physics

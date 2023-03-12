@@ -235,8 +235,65 @@ math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::P
     return Point - Plane.Normal * Distance;
 }
 
+math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::AABox& Box)
+{
+    assert(Box.IsValid());
+    math::Vector3 Result = Point;
+    Result.X = math::Clamp(Result.X, Box.Min.X, Box.Max.X);
+    Result.Y = math::Clamp(Result.Y, Box.Min.Y, Box.Max.Y);
+    Result.Z = math::Clamp(Result.Z, Box.Min.Z, Box.Max.Z);
+    return Result;
+}
+
+math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Sphere& Sphere)
+{
+    assert(Sphere.IsValid());
+    math::Vector3 Direction = Point - Sphere.Center;
+    const real Distance = Direction.Length();
+    if (Distance >= Sphere.Radius)
+    {
+        Direction = math::Normalize(Direction);
+        return Sphere.Center + Direction * Sphere.Radius;
+    }
+    return Point;
+}
+
 physics::real physics::Distance(const math::Vector3& Point, const physics::Plane& Plane)
 {
     assert(Plane.IsValid());
     return math::Dot(Point, Plane.Normal) - Plane.Distance;
+}
+
+physics::real physics::Distance(const math::Vector3& Point, const physics::AABox& Box)
+{
+    return math::Sqrt(SquareDistance(Point, Box));
+}
+
+physics::real physics::Distance(const math::Vector3& Point, const physics::Sphere& Sphere)
+{
+    assert(Sphere.IsValid());
+    const math::Vector3 Direction = Point - Sphere.Center;
+    const real Distance = Direction.Length();
+    return Distance >= Sphere.Radius ? Distance - Sphere.Radius : PHYSICS_REALC(0.0);
+}
+
+physics::real physics::SquareDistance(const math::Vector3& Point, const physics::AABox& Box)
+{
+    assert(Box.IsValid());
+    real SquareDistance = PHYSICS_REALC(0.0);
+    for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
+    {
+        const real AxisValue = Point[AxisIndex];
+        if (AxisValue < Box.Min[AxisIndex])
+        {
+            const real Diff = Box.Min[AxisIndex] - AxisValue;
+            SquareDistance += Diff * Diff;
+        }
+        else if (AxisValue > Box.Max[AxisIndex])
+        {
+            const real Diff = AxisValue - Box.Max[AxisIndex];
+            SquareDistance += Diff * Diff;
+        }
+    }
+    return SquareDistance;
 }
