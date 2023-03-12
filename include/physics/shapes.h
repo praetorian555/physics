@@ -148,4 +148,21 @@ bool Overlaps(const Plane& A, const AABox& B);
 bool Overlaps(const Sphere& A, const Plane& B);
 bool Overlaps(const Plane& A, const Sphere& B);
 
+/**
+ * Find the closest point on the plane to the given point.
+ * @param Point Point to find the closest point on the plane to.
+ * @param Plane Plane to find the closest point on.
+ * @return Returns the closest point on the plane to the given point.
+ */
+math::Vector3 ClosestPoint(const math::Vector3& Point, const Plane& Plane);
+
+/**
+ * Find the distance from the given point to the plane.
+ * @param Point Point to find the distance to the plane.
+ * @param Plane Plane to find the distance to.
+ * @return Returns the distance from the point to the plane. The distance is negative if the point
+ * is on the negative side of the plane.
+ */
+real Distance(const math::Vector3& Point, const Plane& Plane);
+
 }  // namespace physics

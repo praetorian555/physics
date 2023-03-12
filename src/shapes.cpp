@@ -227,3 +227,16 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)
 {
     return Overlaps(B, A);
 }
+
+math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Plane& Plane)
+{
+    assert(Plane.IsValid());
+    const real Distance = math::Dot(Point, Plane.Normal) - Plane.Distance;
+    return Point - Plane.Normal * Distance;
+}
+
+physics::real physics::Distance(const math::Vector3& Point, const physics::Plane& Plane)
+{
+    assert(Plane.IsValid());
+    return math::Dot(Point, Plane.Normal) - Plane.Distance;
+}

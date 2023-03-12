@@ -297,3 +297,51 @@ TEST_CASE("ShapesAABoxPlane")
         REQUIRE(!B.Overlaps(P));
     }
 }
+
+TEST_CASE("DistancePointPlane")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, 1}, 0);
+        REQUIRE(physics::Distance(P, P2) == 0);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, 1}, 1);
+        REQUIRE(physics::Distance(P, P2) == -1);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, 1}, -1);
+        REQUIRE(physics::Distance(P, P2) == 1);
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, -1}, 1);
+        REQUIRE(physics::Distance(P, P2) == -1);
+    }
+}
+
+TEST_CASE("ClosestPointPointPlane")
+{
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, 1}, 0);
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, 0));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, 1}, 1);
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, 1));
+    }
+    {
+        const math::Vector3 P(0, 2, 0);
+        const physics::Plane P2({0, 0, 1}, -1);
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 2, -1));
+    }
+    {
+        const math::Vector3 P(0, 0, 0);
+        const physics::Plane P2({0, 0, -1}, 1);
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, -1));
+    }
+}
