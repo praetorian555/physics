@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "math/matrix4x4.h"
+
 physics::AABox::AABox(const math::Vector3& Min, const math::Vector3& Max)
     : Shape(ShapeType::AABox), Min(Min), Max(Max)
 {
@@ -122,6 +124,63 @@ bool physics::Plane::Overlaps(const physics::Shape& Other) const
             assert(false);
     }
     return true;
+}
+
+physics::Box::Box() : Shape(ShapeType::Box) {}
+
+physics::Box::Box(const math::Vector3& Center,
+                  const math::Vector3& Extents,
+                  const math::Vector3& AxisX,
+                  const math::Vector3& AxisY,
+                  const math::Vector3& AxisZ)
+    : Shape(ShapeType::Box),
+      Center(Center),
+      Extents(Extents),
+      AxisX(AxisX),
+      AxisY(AxisY),
+      AxisZ(AxisZ)
+{
+    if (IsValid())
+    {
+        this->AxisX = math::Normalize(this->AxisX);
+        this->AxisY = math::Normalize(this->AxisY);
+        this->AxisZ = math::Normalize(this->AxisZ);
+    }
+}
+
+physics::Box::Box(const math::Vector3& Center,
+                  const math::Vector3& Extents,
+                  const math::Matrix4x4& RotMat)
+    : Shape(ShapeType::Box), Center(Center), Extents(Extents)
+{
+    Axes[0] = math::Vector3(RotMat.Data[0][0], RotMat.Data[1][0], RotMat.Data[2][0]);
+    Axes[1] = math::Vector3(RotMat.Data[0][1], RotMat.Data[1][1], RotMat.Data[2][1]);
+    Axes[2] = math::Vector3(RotMat.Data[0][2], RotMat.Data[1][2], RotMat.Data[2][2]);
+}
+
+bool physics::Box::IsValid() const
+{
+    constexpr real kEpsilon = PHYSICS_REALC(0.0001);
+    return Extents.X > kEpsilon && Extents.Y > kEpsilon && Extents.Z > kEpsilon &&
+           AxisX.LengthSquared() > kEpsilon && AxisY.LengthSquared() > kEpsilon &&
+           AxisZ.LengthSquared() > kEpsilon;
+}
+
+bool physics::Box::Overlaps(const physics::Shape& Other) const
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(Other);
+    return false;
+}
+
+physics::real physics::Box::GetSurfaceArea() const
+{
+    return 2 * Extents.X * Extents.Y + 2 * Extents.X * Extents.Z + 2 * Extents.Y * Extents.Z;
+}
+
+physics::real physics::Box::GetVolume() const
+{
+    return Extents.X * Extents.Y * Extents.Z;
 }
 
 bool physics::Overlaps(const AABox& A, const AABox& B)

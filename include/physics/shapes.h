@@ -3,6 +3,12 @@
 #include "math/vector3.h"
 
 #include "physics/base.h"
+#include "physics/containers.h"
+
+namespace math
+{
+struct Matrix4x4;
+}
 
 namespace physics
 {
@@ -12,6 +18,7 @@ enum class ShapeType
     AABox = 0,
     Sphere,
     Plane,
+    Box,
     Max
 };
 
@@ -95,6 +102,39 @@ struct Plane : public Shape
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
     [[nodiscard]] real GetSurfaceArea() const override { return 0; }
     [[nodiscard]] real GetVolume() const override { return 0; }
+};
+
+struct Box : public Shape
+{
+    math::Vector3 Center;
+    math::Vector3 Extents;
+    /** The column vector of the rotation matrix that transforms from local box space to world
+     * space. */
+    union
+    {
+        struct
+        {
+            math::Vector3 AxisX;
+            math::Vector3 AxisY;
+            math::Vector3 AxisZ;
+        };
+        StackArray<math::Vector3, 3> Axes;
+    };
+
+    Box();
+    Box(const math::Vector3& Center,
+        const math::Vector3& Extents,
+        const math::Vector3& AxisX,
+        const math::Vector3& AxisY,
+        const math::Vector3& AxisZ);
+    Box(const math::Vector3& Center,
+        const math::Vector3& Extents,
+        const math::Matrix4x4& RotationMatrix);
+
+    [[nodiscard]] bool IsValid() const override;
+    [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] real GetSurfaceArea() const override;
+    [[nodiscard]] real GetVolume() const override;
 };
 
 /**
