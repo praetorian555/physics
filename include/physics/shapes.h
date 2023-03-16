@@ -131,6 +131,12 @@ struct Box : public Shape
         const math::Vector3& Extents,
         const math::Matrix4x4& RotationMatrix);
 
+    /**
+     * Checks if the box is valid. A box is valid if all extents are larger then Epsilon and the
+     * rotation vectors are not zero.
+     * @param Epsilon The minimum extent and rotation vector length value.
+     * @return Returns true if the box is valid, false otherwise.
+     */
     [[nodiscard]] bool IsValid() const override;
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;

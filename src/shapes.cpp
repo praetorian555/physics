@@ -126,7 +126,13 @@ bool physics::Plane::Overlaps(const physics::Shape& Other) const
     return true;
 }
 
-physics::Box::Box() : Shape(ShapeType::Box) {}
+physics::Box::Box()
+    : Shape(ShapeType::Box),
+      AxisX(math::Vector3::Zero),
+      AxisY(math::Vector3::Zero),
+      AxisZ(math::Vector3::Zero)
+{
+}
 
 physics::Box::Box(const math::Vector3& Center,
                   const math::Vector3& Extents,
@@ -156,6 +162,12 @@ physics::Box::Box(const math::Vector3& Center,
     Axes[0] = math::Vector3(RotMat.Data[0][0], RotMat.Data[1][0], RotMat.Data[2][0]);
     Axes[1] = math::Vector3(RotMat.Data[0][1], RotMat.Data[1][1], RotMat.Data[2][1]);
     Axes[2] = math::Vector3(RotMat.Data[0][2], RotMat.Data[1][2], RotMat.Data[2][2]);
+    if (IsValid())
+    {
+        AxisX = math::Normalize(Axes[0]);
+        AxisY = math::Normalize(Axes[1]);
+        AxisZ = math::Normalize(Axes[2]);
+    }
 }
 
 bool physics::Box::IsValid() const

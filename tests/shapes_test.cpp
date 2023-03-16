@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "math/transform.h"
+
 #include "physics/shapes.h"
 
 TEST_CASE("ShapesSphereCreation")
@@ -167,6 +169,45 @@ TEST_CASE("ShapesPlaneIntersection")
         const physics::Plane P1({0, 0, 1}, 0);
         const physics::Plane P2({0, 0, 0}, 0);
         REQUIRE(!P1.Overlaps(P2));
+    }
+}
+
+TEST_CASE("ShapesBoxCreation")
+{
+    {
+        physics::Box B;
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(0, 0, 0));
+        REQUIRE(B.AxisX == math::Vector3(0, 0, 0));
+        REQUIRE(B.AxisY == math::Vector3(0, 0, 0));
+        REQUIRE(B.AxisZ == math::Vector3(0, 0, 0));
+        REQUIRE(!B.IsValid());
+    }
+    {
+        physics::Box B({0, 0, 0}, {1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(1, 1, 1));
+        REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
+        REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
+        REQUIRE(B.AxisZ == math::Vector3(0, 0, 1));
+        REQUIRE(B.IsValid());
+        REQUIRE(B.GetSurfaceArea() == 6);
+        REQUIRE(B.GetVolume() == 1);
+    }
+    {
+        math::Transform T = math::RotateZ(90);
+        physics::Box B({0, 0, 0}, {1, 1, 1}, T.GetMatrix());
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(1, 1, 1));
+        REQUIRE(math::IsEqual(B.AxisX, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));
+        REQUIRE(math::IsEqual(B.AxisY, math::Vector3(-1, 0, 0), PHYSICS_REALC(0.0001)));
+        REQUIRE(math::IsEqual(B.AxisZ, math::Vector3(0, 0, 1), PHYSICS_REALC(0.0001)));
+        REQUIRE(B.IsValid());
+        REQUIRE(B.GetSurfaceArea() == 6);
+        REQUIRE(B.GetVolume() == 1);
     }
 }
 
