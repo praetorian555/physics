@@ -168,6 +168,14 @@ bool Overlaps(const Sphere& A, const Sphere& B);
 bool Overlaps(const Plane& A, const Plane& B);
 
 /**
+ * Checks if the given boxes overlap.
+ * @param A The first box.
+ * @param B The second box.
+ * @return Returns true if the boxes overlap, false otherwise.
+ */
+bool Overlaps(const Box& A, const Box& B);
+
+/**
  * Checks if the given sphere overlaps with the given axis-aligned box.
  * @param A The sphere.
  * @param B The box.
@@ -195,6 +203,33 @@ bool Overlaps(const Sphere& A, const Plane& B);
 bool Overlaps(const Plane& A, const Sphere& B);
 
 /**
+ * Checks if the given box overlaps with the given axis-aligned box.
+ * @param A The box.
+ * @param B The axis-aligned box.
+ * @return Returns true if the box overlaps with the axis-aligned box, false otherwise.
+ */
+bool Overlaps(const Box& A, const AABox& B);
+bool Overlaps(const AABox& A, const Box& B);
+
+/**
+ * Checks if the given box overlaps with the given sphere.
+ * @param A The box.
+ * @param B The sphere.
+ * @return Returns true if the box overlaps with the sphere, false otherwise.
+ */
+bool Overlaps(const Box& A, const Sphere& B);
+bool Overlaps(const Sphere& A, const Box& B);
+
+/**
+ * Checks if the given box overlaps with the given plane.
+ * @param A The box.
+ * @param B The plane.
+ * @return Returns true if the box overlaps with the plane, false otherwise.
+ */
+bool Overlaps(const Box& A, const Plane& B);
+bool Overlaps(const Plane& A, const Box& B);
+
+/**
  * Find the closest point on the plane to the given point.
  * @param Point Point to find the closest point on the plane to.
  * @param Plane Plane to find the closest point on.
@@ -217,6 +252,14 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const AABox& Box);
  * @return Returns the closest point on the sphere to the given point.
  */
 math::Vector3 ClosestPoint(const math::Vector3& Point, const Sphere& Sphere);
+
+/**
+ * Find the closest point on the box to the given point.
+ * @param Point Point to find the closest point on the box to.
+ * @param Box Box to find the closest point on.
+ * @return Returns the closest point on the box to the given point.
+ */
+math::Vector3 ClosestPoint(const math::Vector3& Point, const Box& Box);
 
 /**
  * Find the distance from the given point to the plane.
@@ -242,6 +285,14 @@ real Distance(const math::Vector3& Point, const AABox& Box);
  * @return Returns the distance from the point to the sphere.
  */
 real Distance(const math::Vector3& Point, const Sphere& Sphere);
+
+/**
+ * Find the distance from the given point to the box.
+ * @param Point Point to find the distance to the box.
+ * @param Box Box to find the distance to.
+ * @return Returns the distance from the point to the box.
+ */
+real Distance(const math::Vector3& Point, const Box& Box);
 
 /**
  * Find the square distance from the given point to the axis-aligned box.

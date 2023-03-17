@@ -26,6 +26,8 @@ bool physics::AABox::Overlaps(const Shape& Other) const
             return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
         case ShapeType::Plane:
             return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+        case ShapeType::Box:
+            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
         default:
             assert(false);
     }
@@ -66,6 +68,8 @@ bool physics::Sphere::Overlaps(const physics::Shape& Other) const
             return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
         case ShapeType::Plane:
             return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+        case ShapeType::Box:
+            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
         default:
             assert(false);
     }
@@ -120,6 +124,8 @@ bool physics::Plane::Overlaps(const physics::Shape& Other) const
             return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
         case ShapeType::Sphere:
             return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+        case ShapeType::Box:
+            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
         default:
             assert(false);
     }
@@ -180,8 +186,19 @@ bool physics::Box::IsValid() const
 
 bool physics::Box::Overlaps(const physics::Shape& Other) const
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(Other);
+    switch (Other.Type)
+    {
+        case ShapeType::AABox:
+            return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
+        case ShapeType::Sphere:
+            return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+        case ShapeType::Plane:
+            return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+        case ShapeType::Box:
+            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
+        default:
+            assert(false);
+    }
     return false;
 }
 
@@ -246,6 +263,14 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Plane& B)
     return true;
 }
 
+bool physics::Overlaps(const physics::Box& A, const physics::Box& B)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(A);
+    PHYSICS_UNUSED(B);
+    return false;
+}
+
 bool physics::Overlaps(const AABox& A, const Sphere& B)
 {
     const real SquareDistance = physics::SquareDistance(B.Center, A);
@@ -296,6 +321,45 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)
     return Overlaps(B, A);
 }
 
+bool physics::Overlaps(const physics::Box& A, const physics::AABox& B)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(A);
+    PHYSICS_UNUSED(B);
+    return false;
+}
+
+bool physics::Overlaps(const physics::AABox& A, const physics::Box& B)
+{
+    return Overlaps(B, A);
+}
+
+bool physics::Overlaps(const physics::Box& A, const physics::Sphere& B)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(A);
+    PHYSICS_UNUSED(B);
+    return false;
+}
+
+bool physics::Overlaps(const physics::Sphere& A, const physics::Box& B)
+{
+    return Overlaps(B, A);
+}
+
+bool physics::Overlaps(const physics::Box& A, const physics::Plane& B)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(A);
+    PHYSICS_UNUSED(B);
+    return false;
+}
+
+bool physics::Overlaps(const physics::Plane& A, const physics::Box& B)
+{
+    return Overlaps(B, A);
+}
+
 math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Plane& Plane)
 {
     assert(Plane.IsValid());
@@ -326,6 +390,14 @@ math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::S
     return Point;
 }
 
+math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Box& Box)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(Point);
+    PHYSICS_UNUSED(Box);
+    return math::Vector3();
+}
+
 physics::real physics::Distance(const math::Vector3& Point, const physics::Plane& Plane)
 {
     assert(Plane.IsValid());
@@ -343,6 +415,14 @@ physics::real physics::Distance(const math::Vector3& Point, const physics::Spher
     const math::Vector3 Direction = Point - Sphere.Center;
     const real Distance = Direction.Length();
     return Distance >= Sphere.Radius ? Distance - Sphere.Radius : PHYSICS_REALC(0.0);
+}
+
+physics::real physics::Distance(const math::Vector3& Point, const physics::Box& Box)
+{
+    // TODO(Marko): Implement
+    PHYSICS_UNUSED(Point);
+    PHYSICS_UNUSED(Box);
+    return 0;
 }
 
 physics::real physics::SquareDistance(const math::Vector3& Point, const physics::AABox& Box)
