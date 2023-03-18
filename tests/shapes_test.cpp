@@ -211,6 +211,67 @@ TEST_CASE("ShapesBoxCreation")
     }
 }
 
+TEST_CASE("ShapesBoxIntersection")
+{
+    using math::Vector3;
+
+    const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+    const physics::Box Box2(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+    const physics::Box Box3(Vector3(0.5, 0.5, 0.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
+                            Vector3(0, 1, 0), Vector3(0, 0, 1));
+    const physics::Box Box4(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
+                            Vector3(0, 0, 1));
+    const physics::Box Box5(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 0, 1), Vector3(0, 1, 0),
+                            Vector3(-1, 0, 0));
+    const physics::Box Box6(Vector3(2, 2, 2), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+    const physics::Box Box7(Vector3(2, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+    const physics::Box Box8(Vector3(2, 2, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+
+    SECTION("Non-overlapping boxes with same orientation")
+    {
+        REQUIRE(!Overlaps(Box1, Box2));
+    }
+    SECTION("Overlapping boxes with same orientation")
+    {
+        REQUIRE(Overlaps(Box1, Box3));
+    }
+    SECTION("Overlapping boxes with different orientations")
+    {
+        REQUIRE(Overlaps(Box1, Box4));
+    }
+    SECTION("Non-overlapping boxes with different orientations")
+    {
+        REQUIRE(!Overlaps(Box2, Box4));
+    }
+    SECTION("Overlapping boxes with orthogonal orientations")
+    {
+        REQUIRE(Overlaps(Box1, Box5));
+    }
+    SECTION("Identical boxes")
+    {
+        REQUIRE(Overlaps(Box1, Box1));
+    }
+    SECTION("Boxes touching at one point")
+    {
+        REQUIRE(Overlaps(Box1, Box6));
+    }
+
+    SECTION("Boxes touching along an edge")
+    {
+        REQUIRE(Overlaps(Box1, Box8));
+    }
+
+    SECTION("Boxes touching along a face")
+    {
+        REQUIRE(Overlaps(Box1, Box7));
+    }
+}
+
 TEST_CASE("ShapesSpherePlane")
 {
     {

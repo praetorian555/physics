@@ -265,10 +265,175 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Plane& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::Box& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    if (!A.IsValid() || !B.IsValid())
+    {
+        return false;
+    }
+
+    math::Matrix4x4 R, AbsR;
+
+    // Compute the rotation matrix that represents B's orientation in A's coordinate frame.
+    // This is equivalent to R = A_transpose * B.
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            R.Data[i][j] = math::Dot(A.Axes[i], B.Axes[j]);
+        }
+    }
+
+    // Convert distance between centers to A's coordinate frame.
+    math::Vector3 Distance = B.Center - A.Center;
+    Distance = math::Vector3(math::Dot(Distance, A.Axes[0]), math::Dot(Distance, A.Axes[1]),
+                             math::Dot(Distance, A.Axes[2]));
+
+    // Since we are projecting the extents, we don't really care about the sign of the rotation
+    // matrix. We can just take the absolute value of each component.
+    constexpr real kEpsilon = PHYSICS_REALC(0.0001);
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            AbsR.Data[i][j] = math::Abs(R.Data[i][j]) + kEpsilon;
+        }
+    }
+
+    // Separating-axis test for axes of A.
+    for (int i = 0; i < 3; ++i)
+    {
+        const real ProjectionA = A.Extents[i];
+        const real ProjectionB = B.Extents.X * AbsR.Data[i][0] + B.Extents.Y * AbsR.Data[i][1] +
+                                 B.Extents.Z * AbsR.Data[i][2];
+        if (math::Abs(Distance[i]) > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Separating-axis test for axes of B. We use a transpose of R effectively to get extents of A
+    // in B's coordinate frame.
+    for (int i = 0; i < 3; ++i)
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[0][i] + A.Extents.Y * AbsR.Data[1][i] +
+                                 A.Extents.Z * AbsR.Data[2][i];
+        const real ProjectionB = B.Extents[i];
+        const real DistanceProjection = math::Abs(
+            Distance.X * R.Data[0][i] + Distance.Y * R.Data[1][i] + Distance.Z * R.Data[2][i]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A0 x B0
+    {
+        const real ProjectionA = A.Extents.Y * AbsR.Data[2][0] + A.Extents.Z * AbsR.Data[1][0];
+        const real ProjectionB = B.Extents.Y * AbsR.Data[0][2] + B.Extents.Z * AbsR.Data[0][1];
+        const real DistanceProjection =
+            math::Abs(Distance.Z * R.Data[1][0] - Distance.Y * R.Data[2][0]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A0 x B1
+    {
+        const real ProjectionA = A.Extents.Y * AbsR.Data[2][1] + A.Extents.Z * AbsR.Data[1][1];
+        const real ProjectionB = B.Extents.X * AbsR.Data[0][2] + B.Extents.Z * AbsR.Data[0][0];
+        const real DistanceProjection =
+            math::Abs(Distance.Z * R.Data[1][1] - Distance.Y * R.Data[2][1]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A0 x B2
+    {
+        const real ProjectionA = A.Extents.Y * AbsR.Data[2][2] + A.Extents.Z * AbsR.Data[1][2];
+        const real ProjectionB = B.Extents.X * AbsR.Data[0][1] + B.Extents.Y * AbsR.Data[0][0];
+        const real DistanceProjection =
+            math::Abs(Distance.Z * R.Data[1][2] - Distance.Y * R.Data[2][2]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A1 x B0
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[2][0] + A.Extents.Z * AbsR.Data[0][0];
+        const real ProjectionB = B.Extents.Y * AbsR.Data[1][2] + B.Extents.Z * AbsR.Data[1][1];
+        const real DistanceProjection =
+            math::Abs(Distance.X * R.Data[2][0] - Distance.Z * R.Data[0][0]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A1 x B1
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[2][1] + A.Extents.Z * AbsR.Data[0][1];
+        const real ProjectionB = B.Extents.X * AbsR.Data[1][2] + B.Extents.Z * AbsR.Data[1][0];
+        const real DistanceProjection =
+            math::Abs(Distance.X * R.Data[2][1] - Distance.Z * R.Data[0][1]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A1 x B2
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[2][2] + A.Extents.Z * AbsR.Data[0][2];
+        const real ProjectionB = B.Extents.X * AbsR.Data[1][1] + B.Extents.Y * AbsR.Data[1][0];
+        const real DistanceProjection =
+            math::Abs(Distance.X * R.Data[2][2] - Distance.Z * R.Data[0][2]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A2 x B0
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[1][0] + A.Extents.Y * AbsR.Data[0][0];
+        const real ProjectionB = B.Extents.Y * AbsR.Data[2][2] + B.Extents.Z * AbsR.Data[2][1];
+        const real DistanceProjection =
+            math::Abs(Distance.Y * R.Data[0][0] - Distance.X * R.Data[1][0]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A2 x B1
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[1][1] + A.Extents.Y * AbsR.Data[0][1];
+        const real ProjectionB = B.Extents.X * AbsR.Data[2][2] + B.Extents.Z * AbsR.Data[2][0];
+        const real DistanceProjection =
+            math::Abs(Distance.Y * R.Data[0][1] - Distance.X * R.Data[1][1]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    // Test axis A2 x B2
+    {
+        const real ProjectionA = A.Extents.X * AbsR.Data[1][2] + A.Extents.Y * AbsR.Data[0][2];
+        const real ProjectionB = B.Extents.X * AbsR.Data[2][1] + B.Extents.Y * AbsR.Data[2][0];
+        const real DistanceProjection =
+            math::Abs(Distance.Y * R.Data[0][2] - Distance.X * R.Data[1][2]);
+        if (DistanceProjection > ProjectionA + ProjectionB)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool physics::Overlaps(const AABox& A, const Sphere& B)
