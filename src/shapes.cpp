@@ -488,10 +488,10 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::AABox& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    const math::Vector3 AABBCenter = (B.Min + B.Max) * PHYSICS_REALC(0.5);
+    const math::Vector3 AABBExtents = B.Max - AABBCenter;
+    const physics::Box BB(AABBCenter, AABBExtents, math::Matrix4x4{});
+    return Overlaps(A, BB);
 }
 
 bool physics::Overlaps(const physics::AABox& A, const physics::Box& B)
@@ -501,10 +501,14 @@ bool physics::Overlaps(const physics::AABox& A, const physics::Box& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::Sphere& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    if (!A.IsValid() || !B.IsValid())
+    {
+        return false;
+    }
+
+    const math::Vector3 Point = ClosestPoint(B.Center, A);
+    const math::Vector3 DistanceVector = Point - B.Center;
+    return math::Dot(DistanceVector, DistanceVector) <= B.Radius * B.Radius;
 }
 
 bool physics::Overlaps(const physics::Sphere& A, const physics::Box& B)
@@ -514,10 +518,17 @@ bool physics::Overlaps(const physics::Sphere& A, const physics::Box& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::Plane& B)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(A);
-    PHYSICS_UNUSED(B);
-    return false;
+    if (!A.IsValid() || !B.IsValid())
+    {
+        return false;
+    }
+
+    // Project the farthest point of the box onto the plane normal.
+    const real Projection = A.Extents.X * math::Dot(A.Axes[0], B.Normal) +
+                            A.Extents.Y * math::Dot(A.Axes[1], B.Normal) +
+                            A.Extents.Z * math::Dot(A.Axes[2], B.Normal);
+    const real Distance = math::Dot(A.Center, B.Normal) - B.Distance;
+    return math::Abs(Distance) <= Projection;
 }
 
 bool physics::Overlaps(const physics::Plane& A, const physics::Box& B)
