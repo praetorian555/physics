@@ -557,10 +557,15 @@ math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::S
 
 math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Box& Box)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(Point);
-    PHYSICS_UNUSED(Box);
-    return math::Vector3();
+    math::Vector3 Result = Box.Center;
+    const math::Vector3 Direction = Point - Box.Center;
+    for (int AxisIdx = 0; AxisIdx < 3; ++AxisIdx)
+    {
+        real Distance = math::Dot(Direction, Box.Axes[AxisIdx]);
+        Distance = math::Clamp(Distance, -Box.Extents[AxisIdx], Box.Extents[AxisIdx]);
+        Result += Distance * Box.Axes[AxisIdx];
+    }
+    return Result;
 }
 
 physics::real physics::Distance(const math::Vector3& Point, const physics::Plane& Plane)
@@ -584,10 +589,8 @@ physics::real physics::Distance(const math::Vector3& Point, const physics::Spher
 
 physics::real physics::Distance(const math::Vector3& Point, const physics::Box& Box)
 {
-    // TODO(Marko): Implement
-    PHYSICS_UNUSED(Point);
-    PHYSICS_UNUSED(Box);
-    return 0;
+    const math::Vector3 ClosestPointOnBox = ClosestPoint(Point, Box);
+    return (Point - ClosestPointOnBox).Length();
 }
 
 physics::real physics::SquareDistance(const math::Vector3& Point, const physics::AABox& Box)

@@ -256,7 +256,7 @@ TEST_CASE("ShapesBoxIntersection")
     {
         REQUIRE(Overlaps(Box1, Box1));
     }
-    SECTION("Boxes touching at one point")
+    SECTION("Boxes touching at one Point")
     {
         REQUIRE(Overlaps(Box1, Box6));
     }
@@ -506,6 +506,64 @@ TEST_CASE("DistancePointSphere")
     }
 }
 
+TEST_CASE("DistancePointBox")
+{
+    using math::Vector3;
+
+    const physics::Box B1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                          Vector3(0, 0, 1));
+    const physics::real Epsilon = PHYSICS_REALC(1e-6);
+
+    SECTION("Point inside the box")
+    {
+        const Vector3 P(0.5, 0.5, 0.5);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 0.0, Epsilon));
+    }
+
+    SECTION("Point outside the box - closest to a vertex")
+    {
+        const Vector3 P(3, 3, 3);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 2 * math::Sqrt(3.0), Epsilon));
+    }
+
+    SECTION("Point outside the box - closest to an edge")
+    {
+        const Vector3 P(0.5, 0.5, 2);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 1.0, Epsilon));
+    }
+
+    SECTION("Point outside the box - closest to a face")
+    {
+        const Vector3 P(2, 0.5, 0.5);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 1.0, Epsilon));
+    }
+
+    SECTION("Point on the box surface")
+    {
+        const Vector3 P(1, 0.5, 0.5);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 0.0, Epsilon));
+    }
+
+    SECTION("Point on the box edge")
+    {
+        const Vector3 P(1, 1, 0.5);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 0.0, Epsilon));
+    }
+
+    SECTION("Point on the box vertex")
+    {
+        const Vector3 P(1, 1, 1);
+        const physics::real R = Distance(P, B1);
+        REQUIRE(math::IsEqual(R, 0.0, Epsilon));
+    }
+}
+
 TEST_CASE("ClosestPointPointPlane")
 {
     {
@@ -580,5 +638,62 @@ TEST_CASE("ClosestPointPointSphere")
         const math::Vector3 P(0, 0, 0);
         const physics::Sphere S({1, 1, 1}, 2);
         REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
+    }
+}
+
+TEST_CASE("ClosestPointPointBox")
+{
+    using math::Vector3;
+
+    const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                            Vector3(0, 0, 1));
+
+    SECTION("Point inside the box")
+    {
+        const Vector3 Point(0.5, 0.5, 0.5);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point);
+    }
+
+    SECTION("Point outside the box - closest to a vertex")
+    {
+        const Vector3 Point(3, 3, 3);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Vector3(1, 1, 1));
+    }
+
+    SECTION("Point outside the box - closest to an edge")
+    {
+        const Vector3 Point(0.5, 1, 2);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Vector3(0.5, 1, 1));
+    }
+
+    SECTION("Point outside the box - closest to a face")
+    {
+        const Vector3 Point(2, 0.5, 0.5);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Vector3(1, 0.5, 0.5));
+    }
+
+    SECTION("Point on the box surface")
+    {
+        const Vector3 Point(1, 0.5, 0.5);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point);
+    }
+
+    SECTION("Point on the box edge")
+    {
+        const Vector3 Point(1, 1, 0.5);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point);
+    }
+
+    SECTION("Point on the box vertex")
+    {
+        const Vector3 Point(1, 1, 1);
+        const Vector3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point);
     }
 }
