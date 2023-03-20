@@ -4,6 +4,9 @@
 
 #include "physics/shapes.h"
 
+// TODO(Marko): Add sections.
+// TODO(Marko): Test overlaps with NaN.
+
 TEST_CASE("ShapesSphereCreation")
 {
     {
