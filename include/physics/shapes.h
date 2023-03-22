@@ -58,7 +58,13 @@ struct AABox : public Shape
     AABox();
     AABox(const math::Vector3& Min, const math::Vector3& Max);
 
+    /**
+     * Check if the axis-aligned box is valid. An axis-aligned box is valid if the minimum point is
+     * less than or equal to the maximum point.
+     * @return Returns true if the box is valid, false otherwise.
+     */
     [[nodiscard]] bool IsValid() const override;
+
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;
     [[nodiscard]] real GetVolume() const override;
@@ -72,7 +78,12 @@ struct Sphere final : public Shape
     Sphere();
     Sphere(const math::Vector3& Center, real Radius);
 
+    /**
+     * Check if the sphere is valid. A sphere is valid if the radius is greater than or equal to 0.
+     * @return Returns true if the sphere is valid, false otherwise.
+     */
     [[nodiscard]] bool IsValid() const override;
+
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;
     [[nodiscard]] real GetVolume() const override;
@@ -94,7 +105,7 @@ struct Plane : public Shape
      * @param A The first point.
      * @param B The second point.
      * @param C The third point.
-     * @return Returns the plane.
+     * @return Returns the plane. If the points are collinear, the plane will be invalid.
      */
     static Plane FromPoints(const math::Vector3& A, const math::Vector3& B, const math::Vector3& C);
 

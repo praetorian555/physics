@@ -4,11 +4,19 @@
 
 #include "physics/shapes.h"
 
-// TODO(Marko): Add sections.
-// TODO(Marko): Test overlaps with NaN.
-
-TEST_CASE("ShapesSphereCreation")
+TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
 {
+    SECTION("Default constructor")
+    {
+        physics::Sphere S;
+        REQUIRE(S.Type == physics::ShapeType::Sphere);
+        REQUIRE(S.Center == math::Vector3(0, 0, 0));
+        REQUIRE(S.Radius == 0);
+        REQUIRE(S.GetVolume() == 0);
+        REQUIRE(S.GetSurfaceArea() == 0);
+        REQUIRE(S.IsValid());
+    }
+    SECTION("Constructor with center and radius")
     {
         physics::Sphere S({1, 1, 1}, 5);
         REQUIRE(S.Type == physics::ShapeType::Sphere);
@@ -19,58 +27,39 @@ TEST_CASE("ShapesSphereCreation")
         REQUIRE(S.GetSurfaceArea() == math::kPi * 5 * 5 * 4);
         REQUIRE(S.IsValid());
     }
+    SECTION("Constructor with radius 0")
     {
-        physics::Sphere S{};
+        physics::Sphere S({1, 1, 1}, 0);
         REQUIRE(S.Type == physics::ShapeType::Sphere);
-        REQUIRE(S.Center == math::Vector3(0, 0, 0));
+        REQUIRE(S.Center == math::Vector3(1, 1, 1));
         REQUIRE(S.Radius == 0);
         REQUIRE(S.GetVolume() == 0);
         REQUIRE(S.GetSurfaceArea() == 0);
+        REQUIRE(S.IsValid());
+    }
+    SECTION("Constructor with center and invalid radius")
+    {
+        physics::Sphere S({1, 1, 1}, -5);
+        REQUIRE(S.Type == physics::ShapeType::Sphere);
+        REQUIRE(S.Center == math::Vector3(1, 1, 1));
+        REQUIRE(S.Radius == -5);
         REQUIRE(!S.IsValid());
     }
 }
 
-TEST_CASE("ShapesSphereIntersection")
+TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
 {
+    SECTION("Default constructor")
     {
-        const physics::Sphere S1({0, 0, 0}, 1);
-        const physics::Sphere S2({0, 0, 0}, 1);
-        REQUIRE(S1.Overlaps(S2));
+        const physics::AABox B;
+        REQUIRE(B.Type == physics::ShapeType::AABox);
+        REQUIRE(B.Min == math::Vector3(0, 0, 0));
+        REQUIRE(B.Max == math::Vector3(0, 0, 0));
+        REQUIRE(B.GetVolume() == 0);
+        REQUIRE(B.GetSurfaceArea() == 0);
+        REQUIRE(B.IsValid());
     }
-    {
-        const physics::Sphere S1({0, 0, 0}, 1);
-        const physics::Sphere S2({2, 0, 0}, 2);
-        REQUIRE(S1.Overlaps(S2));
-    }
-    {
-        const physics::Sphere S1({0, 0, 0}, 1);
-        const physics::Sphere S2({2, 0, 0}, 1);
-        REQUIRE(S1.Overlaps(S2));
-    }
-    {
-        const physics::Sphere S1({0, 0, 0}, 2);
-        const physics::Sphere S2({1, 0, 0}, 0.5);
-        REQUIRE(S1.Overlaps(S2));
-    }
-    {
-        const physics::Sphere S1({0, 0, 0}, 2);
-        const physics::Sphere S2({1.5, 0, 0}, 1);
-        REQUIRE(S1.Overlaps(S2));
-    }
-    {
-        const physics::Sphere S1({0, 0, 0}, 2);
-        const physics::Sphere S2({3, 0, 0}, 0.5);
-        REQUIRE(!S1.Overlaps(S2));
-    }
-    {
-        const physics::Sphere S1({0, 0, 0}, 2);
-        const physics::Sphere S2({0, 0, 0}, 0);
-        REQUIRE(!S1.Overlaps(S2));
-    }
-}
-
-TEST_CASE("ShapesAABoxConstruction")
-{
+    SECTION("Constructor with valid min and max")
     {
         physics::AABox B({0, 0, 0}, {1, 1, 1});
         REQUIRE(B.Type == physics::ShapeType::AABox);
@@ -80,55 +69,29 @@ TEST_CASE("ShapesAABoxConstruction")
         REQUIRE(B.GetSurfaceArea() == 6);
         REQUIRE(B.IsValid());
     }
+    SECTION("Constructor with equal min and max")
     {
-        const physics::AABox B;
+        physics::AABox B({0, 0, 0}, {0, 0, 0});
         REQUIRE(B.Type == physics::ShapeType::AABox);
         REQUIRE(B.Min == math::Vector3(0, 0, 0));
         REQUIRE(B.Max == math::Vector3(0, 0, 0));
         REQUIRE(B.GetVolume() == 0);
         REQUIRE(B.GetSurfaceArea() == 0);
+        REQUIRE(B.IsValid());
+    }
+    SECTION("Constructor with invalid min and max")
+    {
+        physics::AABox B({1, 1, 1}, {0, 0, 0});
+        REQUIRE(B.Type == physics::ShapeType::AABox);
+        REQUIRE(B.Min == math::Vector3(1, 1, 1));
+        REQUIRE(B.Max == math::Vector3(0, 0, 0));
         REQUIRE(!B.IsValid());
     }
 }
 
-TEST_CASE("ShapesAABoxIntersection")
+TEST_CASE("Creation of a plane shape", "[creation][shape][plane]")
 {
-    {
-        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
-        const physics::AABox B2({0, 0, 0}, {1, 1, 1});
-        REQUIRE(B1.Overlaps(B2));
-    }
-    {
-        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
-        const physics::AABox B2({0, 0, 0}, {2, 2, 2});
-        REQUIRE(B1.Overlaps(B2));
-    }
-    {
-        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
-        const physics::AABox B2({1, 1, 1}, {2, 2, 2});
-        REQUIRE(B1.Overlaps(B2));
-    }
-    {
-        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
-        const physics::AABox B2({2, 2, 2}, {3, 3, 3});
-        REQUIRE(!B1.Overlaps(B2));
-    }
-    {
-        const physics::AABox B1({0, 0, 0}, {2, 2, 2});
-        const physics::AABox B2({1, 1, 1}, {1, 1, 1});
-        REQUIRE(!B1.Overlaps(B2));
-    }
-}
-
-TEST_CASE("ShapesPlaneConstruction")
-{
-    {
-        physics::Plane P({0, 0, 3}, 5);
-        REQUIRE(P.Type == physics::ShapeType::Plane);
-        REQUIRE(P.Normal == math::Vector3(0, 0, 1));
-        REQUIRE(P.Distance == 5);
-        REQUIRE(P.IsValid());
-    }
+    SECTION("Default constructor")
     {
         const physics::Plane P;
         REQUIRE(P.Type == physics::ShapeType::Plane);
@@ -136,6 +99,31 @@ TEST_CASE("ShapesPlaneConstruction")
         REQUIRE(P.Distance == 0);
         REQUIRE(!P.IsValid());
     }
+    SECTION("Constructor with normalized normal")
+    {
+        physics::Plane P({0, 0, 1}, 5);
+        REQUIRE(P.Type == physics::ShapeType::Plane);
+        REQUIRE(P.Normal == math::Vector3(0, 0, 1));
+        REQUIRE(P.Distance == 5);
+        REQUIRE(P.IsValid());
+    }
+    SECTION("Constructor with non-normalized normal")
+    {
+        physics::Plane P({0, 0, 3}, 5);
+        REQUIRE(P.Type == physics::ShapeType::Plane);
+        REQUIRE(P.Normal == math::Vector3(0, 0, 1));
+        REQUIRE(P.Distance == 5);
+        REQUIRE(P.IsValid());
+    }
+    SECTION("Constructor with invalid normal")
+    {
+        physics::Plane P({0, 0, 0}, 5);
+        REQUIRE(P.Type == physics::ShapeType::Plane);
+        REQUIRE(P.Normal == math::Vector3(0, 0, 0));
+        REQUIRE(P.Distance == 5);
+        REQUIRE(!P.IsValid());
+    }
+    SECTION("Construction of a plane from three points that are not collinear")
     {
         const physics::Plane P = physics::Plane::FromPoints(
             math::Vector3(0, 0, 0), math::Vector3(1, 0, 0), math::Vector3(0, 1, 0));
@@ -144,39 +132,20 @@ TEST_CASE("ShapesPlaneConstruction")
         REQUIRE(P.Distance == 0);
         REQUIRE(P.IsValid());
     }
-}
-
-TEST_CASE("ShapesPlaneIntersection")
-{
+    SECTION("Construction of a plane from three points that are collinear")
     {
-        const physics::Plane P1({0, 0, 1}, 0);
-        const physics::Plane P2({0, 0, 1}, 3);
-        REQUIRE(!P1.Overlaps(P2));
-    }
-    {
-        const physics::Plane P1({0, 0, 1}, 0);
-        const physics::Plane P2({0, 0, 1}, 0);
-        REQUIRE(P1.Overlaps(P2));
-    }
-    {
-        const physics::Plane P1({0, 0, 1}, 0);
-        const physics::Plane P2({0, 1, 0}, -3);
-        REQUIRE(P1.Overlaps(P2));
-    }
-    {
-        const physics::Plane P1({0, 0, 1}, 0);
-        const physics::Plane P2({0, 0, -1}, 3);
-        REQUIRE(!P1.Overlaps(P2));
-    }
-    {
-        const physics::Plane P1({0, 0, 1}, 0);
-        const physics::Plane P2({0, 0, 0}, 0);
-        REQUIRE(!P1.Overlaps(P2));
+        const physics::Plane P = physics::Plane::FromPoints(
+            math::Vector3(0, 0, 0), math::Vector3(1, 0, 0), math::Vector3(2, 0, 0));
+        REQUIRE(P.Type == physics::ShapeType::Plane);
+        REQUIRE(P.Normal == math::Vector3(0, 0, 0));
+        REQUIRE(P.Distance == 0);
+        REQUIRE(!P.IsValid());
     }
 }
 
-TEST_CASE("ShapesBoxCreation")
+TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
 {
+    SECTION("Default constructor")
     {
         physics::Box B;
         REQUIRE(B.Type == physics::ShapeType::Box);
@@ -187,6 +156,7 @@ TEST_CASE("ShapesBoxCreation")
         REQUIRE(B.AxisZ == math::Vector3(0, 0, 0));
         REQUIRE(!B.IsValid());
     }
+    SECTION("Constructor with valid parameters and axes vectors")
     {
         physics::Box B({0, 0, 0}, {1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
         REQUIRE(B.Type == physics::ShapeType::Box);
@@ -199,8 +169,46 @@ TEST_CASE("ShapesBoxCreation")
         REQUIRE(B.GetSurfaceArea() == 6);
         REQUIRE(B.GetVolume() == 1);
     }
+    SECTION("Constructor with zero extent")
     {
-        math::Transform T = math::RotateZ(90);
+        physics::Box B({0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(0, 0, 0));
+        REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
+        REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
+        REQUIRE(B.AxisZ == math::Vector3(0, 0, 1));
+        REQUIRE(B.IsValid());
+        REQUIRE(B.GetSurfaceArea() == 0);
+        REQUIRE(B.GetVolume() == 0);
+    }
+    SECTION("Constructor with invalid extent")
+    {
+        physics::Box B({0, 0, 0}, {-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(-1, -1, -1));
+        REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
+        REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
+        REQUIRE(B.AxisZ == math::Vector3(0, 0, 1));
+        REQUIRE(!B.IsValid());
+    }
+    SECTION("Constructor with valid parameters and non-normalized axes vectors")
+    {
+        physics::Box B({0, 0, 0}, {1, 1, 1}, {3, 0, 0}, {0, 5, 0}, {0, 0, 2});
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(1, 1, 1));
+        REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
+        REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
+        REQUIRE(B.AxisZ == math::Vector3(0, 0, 1));
+        REQUIRE(B.IsValid());
+        REQUIRE(B.GetSurfaceArea() == 6);
+        REQUIRE(B.GetVolume() == 1);
+    }
+    SECTION("Constructor with valid parameters and rotation matrix")
+    {
+        const math::Transform T = math::RotateZ(90);
         physics::Box B({0, 0, 0}, {1, 1, 1}, T.GetMatrix());
         REQUIRE(B.Type == physics::ShapeType::Box);
         REQUIRE(B.Center == math::Vector3(0, 0, 0));
@@ -212,193 +220,356 @@ TEST_CASE("ShapesBoxCreation")
         REQUIRE(B.GetSurfaceArea() == 6);
         REQUIRE(B.GetVolume() == 1);
     }
+    SECTION("Constructor with invalid extent and rotation matrix")
+    {
+        const math::Transform T = math::RotateZ(90);
+        physics::Box B({0, 0, 0}, {-1, -1, -1}, T.GetMatrix());
+        REQUIRE(B.Type == physics::ShapeType::Box);
+        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Extents == math::Vector3(-1, -1, -1));
+        REQUIRE(math::IsEqual(B.AxisX, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));
+        REQUIRE(math::IsEqual(B.AxisY, math::Vector3(-1, 0, 0), PHYSICS_REALC(0.0001)));
+        REQUIRE(math::IsEqual(B.AxisZ, math::Vector3(0, 0, 1), PHYSICS_REALC(0.0001)));
+        REQUIRE(!B.IsValid());
+    }
 }
 
-TEST_CASE("ShapesBoxIntersection")
+TEST_CASE("Overlap of two spheres", "[overlaps][shape][sphere]")
+{
+    SECTION("Identical spheres")
+    {
+        const physics::Sphere S1({0, 0, 0}, 1);
+        const physics::Sphere S2({0, 0, 0}, 1);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Overlapping spheres where center is on the surface of the other sphere")
+    {
+        const physics::Sphere S1({0, 0, 0}, 1);
+        const physics::Sphere S2({2, 0, 0}, 2);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Spheres overlapping at one point")
+    {
+        const physics::Sphere S1({0, 0, 0}, 1);
+        const physics::Sphere S2({2, 0, 0}, 1);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Spheres overlapping where one sphere is contained in another")
+    {
+        const physics::Sphere S1({0, 0, 0}, 2);
+        const physics::Sphere S2({1, 0, 0}, 0.5);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Overlapping spheres where centers are not contained in the other sphere")
+    {
+        const physics::Sphere S1({0, 0, 0}, 2);
+        const physics::Sphere S2({1.5, 0, 0}, 1);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Non-overlapping spheres")
+    {
+        const physics::Sphere S1({0, 0, 0}, 2);
+        const physics::Sphere S2({3, 0, 0}, 0.5);
+        REQUIRE(!S1.Overlaps(S2));
+    }
+    SECTION("Overlapping zero radius sphere")
+    {
+        const physics::Sphere S1({0, 0, 0}, 2);
+        const physics::Sphere S2({0, 0, 0}, 0);
+        REQUIRE(S1.Overlaps(S2));
+    }
+    SECTION("Non-overlapping zero radius sphere")
+    {
+        const physics::Sphere S1({0, 0, 0}, 2);
+        const physics::Sphere S2({3, 3, 3}, 0);
+        REQUIRE(!S1.Overlaps(S2));
+    }
+}
+
+TEST_CASE("Overlap of two axis-aligned boxes", "[overlaps][shape][aabox]")
+{
+    SECTION("Identical boxes")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({0, 0, 0}, {1, 1, 1});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("One box contains the other")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({0, 0, 0}, {2, 2, 2});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Overlapping at one vertex")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({1, 1, 1}, {2, 2, 2});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Overlapping at one edge")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({1, 0, 1}, {2, 2, 2});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Overlapping at one face")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({1, 0, 0}, {2, 1, 2});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Overlapping but no center is contained in the other box")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({0.5, 0.5, 0.5}, {2, 2, 2});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Non-overlapping boxes")
+    {
+        const physics::AABox B1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox B2({2, 2, 2}, {3, 3, 3});
+        REQUIRE(!B1.Overlaps(B2));
+    }
+    SECTION("Overlapping a point box")
+    {
+        const physics::AABox B1({0, 0, 0}, {2, 2, 2});
+        const physics::AABox B2({1, 1, 1}, {1, 1, 1});
+        REQUIRE(B1.Overlaps(B2));
+    }
+    SECTION("Non-overlapping point box")
+    {
+        const physics::AABox B1({0, 0, 0}, {2, 2, 2});
+        const physics::AABox B2({3, 3, 3}, {3, 3, 3});
+        REQUIRE(!B1.Overlaps(B2));
+    }
+}
+
+TEST_CASE("Overlap of two planes", "[overlaps][shape][plane]")
+{
+    SECTION("Parallel planes")
+    {
+        const physics::Plane P1({0, 0, 1}, 0);
+        const physics::Plane P2({0, 0, 1}, 3);
+        REQUIRE(!P1.Overlaps(P2));
+    }
+    SECTION("Identical planes")
+    {
+        const physics::Plane P1({0, 0, 1}, 0);
+        const physics::Plane P2({0, 0, 1}, 0);
+        REQUIRE(P1.Overlaps(P2));
+    }
+    SECTION("Parallel planes with opposite normals")
+    {
+        const physics::Plane P1({0, 0, 1}, 0);
+        const physics::Plane P2({0, 0, -1}, 3);
+        REQUIRE(!P1.Overlaps(P2));
+    }
+    SECTION("Parallel planes with opposite normals but same offsets")
+    {
+        const physics::Plane P1({0, 0, 1}, 0);
+        const physics::Plane P2({0, 0, -1}, 0);
+        REQUIRE(P1.Overlaps(P2));
+    }
+    SECTION("Overlapping planes")
+    {
+        const physics::Plane P1({0, 0, 1}, 0);
+        const physics::Plane P2({0, 1, 0}, -3);
+        REQUIRE(P1.Overlaps(P2));
+    }
+}
+
+TEST_CASE("Overlap of two oriented boxes", "[overlaps][shape][box]")
 {
     using math::Vector3;
 
-    const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
-                            Vector3(0, 0, 1));
-    const physics::Box Box2(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
-                            Vector3(0, 0, 1));
-    const physics::Box Box3(Vector3(0.5, 0.5, 0.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
-                            Vector3(0, 1, 0), Vector3(0, 0, 1));
-    const physics::Box Box4(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
-                            Vector3(0, 0, 1));
-    const physics::Box Box5(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 0, 1), Vector3(0, 1, 0),
-                            Vector3(-1, 0, 0));
-    const physics::Box Box6(Vector3(2, 2, 2), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
-                            Vector3(0, 0, 1));
-    const physics::Box Box7(Vector3(2, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
-                            Vector3(0, 0, 1));
-    const physics::Box Box8(Vector3(2, 2, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
-                            Vector3(0, 0, 1));
-
     SECTION("Non-overlapping Boxes with same orientation")
     {
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
         REQUIRE(!Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with same orientation")
     {
-        REQUIRE(Overlaps(Box1, Box3));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(0.5, 0.5, 0.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
+                                Vector3(0, 1, 0), Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with different orientations")
     {
-        REQUIRE(Overlaps(Box1, Box4));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Non-overlapping Boxes with different orientations")
     {
-        REQUIRE(!Overlaps(Box2, Box4));
+        const physics::Box Box1(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(!Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with orthogonal orientations")
     {
-        REQUIRE(Overlaps(Box1, Box5));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 0, 1), Vector3(0, 1, 0),
+                                Vector3(-1, 0, 0));
+        REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Identical Boxes")
     {
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box1));
     }
     SECTION("Boxes touching at one Point")
     {
-        REQUIRE(Overlaps(Box1, Box6));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(2, 2, 2), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
     }
-
     SECTION("Boxes touching along an edge")
     {
-        REQUIRE(Overlaps(Box1, Box8));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(2, 2, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
     }
-
     SECTION("Boxes touching along a face")
     {
-        REQUIRE(Overlaps(Box1, Box7));
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(2, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
+    }
+    SECTION("Overlapping point box")
+    {
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
+    }
+    SECTION("Non-overlapping point box")
+    {
+        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        const physics::Box Box2(Vector3(2, 2, 2), Vector3(2, 2, 2), Vector3(1, 0, 0), Vector3(0, 1, 0),
+                                Vector3(0, 0, 1));
+        REQUIRE(Overlaps(Box1, Box2));
     }
 }
 
-TEST_CASE("ShapesSpherePlane")
+TEST_CASE("Overlap of a sphere and a plane", "[overlaps][shape][sphere][plane]")
 {
+    SECTION("Overlapping")
     {
         const physics::Sphere S({0, 0, 0}, 1);
         const physics::Plane P({0, 0, 1}, 0);
         REQUIRE(S.Overlaps(P));
     }
+    SECTION("Non-overlapping")
     {
         const physics::Sphere S({0, 0, 0}, 1);
         const physics::Plane P({0, 0, 1}, 2);
         REQUIRE(!S.Overlaps(P));
     }
+    SECTION("Non-overlapping where plane normal is in negative direction")
     {
         const physics::Sphere S({0, 0, 0}, 1);
         const physics::Plane P({0, 0, 1}, -2);
         REQUIRE(!S.Overlaps(P));
     }
+    SECTION("Overlapping at one point")
     {
         const physics::Sphere S({0, 0, 0}, 1);
         const physics::Plane P({0, 0, 1}, 1);
         REQUIRE(S.Overlaps(P));
     }
+    SECTION("Overlapping at one point on the other side of sphere")
     {
         const physics::Sphere S({0, 0, 0}, 1);
         const physics::Plane P({0, 0, 1}, -1);
         REQUIRE(S.Overlaps(P));
     }
-    {
-        const physics::Sphere S({0, 0, 0}, 1);
-        const physics::Plane P({0, 0, 0}, 0);
-        REQUIRE(!S.Overlaps(P));
-    }
+    SECTION("Overlapping point sphere")
     {
         const physics::Sphere S({0, 0, 0}, 0);
         const physics::Plane P({0, 0, 1}, 0);
+        REQUIRE(S.Overlaps(P));
+    }
+    SECTION("Non-overlapping point sphere")
+    {
+        const physics::Sphere S({0, 0, 0}, 0);
+        const physics::Plane P({0, 0, 1}, 1);
         REQUIRE(!S.Overlaps(P));
     }
 }
 
-TEST_CASE("ShapesAABoxPlane")
+TEST_CASE("Overlapping an axis-aligned box and a plane", "[overlaps][shape][aabox][plane]")
 {
+    SECTION("Overlapping on a face")
     {
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
         const physics::Plane P({1, 0, 0}, 0);
         REQUIRE(B.Overlaps(P));
     }
+    SECTION("Overlapping on a vertex")
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 1, 1}, 0);
+        REQUIRE(B.Overlaps(P));
+    }
+    SECTION("Overlapping on an edge")
+    {
+        const physics::AABox B({0, 0, 0}, {2, 2, 2});
+        const physics::Plane P({1, 1, 0}, 0);
+        REQUIRE(B.Overlaps(P));
+    }
+    SECTION("Overlapping on a face from the negative side of a plane")
     {
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
         const physics::Plane P({1, 0, 0}, 2);
         REQUIRE(B.Overlaps(P));
     }
+    SECTION("Overlapping")
     {
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({1, 0, 0}, 1);
+        const physics::Plane P({1, 1, 1}, 1);
         REQUIRE(B.Overlaps(P));
     }
+    SECTION("Non-overlapping on positive side")
     {
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({1, 0, 0}, -1);
+        const physics::Plane P({1, 1, 1}, -1);
         REQUIRE(!B.Overlaps(P));
     }
+    SECTION("Non-overlapping on negative side")
     {
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({1, 0, 0}, 5);
+        const physics::Plane P({1, 1, 1}, 5);
         REQUIRE(!B.Overlaps(P));
     }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, 0}, 0);
-        REQUIRE(!B.Overlaps(P));
-    }
+    SECTION("Overlapping point box")
     {
         const physics::AABox B({0, 0, 0}, {0, 0, 0});
         const physics::Plane P({1, 0, 0}, 0);
-        REQUIRE(!B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 1, 0}, 0);
         REQUIRE(B.Overlaps(P));
     }
+    SECTION("Non-overlapping point box")
     {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 1, 0}, 2);
-        REQUIRE(B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 1, 0}, 1);
-        REQUIRE(B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 1, 0}, -1);
-        REQUIRE(!B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 1, 0}, 5);
-        REQUIRE(!B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, -1}, 0);
-        REQUIRE(B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, -1}, -2);
-        REQUIRE(B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, -1}, -1);
-        REQUIRE(B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, -1}, 1);
-        REQUIRE(!B.Overlaps(P));
-    }
-    {
-        const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        const physics::Plane P({0, 0, -1}, -5);
+        const physics::AABox B({0, 0, 0}, {0, 0, 0});
+        const physics::Plane P({1, 0, 0}, 1);
         REQUIRE(!B.Overlaps(P));
     }
 }

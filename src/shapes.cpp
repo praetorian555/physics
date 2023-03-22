@@ -13,7 +13,7 @@ physics::AABox::AABox() : Shape(ShapeType::AABox) {}
 
 bool physics::AABox::IsValid() const
 {
-    return Min != Max;
+    return math::Min(Min, Max) == Min && math::Max(Min, Max) == Max;
 }
 
 bool physics::AABox::Overlaps(const Shape& Other) const
@@ -55,7 +55,7 @@ physics::Sphere::Sphere(const math::Vector3& Center, physics::real Radius)
 
 bool physics::Sphere::IsValid() const
 {
-    return Radius > PHYSICS_REALC(0.0);
+    return Radius >= PHYSICS_REALC(0.0);
 }
 
 bool physics::Sphere::Overlaps(const physics::Shape& Other) const
@@ -178,10 +178,10 @@ physics::Box::Box(const math::Vector3& Center,
 
 bool physics::Box::IsValid() const
 {
-    constexpr real kEpsilon = PHYSICS_REALC(0.0001);
-    return Extents.X > kEpsilon && Extents.Y > kEpsilon && Extents.Z > kEpsilon &&
-           AxisX.LengthSquared() > kEpsilon && AxisY.LengthSquared() > kEpsilon &&
-           AxisZ.LengthSquared() > kEpsilon;
+    constexpr real kEpsilon = PHYSICS_REALC(1e-6);
+    return Extents.X >= PHYSICS_REALC(0.0) && Extents.Y >= PHYSICS_REALC(0.0) &&
+           Extents.Z >= PHYSICS_REALC(0.0) && AxisX.LengthSquared() > kEpsilon &&
+           AxisY.LengthSquared() > kEpsilon && AxisZ.LengthSquared() > kEpsilon;
 }
 
 bool physics::Box::Overlaps(const physics::Shape& Other) const
