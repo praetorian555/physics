@@ -10,7 +10,7 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     {
         physics::Sphere S;
         REQUIRE(S.Type == physics::ShapeType::Sphere);
-        REQUIRE(S.Center == math::Vector3(0, 0, 0));
+        REQUIRE(S.Center == math::Point3(0, 0, 0));
         REQUIRE(S.Radius == 0);
         REQUIRE(S.GetVolume() == 0);
         REQUIRE(S.GetSurfaceArea() == 0);
@@ -20,7 +20,7 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     {
         physics::Sphere S({1, 1, 1}, 5);
         REQUIRE(S.Type == physics::ShapeType::Sphere);
-        REQUIRE(S.Center == math::Vector3(1, 1, 1));
+        REQUIRE(S.Center == math::Point3(1, 1, 1));
         REQUIRE(S.Radius == 5);
         REQUIRE(
             math::IsEqual(S.GetVolume(), math::kPi * 5 * 5 * 5 * 4 / PHYSICS_REALC(3.0), 0.0001f));
@@ -31,7 +31,7 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     {
         physics::Sphere S({1, 1, 1}, 0);
         REQUIRE(S.Type == physics::ShapeType::Sphere);
-        REQUIRE(S.Center == math::Vector3(1, 1, 1));
+        REQUIRE(S.Center == math::Point3(1, 1, 1));
         REQUIRE(S.Radius == 0);
         REQUIRE(S.GetVolume() == 0);
         REQUIRE(S.GetSurfaceArea() == 0);
@@ -41,7 +41,7 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     {
         physics::Sphere S({1, 1, 1}, -5);
         REQUIRE(S.Type == physics::ShapeType::Sphere);
-        REQUIRE(S.Center == math::Vector3(1, 1, 1));
+        REQUIRE(S.Center == math::Point3(1, 1, 1));
         REQUIRE(S.Radius == -5);
         REQUIRE(!S.IsValid());
     }
@@ -53,8 +53,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     {
         const physics::AABox B;
         REQUIRE(B.Type == physics::ShapeType::AABox);
-        REQUIRE(B.Min == math::Vector3(0, 0, 0));
-        REQUIRE(B.Max == math::Vector3(0, 0, 0));
+        REQUIRE(B.Min == math::Point3(0, 0, 0));
+        REQUIRE(B.Max == math::Point3(0, 0, 0));
         REQUIRE(B.GetVolume() == 0);
         REQUIRE(B.GetSurfaceArea() == 0);
         REQUIRE(B.IsValid());
@@ -63,8 +63,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     {
         physics::AABox B({0, 0, 0}, {1, 1, 1});
         REQUIRE(B.Type == physics::ShapeType::AABox);
-        REQUIRE(B.Min == math::Vector3(0, 0, 0));
-        REQUIRE(B.Max == math::Vector3(1, 1, 1));
+        REQUIRE(B.Min == math::Point3(0, 0, 0));
+        REQUIRE(B.Max == math::Point3(1, 1, 1));
         REQUIRE(B.GetVolume() == 1);
         REQUIRE(B.GetSurfaceArea() == 6);
         REQUIRE(B.IsValid());
@@ -73,8 +73,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     {
         physics::AABox B({0, 0, 0}, {0, 0, 0});
         REQUIRE(B.Type == physics::ShapeType::AABox);
-        REQUIRE(B.Min == math::Vector3(0, 0, 0));
-        REQUIRE(B.Max == math::Vector3(0, 0, 0));
+        REQUIRE(B.Min == math::Point3(0, 0, 0));
+        REQUIRE(B.Max == math::Point3(0, 0, 0));
         REQUIRE(B.GetVolume() == 0);
         REQUIRE(B.GetSurfaceArea() == 0);
         REQUIRE(B.IsValid());
@@ -83,8 +83,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     {
         physics::AABox B({1, 1, 1}, {0, 0, 0});
         REQUIRE(B.Type == physics::ShapeType::AABox);
-        REQUIRE(B.Min == math::Vector3(1, 1, 1));
-        REQUIRE(B.Max == math::Vector3(0, 0, 0));
+        REQUIRE(B.Min == math::Point3(1, 1, 1));
+        REQUIRE(B.Max == math::Point3(0, 0, 0));
         REQUIRE(!B.IsValid());
     }
 }
@@ -126,7 +126,7 @@ TEST_CASE("Creation of a plane shape", "[creation][shape][plane]")
     SECTION("Construction of a plane from three points that are not collinear")
     {
         const physics::Plane P = physics::Plane::FromPoints(
-            math::Vector3(0, 0, 0), math::Vector3(1, 0, 0), math::Vector3(0, 1, 0));
+            math::Point3(0, 0, 0), math::Point3(1, 0, 0), math::Point3(0, 1, 0));
         REQUIRE(P.Type == physics::ShapeType::Plane);
         REQUIRE(P.Normal == math::Vector3(0, 0, 1));
         REQUIRE(P.Distance == 0);
@@ -135,7 +135,7 @@ TEST_CASE("Creation of a plane shape", "[creation][shape][plane]")
     SECTION("Construction of a plane from three points that are collinear")
     {
         const physics::Plane P = physics::Plane::FromPoints(
-            math::Vector3(0, 0, 0), math::Vector3(1, 0, 0), math::Vector3(2, 0, 0));
+            math::Point3(0, 0, 0), math::Point3(1, 0, 0), math::Point3(2, 0, 0));
         REQUIRE(P.Type == physics::ShapeType::Plane);
         REQUIRE(P.Normal == math::Vector3(0, 0, 0));
         REQUIRE(P.Distance == 0);
@@ -149,7 +149,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     {
         physics::Box B;
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(0, 0, 0));
         REQUIRE(B.AxisX == math::Vector3(0, 0, 0));
         REQUIRE(B.AxisY == math::Vector3(0, 0, 0));
@@ -160,7 +160,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     {
         physics::Box B({0, 0, 0}, {1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(1, 1, 1));
         REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
         REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
@@ -173,7 +173,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     {
         physics::Box B({0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(0, 0, 0));
         REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
         REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
@@ -186,7 +186,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     {
         physics::Box B({0, 0, 0}, {-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(-1, -1, -1));
         REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
         REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
@@ -197,7 +197,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     {
         physics::Box B({0, 0, 0}, {1, 1, 1}, {3, 0, 0}, {0, 5, 0}, {0, 0, 2});
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(1, 1, 1));
         REQUIRE(B.AxisX == math::Vector3(1, 0, 0));
         REQUIRE(B.AxisY == math::Vector3(0, 1, 0));
@@ -211,7 +211,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
         const math::Transform T = math::RotateZ(90);
         physics::Box B({0, 0, 0}, {1, 1, 1}, T.GetMatrix());
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(1, 1, 1));
         REQUIRE(math::IsEqual(B.AxisX, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));
         REQUIRE(math::IsEqual(B.AxisY, math::Vector3(-1, 0, 0), PHYSICS_REALC(0.0001)));
@@ -225,7 +225,7 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
         const math::Transform T = math::RotateZ(90);
         physics::Box B({0, 0, 0}, {-1, -1, -1}, T.GetMatrix());
         REQUIRE(B.Type == physics::ShapeType::Box);
-        REQUIRE(B.Center == math::Vector3(0, 0, 0));
+        REQUIRE(B.Center == math::Point3(0, 0, 0));
         REQUIRE(B.Extents == math::Vector3(-1, -1, -1));
         REQUIRE(math::IsEqual(B.AxisX, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));
         REQUIRE(math::IsEqual(B.AxisY, math::Vector3(-1, 0, 0), PHYSICS_REALC(0.0001)));
@@ -381,90 +381,91 @@ TEST_CASE("Overlap of two planes", "[overlaps][shape][plane]")
 TEST_CASE("Overlap of two oriented boxes", "[overlaps][shape][box]")
 {
     using math::Vector3;
+    using math::Point3;
 
     SECTION("Non-overlapping Boxes with same orientation")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(!Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with same orientation")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(0.5, 0.5, 0.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box2(Point3(0.5, 0.5, 0.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                 Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with different orientations")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
+        const physics::Box Box2(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Non-overlapping Boxes with different orientations")
     {
-        const physics::Box Box1(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
+        const physics::Box Box2(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(!Overlaps(Box1, Box2));
     }
     SECTION("Overlapping Boxes with orthogonal orientations")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 0, 1), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(0, 0, 1), Vector3(0, 1, 0),
                                 Vector3(-1, 0, 0));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Identical Boxes")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box1));
     }
     SECTION("Boxes touching at one Point")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(2, 2, 2), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(2, 2, 2), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Boxes touching along an edge")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(2, 2, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(2, 2, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Boxes touching along a face")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(2, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(2, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Overlapping point box")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(1, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
     SECTION("Non-overlapping point box")
     {
-        const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
-        const physics::Box Box2(Vector3(2, 2, 2), Vector3(2, 2, 2), Vector3(1, 0, 0), Vector3(0, 1, 0),
+        const physics::Box Box2(Point3(2, 2, 2), Vector3(2, 2, 2), Vector3(1, 0, 0), Vector3(0, 1, 0),
                                 Vector3(0, 0, 1));
         REQUIRE(Overlaps(Box1, Box2));
     }
@@ -611,29 +612,30 @@ TEST_CASE("Overlap of an axis-aligned box and a sphere", "[overlaps][shape][aabo
 TEST_CASE("Overlap of an axis-aligned box and a oriented box", "[overlaps][shape][aabox][box]")
 {
     using math::Vector3;
-    const physics::AABox AABox(Vector3(0, 0, 0), Vector3(2, 2, 2));
+    using math::Point3;
+    const physics::AABox AABox(Point3(0, 0, 0), Point3(2, 2, 2));
 
     SECTION("Box inside AABox")
     {
-        const physics::Box Box(Vector3(1, 1, 1), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(1, 1, 1), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(AABox, Box) == true);
     }
     SECTION("Box outside AABox")
     {
-        const physics::Box Box(Vector3(4, 4, 4), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(4, 4, 4), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(AABox, Box) == false);
     }
     SECTION("Box partially overlapping AABox")
     {
-        const physics::Box Box(Vector3(1, 1, 2.5), Vector3(1, 1, 0.5), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(1, 1, 2.5), Vector3(1, 1, 0.5), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(AABox, Box) == true);
     }
     SECTION("Box touching AABox surface")
     {
-        const physics::Box Box(Vector3(3, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(3, 1, 1), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(AABox, Box) == true);
     }
@@ -644,7 +646,7 @@ TEST_CASE("Overlap of an axis-aligned box and a oriented box", "[overlaps][shape
         const math::Vector3 ZAxis(0, 0, 1);
         XAxis = math::Normalize(XAxis);
         YAxis = math::Normalize(YAxis);
-        const physics::Box Box(Vector3(1, 1, 1), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
+        const physics::Box Box(Point3(1, 1, 1), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
         REQUIRE(Overlaps(AABox, Box) == true);
     }
 }
@@ -652,30 +654,31 @@ TEST_CASE("Overlap of an axis-aligned box and a oriented box", "[overlaps][shape
 TEST_CASE("Overlap of a plane and an oriented box", "[overlaps][shape][plane][box]")
 {
     using math::Vector3;
+    using math::Point3;
 
     const physics::Plane Plane(Vector3(0, 0, 1), 0);
 
     SECTION("Box inside Plane")
     {
-        const physics::Box Box(Vector3(0, 0, 0), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(0, 0, 0), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Plane, Box) == true);
     }
     SECTION("Box completely above Plane")
     {
-        const physics::Box Box(Vector3(0, 0, 3), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(0, 0, 3), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Plane, Box) == false);
     }
     SECTION("Box completely below Plane")
     {
-        const physics::Box Box(Vector3(0, 0, -3), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(0, 0, -3), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Plane, Box) == false);
     }
     SECTION("Box partially overlapping Plane")
     {
-        const physics::Box Box(Vector3(0, 0, 0.5), Vector3(1, 1, 0.5), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(0, 0, 0.5), Vector3(1, 1, 0.5), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Plane, Box) == true);
     }
@@ -686,7 +689,7 @@ TEST_CASE("Overlap of a plane and an oriented box", "[overlaps][shape][plane][bo
         const math::Vector3 ZAxis(0, 0, 1);
         XAxis = math::Normalize(XAxis);
         YAxis = Normalize(YAxis);
-        const physics::Box Box(Vector3(1, 1, 0.5), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
+        const physics::Box Box(Point3(1, 1, 0.5), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
         REQUIRE(Overlaps(Plane, Box) == true);
     }
 }
@@ -694,29 +697,30 @@ TEST_CASE("Overlap of a plane and an oriented box", "[overlaps][shape][plane][bo
 TEST_CASE("Overlap of a sphere and a oriented box", "[overlaps][shape][sphere][box]")
 {
     using math::Vector3;
-    const physics::Sphere Sphere(Vector3(0, 0, 0), 2);
+    using math::Point3;
+    const physics::Sphere Sphere(Point3(0, 0, 0), 2);
 
     SECTION("Box inside Sphere")
     {
-        const physics::Box Box(Vector3(0, 0, 0), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(0, 0, 0), Vector3(0.5, 0.5, 0.5), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Sphere, Box) == true);
     }
     SECTION("Box outside Sphere")
     {
-        const physics::Box Box(Vector3(4, 4, 4), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(4, 4, 4), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Sphere, Box) == false);
     }
     SECTION("Box partially overlapping Sphere")
     {
-        const physics::Box Box(Vector3(1, 1, 2.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(1, 1, 2.5), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Sphere, Box) == true);
     }
     SECTION("Box touching Sphere surface")
     {
-        const physics::Box Box(Vector3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0),
+        const physics::Box Box(Point3(3, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0),
                                Vector3(0, 1, 0), Vector3(0, 0, 1));
         REQUIRE(Overlaps(Sphere, Box) == true);
     }
@@ -727,7 +731,7 @@ TEST_CASE("Overlap of a sphere and a oriented box", "[overlaps][shape][sphere][b
         const math::Vector3 ZAxis(0, 0, 1);
         XAxis = math::Normalize(XAxis);
         YAxis = math::Normalize(YAxis);
-        const physics::Box Box(Vector3(1, 1, 1), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
+        const physics::Box Box(Point3(1, 1, 1), Vector3(0.5, 0.5, 0.5), XAxis, YAxis, ZAxis);
         REQUIRE(Overlaps(Sphere, Box) == true);
     }
 }
@@ -736,25 +740,25 @@ TEST_CASE("Distance between point and a plane", "[distance][shape][plane]")
 {
     SECTION("Point on a plane")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, 1}, 0);
         REQUIRE(physics::Distance(P, P2) == 0);
     }
     SECTION("Point behind a plane")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, 1}, 1);
         REQUIRE(physics::Distance(P, P2) == -1);
     }
     SECTION("Point in front of the plane")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, 1}, -1);
         REQUIRE(physics::Distance(P, P2) == 1);
     }
     SECTION("Point behind the plane but the plane is pointing along negative z-axis")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, -1}, 1);
         REQUIRE(physics::Distance(P, P2) == -1);
     }
@@ -764,25 +768,25 @@ TEST_CASE("Distance between a point and an axis-aligned box", "[distance][shape]
 {
     SECTION("Point on the surface ofa a box")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
         REQUIRE(physics::Distance(P, B) == 0);
     }
     SECTION("Point closest to the vertex in voronoi region")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({1, 1, 1}, {2, 2, 2});
         REQUIRE(physics::Distance(P, B) == math::Sqrt(3));
     }
     SECTION("Point inside the box")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({-1, -1, -1}, {2, 2, 2});
         REQUIRE(physics::Distance(P, B) == 0);
     }
     SECTION("Point closest to the face/edge")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({1, -2, -2}, {2, 2, 2});
         REQUIRE(physics::Distance(P, B) == 1);
     }
@@ -792,19 +796,19 @@ TEST_CASE("Distance between a point and a sphere", "[distance][shape][sphere]")
 {
     SECTION("Point inside sphere")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({0, 0, 0}, 1);
         REQUIRE(physics::Distance(P, S) == 0);
     }
     SECTION("Point outside of the sphere")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({1, 1, 1}, 1);
         REQUIRE(physics::Distance(P, S) == (math::Sqrt(3) - 1));
     }
     SECTION("Point on a surface of the sphere")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({1, 1, 1}, 2);
         REQUIRE(physics::Distance(P, S) == 0);
     }
@@ -813,49 +817,50 @@ TEST_CASE("Distance between a point and a sphere", "[distance][shape][sphere]")
 TEST_CASE("Distance between point and an oriented box", "[distance][shape][box]")
 {
     using math::Vector3;
-    const physics::Box B1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+    using math::Point3;
+    const physics::Box B1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                           Vector3(0, 0, 1));
     const physics::real Epsilon = PHYSICS_REALC(1e-6);
 
     SECTION("Point inside the Box")
     {
-        const Vector3 P(0.5, 0.5, 0.5);
+        const Point3 P(0.5, 0.5, 0.5);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 0.0, Epsilon));
     }
     SECTION("Point outside the Box - closest to a vertex")
     {
-        const Vector3 P(3, 3, 3);
+        const Point3 P(3, 3, 3);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 2 * math::Sqrt(3.0), Epsilon));
     }
     SECTION("Point outside the Box - closest to an edge")
     {
-        const Vector3 P(0.5, 0.5, 2);
+        const Point3 P(0.5, 0.5, 2);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 1.0, Epsilon));
     }
     SECTION("Point outside the Box - closest to a face")
     {
-        const Vector3 P(2, 0.5, 0.5);
+        const Point3 P(2, 0.5, 0.5);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 1.0, Epsilon));
     }
     SECTION("Point on the Box surface")
     {
-        const Vector3 P(1, 0.5, 0.5);
+        const Point3 P(1, 0.5, 0.5);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 0.0, Epsilon));
     }
     SECTION("Point on the Box edge")
     {
-        const Vector3 P(1, 1, 0.5);
+        const Point3 P(1, 1, 0.5);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 0.0, Epsilon));
     }
     SECTION("Point on the Box vertex")
     {
-        const Vector3 P(1, 1, 1);
+        const Point3 P(1, 1, 1);
         const physics::real R = Distance(P, B1);
         REQUIRE(math::IsEqual(R, 0.0, Epsilon));
     }
@@ -865,27 +870,27 @@ TEST_CASE("Closest point on a plane to the given point", "[closestpoint][shape][
 {
     SECTION("Point on a plane")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, 1}, 0);
-        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Point3(0, 0, 0));
     }
     SECTION("Point behind the plane")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, 1}, 1);
-        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, 1));
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Point3(0, 0, 1));
     }
     SECTION("Point in front of the plane")
     {
-        const math::Vector3 P(0, 2, 0);
+        const math::Point3 P(0, 2, 0);
         const physics::Plane P2({0, 0, 1}, -1);
-        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 2, -1));
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Point3(0, 2, -1));
     }
     SECTION("Point behind the plane and plane normal is along negative z-axis")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Plane P2({0, 0, -1}, 1);
-        REQUIRE(physics::ClosestPoint(P, P2) == math::Vector3(0, 0, -1));
+        REQUIRE(physics::ClosestPoint(P, P2) == math::Point3(0, 0, -1));
     }
 }
 
@@ -893,27 +898,27 @@ TEST_CASE("Closest point on an axis-aligned box to the given point", "[closestpo
 {
     SECTION("Point on the surface")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({0, 0, 0}, {2, 2, 2});
-        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(0, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, B) == math::Point3(0, 0, 0));
     }
     SECTION("Point closest to the vertex")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({1, 1, 1}, {2, 2, 2});
-        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(1, 1, 1));
+        REQUIRE(physics::ClosestPoint(P, B) == math::Point3(1, 1, 1));
     }
     SECTION("Point inside the box")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({-1, -1, -1}, {2, 2, 2});
-        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(0, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, B) == math::Point3(0, 0, 0));
     }
     SECTION("Point closest to the face/edge")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::AABox B({1, -5, -5}, {5, 5, 5});
-        REQUIRE(physics::ClosestPoint(P, B) == math::Vector3(1, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, B) == math::Point3(1, 0, 0));
     }
 }
 
@@ -921,70 +926,71 @@ TEST_CASE("Closest point on a sphere to the given point", "[closestpoint][shape]
 {
     SECTION("Point inside the sphere")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({0, 0, 0}, 1);
-        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, S) == math::Point3(0, 0, 0));
     }
     SECTION("Point on the surface")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({1, 0, 0}, 1);
-        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(0, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, S) == math::Point3(0, 0, 0));
     }
     SECTION("Point outside the sphere")
     {
-        const math::Vector3 P(0, 0, 0);
+        const math::Point3 P(0, 0, 0);
         const physics::Sphere S({-2, 0, 0}, 1);
-        REQUIRE(physics::ClosestPoint(P, S) == math::Vector3(-1, 0, 0));
+        REQUIRE(physics::ClosestPoint(P, S) == math::Point3(-1, 0, 0));
     }
 }
 
 TEST_CASE("Closest point on a oriented box to the given point", "[closestpoint][shape][box]")
 {
+    using math::Point3;
     using math::Vector3;
-    const physics::Box Box1(Vector3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
+    const physics::Box Box1(Point3(0, 0, 0), Vector3(1, 1, 1), Vector3(1, 0, 0), Vector3(0, 1, 0),
                             Vector3(0, 0, 1));
 
     SECTION("Point inside the Box")
     {
-        const Vector3 Point(0.5, 0.5, 0.5);
-        const Vector3 Result = ClosestPoint(Point, Box1);
+        const Point3 Point(0.5, 0.5, 0.5);
+        const Point3 Result = ClosestPoint(Point, Box1);
         REQUIRE(Result == Point);
     }
     SECTION("Point outside the Box - closest to a vertex")
     {
-        const Vector3 Point(3, 3, 3);
-        const Vector3 Result = ClosestPoint(Point, Box1);
-        REQUIRE(Result == Vector3(1, 1, 1));
+        const Point3 Point(3, 3, 3);
+        const Point3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point3(1, 1, 1));
     }
     SECTION("Point outside the Box - closest to an edge")
     {
-        const Vector3 Point(0.5, 1, 2);
-        const Vector3 Result = ClosestPoint(Point, Box1);
-        REQUIRE(Result == Vector3(0.5, 1, 1));
+        const Point3 Point(0.5, 1, 2);
+        const Point3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point3(0.5, 1, 1));
     }
     SECTION("Point outside the Box - closest to a face")
     {
-        const Vector3 Point(2, 0.5, 0.5);
-        const Vector3 Result = ClosestPoint(Point, Box1);
-        REQUIRE(Result == Vector3(1, 0.5, 0.5));
+        const Point3 Point(2, 0.5, 0.5);
+        const Point3 Result = ClosestPoint(Point, Box1);
+        REQUIRE(Result == Point3(1, 0.5, 0.5));
     }
     SECTION("Point on the Box surface")
     {
-        const Vector3 Point(1, 0.5, 0.5);
-        const Vector3 Result = ClosestPoint(Point, Box1);
+        const Point3 Point(1, 0.5, 0.5);
+        const Point3 Result = ClosestPoint(Point, Box1);
         REQUIRE(Result == Point);
     }
     SECTION("Point on the Box edge")
     {
-        const Vector3 Point(1, 1, 0.5);
-        const Vector3 Result = ClosestPoint(Point, Box1);
+        const Point3 Point(1, 1, 0.5);
+        const Point3 Result = ClosestPoint(Point, Box1);
         REQUIRE(Result == Point);
     }
     SECTION("Point on the Box vertex")
     {
-        const Vector3 Point(1, 1, 1);
-        const Vector3 Result = ClosestPoint(Point, Box1);
+        const Point3 Point(1, 1, 1);
+        const Point3 Result = ClosestPoint(Point, Box1);
         REQUIRE(Result == Point);
     }
 }

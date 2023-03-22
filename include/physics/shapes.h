@@ -50,11 +50,11 @@ struct Shape
 
 struct AABox : public Shape
 {
-    math::Vector3 Min;
-    math::Vector3 Max;
+    math::Point3 Min;
+    math::Point3 Max;
 
     AABox();
-    AABox(const math::Vector3& Min, const math::Vector3& Max);
+    AABox(const math::Point3& Min, const math::Point3& Max);
 
     /**
      * Check if the axis-aligned box is valid. An axis-aligned box is valid if the minimum point is
@@ -70,11 +70,11 @@ struct AABox : public Shape
 
 struct Sphere final : public Shape
 {
-    math::Vector3 Center;
+    math::Point3 Center;
     real Radius;
 
     Sphere();
-    Sphere(const math::Vector3& Center, real Radius);
+    Sphere(const math::Point3& Center, real Radius);
 
     /**
      * Check if the sphere is valid. A sphere is valid if the radius is greater than or equal to 0.
@@ -87,6 +87,7 @@ struct Sphere final : public Shape
     [[nodiscard]] real GetVolume() const override;
 };
 
+// TODO(Marko): Make normal be of type math::Normal.
 struct Plane : public Shape
 {
     /** Normal of the plane. */
@@ -105,7 +106,7 @@ struct Plane : public Shape
      * @param C The third point.
      * @return Returns the plane. If the points are collinear, the plane will be invalid.
      */
-    static Plane FromPoints(const math::Vector3& A, const math::Vector3& B, const math::Vector3& C);
+    static Plane FromPoints(const math::Point3& A, const math::Point3& B, const math::Point3& C);
 
     [[nodiscard]] bool IsValid() const override;
     [[nodiscard]] bool Overlaps(const Shape& Other) const override;
@@ -115,7 +116,7 @@ struct Plane : public Shape
 
 struct Box : public Shape
 {
-    math::Vector3 Center;
+    math::Point3 Center;
     math::Vector3 Extents;
     /** The column vector of the rotation matrix that transforms from local box space to world
      * space. */
@@ -131,12 +132,12 @@ struct Box : public Shape
     };
 
     Box();
-    Box(const math::Vector3& Center,
+    Box(const math::Point3& Center,
         const math::Vector3& Extents,
         const math::Vector3& AxisX,
         const math::Vector3& AxisY,
         const math::Vector3& AxisZ);
-    Box(const math::Vector3& Center,
+    Box(const math::Point3& Center,
         const math::Vector3& Extents,
         const math::Matrix4x4& RotationMatrix);
 
@@ -244,7 +245,7 @@ bool Overlaps(const Plane& A, const Box& B);
  * @param Plane Plane to find the closest point on.
  * @return Returns the closest point on the plane to the given point.
  */
-math::Vector3 ClosestPoint(const math::Vector3& Point, const Plane& Plane);
+math::Point3 ClosestPoint(const math::Point3& Point, const Plane& Plane);
 
 /**
  * Find the closest point on the axis-aligned box to the given point.
@@ -252,7 +253,7 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const Plane& Plane);
  * @param Box Axis-aligned box to find the closest point on.
  * @return Returns the closest point on the axis-aligned box to the given point.
  */
-math::Vector3 ClosestPoint(const math::Vector3& Point, const AABox& Box);
+math::Point3 ClosestPoint(const math::Point3& Point, const AABox& Box);
 
 /**
  * Find the closest point on the sphere to the given point.
@@ -260,7 +261,7 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const AABox& Box);
  * @param Sphere Sphere to find the closest point on.
  * @return Returns the closest point on the sphere to the given point.
  */
-math::Vector3 ClosestPoint(const math::Vector3& Point, const Sphere& Sphere);
+math::Point3 ClosestPoint(const math::Point3& Point, const Sphere& Sphere);
 
 /**
  * Find the closest point on the box to the given point.
@@ -268,7 +269,7 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const Sphere& Sphere);
  * @param Box Box to find the closest point on.
  * @return Returns the closest point on the box to the given point.
  */
-math::Vector3 ClosestPoint(const math::Vector3& Point, const Box& Box);
+math::Point3 ClosestPoint(const math::Point3& Point, const Box& Box);
 
 /**
  * Find the distance from the given point to the plane.
@@ -277,7 +278,7 @@ math::Vector3 ClosestPoint(const math::Vector3& Point, const Box& Box);
  * @return Returns the distance from the point to the plane. The distance is negative if the point
  * is on the negative side of the plane.
  */
-real Distance(const math::Vector3& Point, const Plane& Plane);
+real Distance(const math::Point3& Point, const Plane& Plane);
 
 /**
  * Find the distance from the given point to the axis-aligned box.
@@ -285,7 +286,7 @@ real Distance(const math::Vector3& Point, const Plane& Plane);
  * @param Box Axis-aligned box to find the distance to.
  * @return Returns the distance from the point to the axis-aligned box.
  */
-real Distance(const math::Vector3& Point, const AABox& Box);
+real Distance(const math::Point3& Point, const AABox& Box);
 
 /**
  * Find the distance from the given point to the sphere.
@@ -293,7 +294,7 @@ real Distance(const math::Vector3& Point, const AABox& Box);
  * @param Sphere Sphere to find the distance to.
  * @return Returns the distance from the point to the sphere.
  */
-real Distance(const math::Vector3& Point, const Sphere& Sphere);
+real Distance(const math::Point3& Point, const Sphere& Sphere);
 
 /**
  * Find the distance from the given point to the box.
@@ -301,7 +302,7 @@ real Distance(const math::Vector3& Point, const Sphere& Sphere);
  * @param Box Box to find the distance to.
  * @return Returns the distance from the point to the box.
  */
-real Distance(const math::Vector3& Point, const Box& Box);
+real Distance(const math::Point3& Point, const Box& Box);
 
 /**
  * Find the square distance from the given point to the axis-aligned box.
@@ -309,6 +310,6 @@ real Distance(const math::Vector3& Point, const Box& Box);
  * @param Box Axis-aligned box to find the square distance to.
  * @return Returns the square distance from the point to the axis-aligned box.
  */
-real SquareDistance(const math::Vector3& Point, const AABox& Box);
+real SquareDistance(const math::Point3& Point, const AABox& Box);
 
 }  // namespace physics
