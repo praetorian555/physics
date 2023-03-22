@@ -4,9 +4,6 @@
 
 #include "math/matrix4x4.h"
 
-// TODO(Marko): IsValid methods should check for NaNs
-// TODO(Marko): Overlaps method should assert on invalid shapes
-
 physics::AABox::AABox(const math::Vector3& Min, const math::Vector3& Max)
     : Shape(ShapeType::AABox), Min(Min), Max(Max)
 {
