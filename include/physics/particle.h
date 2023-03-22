@@ -1,9 +1,8 @@
 #pragma once
 
-#include "physics/base.h"
-
 #include "math/point3.h"
-#include "math/vector3.h"
+
+#include "physics/base.h"
 
 namespace physics
 {

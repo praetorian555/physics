@@ -2,8 +2,6 @@
 
 #include "physics/containers.h"
 
-#include "math/vector3.h"
-
 namespace physics
 {
 

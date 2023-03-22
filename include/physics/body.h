@@ -3,7 +3,6 @@
 #include "math/point3.h"
 #include "math/quaternion.h"
 #include "math/transform.h"
-#include "math/vector3.h"
 
 #include "physics/base.h"
 

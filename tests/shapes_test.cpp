@@ -752,7 +752,7 @@ TEST_CASE("Distance between point and a plane", "[distance][shape][plane]")
         const physics::Plane P2({0, 0, 1}, -1);
         REQUIRE(physics::Distance(P, P2) == 1);
     }
-    SECTION("Point behind the plane but the plane is poiting along negative z-axis")
+    SECTION("Point behind the plane but the plane is pointing along negative z-axis")
     {
         const math::Vector3 P(0, 0, 0);
         const physics::Plane P2({0, 0, -1}, 1);

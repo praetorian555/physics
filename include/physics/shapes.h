@@ -1,7 +1,5 @@
 #pragma
 
-#include "math/vector3.h"
-
 #include "physics/base.h"
 #include "physics/containers.h"
 
