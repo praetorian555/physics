@@ -16,7 +16,8 @@ physics::AABox::AABox() : Shape(ShapeType::AABox) {}
 
 bool physics::AABox::IsValid() const
 {
-    return math::Min(Min, Max) == Min && math::Max(Min, Max) == Max;
+    return !Min.HasNaNs() && !Max.HasNaNs() && math::Min(Min, Max) == Min &&
+           math::Max(Min, Max) == Max;
 }
 
 bool physics::AABox::Overlaps(const Shape& Other) const
@@ -58,7 +59,7 @@ physics::Sphere::Sphere(const math::Vector3& Center, physics::real Radius)
 
 bool physics::Sphere::IsValid() const
 {
-    return Radius >= PHYSICS_REALC(0.0);
+    return !Center.HasNaNs() && !math::IsNaN(Radius) && Radius >= PHYSICS_REALC(0.0);
 }
 
 bool physics::Sphere::Overlaps(const physics::Shape& Other) const
@@ -114,7 +115,8 @@ physics::Plane physics::Plane::FromPoints(const math::Vector3& A,
 
 bool physics::Plane::IsValid() const
 {
-    return Normal.LengthSquared() > PHYSICS_REALC(0.0);
+    return !Normal.HasNaNs() && !math::IsNaN(Distance) &&
+           Normal.LengthSquared() > PHYSICS_REALC(0.0);
 }
 
 bool physics::Plane::Overlaps(const physics::Shape& Other) const
@@ -182,7 +184,8 @@ physics::Box::Box(const math::Vector3& Center,
 bool physics::Box::IsValid() const
 {
     constexpr real kEpsilon = PHYSICS_REALC(1e-6);
-    return Extents.X >= PHYSICS_REALC(0.0) && Extents.Y >= PHYSICS_REALC(0.0) &&
+    return !Center.HasNaNs() && !Extents.HasNaNs() && !AxisX.HasNaNs() && !AxisY.HasNaNs() &&
+           !AxisZ.HasNaNs() && Extents.X >= PHYSICS_REALC(0.0) && Extents.Y >= PHYSICS_REALC(0.0) &&
            Extents.Z >= PHYSICS_REALC(0.0) && AxisX.LengthSquared() > kEpsilon &&
            AxisY.LengthSquared() > kEpsilon && AxisZ.LengthSquared() > kEpsilon;
 }
@@ -217,10 +220,8 @@ physics::real physics::Box::GetVolume() const
 
 bool physics::Overlaps(const AABox& A, const AABox& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
     if (A.Max.X < B.Min.X || A.Min.X > B.Max.X)
     {
@@ -239,10 +240,8 @@ bool physics::Overlaps(const AABox& A, const AABox& B)
 
 bool physics::Overlaps(const Sphere& A, const Sphere& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
     const math::Vector3 CenterDiff = A.Center - B.Center;
     const real RadiusSum = A.Radius + B.Radius;
@@ -251,29 +250,26 @@ bool physics::Overlaps(const Sphere& A, const Sphere& B)
 
 bool physics::Overlaps(const physics::Plane& A, const physics::Plane& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
     constexpr real kEpsilon = PHYSICS_REALC(0.0001);
     const bool AreParallel =
         math::IsEqual(math::Abs(math::Dot(A.Normal, B.Normal)), PHYSICS_REALC(1.0), kEpsilon);
 
     if (AreParallel)
     {
-        return A.Distance == B.Distance;
+        return math::IsEqual(A.Distance, B.Distance, kEpsilon);
     }
     return true;
 }
 
 bool physics::Overlaps(const physics::Box& A, const physics::Box& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
-    math::Matrix4x4 R, AbsR;
+    math::Matrix4x4 R;
+    math::Matrix4x4 AbsR;
 
     // Compute the rotation matrix that represents B's orientation in A's coordinate frame.
     // This is equivalent to R = A_transpose * B.
@@ -452,10 +448,8 @@ bool physics::Overlaps(const Sphere& A, const AABox& B)
 
 bool physics::Overlaps(const physics::AABox& A, const physics::Plane& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
     const math::Vector3& Center = (A.Max + A.Min) * PHYSICS_REALC(0.5);
     const math::Vector3& Extents = A.Max - Center;
@@ -476,10 +470,8 @@ bool physics::Overlaps(const physics::Plane& A, const physics::AABox& B)
 
 bool physics::Overlaps(const physics::Sphere& A, const physics::Plane& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
     const real Distance = math::Dot(A.Center, B.Normal) - B.Distance;
     return math::Abs(Distance) <= A.Radius;
 }
@@ -491,6 +483,8 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::AABox& B)
 {
+    assert(A.IsValid());
+    assert(B.IsValid());
     const math::Vector3 AABBCenter = (B.Min + B.Max) * PHYSICS_REALC(0.5);
     const math::Vector3 AABBExtents = B.Max - AABBCenter;
     const physics::Box BB(AABBCenter, AABBExtents, math::Matrix4x4{});
@@ -504,10 +498,8 @@ bool physics::Overlaps(const physics::AABox& A, const physics::Box& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::Sphere& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
     const math::Vector3 Point = ClosestPoint(B.Center, A);
     const math::Vector3 DistanceVector = Point - B.Center;
@@ -521,10 +513,8 @@ bool physics::Overlaps(const physics::Sphere& A, const physics::Box& B)
 
 bool physics::Overlaps(const physics::Box& A, const physics::Plane& B)
 {
-    if (!A.IsValid() || !B.IsValid())
-    {
-        return false;
-    }
+    assert(A.IsValid());
+    assert(B.IsValid());
 
     // Project the farthest point of the box onto the plane normal.
     const real Projection = A.Extents.X * math::Dot(A.Axes[0], B.Normal) +
@@ -541,6 +531,7 @@ bool physics::Overlaps(const physics::Plane& A, const physics::Box& B)
 
 math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Plane& Plane)
 {
+    assert(Plane.IsValid());
     assert(Plane.IsValid());
     const real Distance = math::Dot(Point, Plane.Normal) - Plane.Distance;
     return Point - Plane.Normal * Distance;
@@ -571,6 +562,7 @@ math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::S
 
 math::Vector3 physics::ClosestPoint(const math::Vector3& Point, const physics::Box& Box)
 {
+    assert(Box.IsValid());
     math::Vector3 Result = Box.Center;
     const math::Vector3 Direction = Point - Box.Center;
     for (int AxisIdx = 0; AxisIdx < 3; ++AxisIdx)
@@ -590,6 +582,7 @@ physics::real physics::Distance(const math::Vector3& Point, const physics::Plane
 
 physics::real physics::Distance(const math::Vector3& Point, const physics::AABox& Box)
 {
+    assert(Box.IsValid());
     return math::Sqrt(SquareDistance(Point, Box));
 }
 
@@ -603,6 +596,7 @@ physics::real physics::Distance(const math::Vector3& Point, const physics::Spher
 
 physics::real physics::Distance(const math::Vector3& Point, const physics::Box& Box)
 {
+    assert(Box.IsValid());
     const math::Vector3 ClosestPointOnBox = ClosestPoint(Point, Box);
     return (Point - ClosestPointOnBox).Length();
 }
