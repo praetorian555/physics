@@ -1,7 +1,5 @@
 #pragma once
 
-#include "math/point3.h"
-
 #include "physics/base.h"
 #include "physics/containers.h"
 

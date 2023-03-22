@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math/point3.h"
 #include "math/quaternion.h"
 #include "math/transform.h"
 
