@@ -6,7 +6,7 @@ void physics::World::StartFrame()
 {
     for (RigidBody* body : m_bodies)
     {
-        assert(body != nullptr);
+        PHYSICS_ASSERT(body != nullptr);
         body->CalculateDerivedData();
         body->ClearAccumulators();
     }
@@ -22,7 +22,7 @@ void physics::World::Integrate(physics::real delta_seconds)
 {
     for (RigidBody* body : m_bodies)
     {
-        assert(body != nullptr);
+        PHYSICS_ASSERT(body != nullptr);
         body->Integrate(delta_seconds);
     }
 }

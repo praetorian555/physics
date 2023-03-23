@@ -20,6 +20,8 @@ if (PHYSICS_RENDER)
     target_link_libraries(physics PUBLIC rndr)
 endif ()
 
+target_compile_definitions(physics PUBLIC $<$<NOT:$<CONFIG:Release>>:PHYSICS_ENABLE_ASSERTS>)
+
 # IDEs should put the headers in a nice place
 set_target_properties(physics PROPERTIES FOLDER Physics)
 source_group(

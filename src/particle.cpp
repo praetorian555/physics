@@ -67,7 +67,7 @@ math::Vector3 physics::Particle::GetAcceleration() const
 
 void physics::Particle::SetMass(real mass)
 {
-    assert(mass != PHYSICS_REALC(0.0));
+    PHYSICS_ASSERT(mass != PHYSICS_REALC(0.0));
     m_inverse_mass = PHYSICS_REALC(1.0) / mass;
 }
 
@@ -78,7 +78,7 @@ void physics::Particle::SetInverseMass(real inverse_mass)
 
 physics::real physics::Particle::GetMass() const
 {
-    assert(m_inverse_mass != PHYSICS_REALC(0.0));
+    PHYSICS_ASSERT(m_inverse_mass != PHYSICS_REALC(0.0));
     return PHYSICS_REALC(1.0) / m_inverse_mass;
 }
 
@@ -94,7 +94,7 @@ bool physics::Particle::HasFiniteMass() const
 
 void physics::Particle::SetDamping(real damping)
 {
-    assert(damping >= PHYSICS_REALC(0.0) && damping <= PHYSICS_REALC(1.0));
+    PHYSICS_ASSERT(damping >= PHYSICS_REALC(0.0) && damping <= PHYSICS_REALC(1.0));
     m_damping = damping;
 }
 

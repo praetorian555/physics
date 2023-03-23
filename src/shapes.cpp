@@ -30,7 +30,7 @@ bool physics::AABox::Overlaps(const Shape& other) const
         case ShapeType::Box:
             return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
-            assert(false);
+            PHYSICS_ASSERT(false);
     }
     return false;
 }
@@ -72,7 +72,7 @@ bool physics::Sphere::Overlaps(const physics::Shape& other) const
         case ShapeType::Box:
             return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
-            assert(false);
+            PHYSICS_ASSERT(false);
     }
     return false;
 }
@@ -129,7 +129,7 @@ bool physics::Plane::Overlaps(const physics::Shape& other) const
         case ShapeType::Box:
             return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
-            assert(false);
+            PHYSICS_ASSERT(false);
     }
     return true;
 }
@@ -204,7 +204,7 @@ bool physics::Box::Overlaps(const physics::Shape& other) const
         case ShapeType::Box:
             return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
-            assert(false);
+            PHYSICS_ASSERT(false);
     }
     return false;
 }

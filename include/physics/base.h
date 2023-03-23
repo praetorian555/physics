@@ -5,7 +5,12 @@
 #include "math/prettyprint.h"
 #include "math/vector3.h"
 
+#if PHYSICS_ENABLE_ASSERTS
 #include <cassert>
+#define PHYSICS_ASSERT(x) assert(x)
+#else
+#define PHYSICS_ASSERT(x)
+#endif
 
 namespace physics
 {

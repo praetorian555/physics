@@ -4,8 +4,8 @@
 
 void physics::ForceRegistry::Add(physics::RigidBody* body, physics::ForceGenerator* force_generator)
 {
-    assert(body != nullptr);
-    assert(force_generator != nullptr);
+    PHYSICS_ASSERT(body != nullptr);
+    PHYSICS_ASSERT(force_generator != nullptr);
 
     m_entries.push_back({body, force_generator});
 }

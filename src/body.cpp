@@ -2,7 +2,7 @@
 
 void physics::RigidBody::SetMass(physics::real mass)
 {
-    assert(mass > MATH_REALC(0.0));
+    PHYSICS_ASSERT(mass > MATH_REALC(0.0));
     m_inverse_mass = MATH_REALC(1.0) / mass;
 }
 

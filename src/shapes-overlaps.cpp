@@ -7,8 +7,8 @@
 
 bool physics::Overlaps(const AABox& a, const AABox& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     if (a.max.X < b.min.X || a.min.X > b.max.X)
     {
@@ -27,8 +27,8 @@ bool physics::Overlaps(const AABox& a, const AABox& b)
 
 bool physics::Overlaps(const Sphere& a, const Sphere& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     const math::Vector3 center_diff = a.center - b.center;
     const real radius_sum = a.radius + b.radius;
@@ -37,8 +37,8 @@ bool physics::Overlaps(const Sphere& a, const Sphere& b)
 
 bool physics::Overlaps(const physics::Plane& a, const physics::Plane& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
     constexpr real k_epsilon = PHYSICS_REALC(0.0001);
     const real abs_projection = math::Abs(math::Dot(a.normal, b.normal));
     const bool are_parallel = math::IsEqual(abs_projection, PHYSICS_REALC(1.0), k_epsilon);
@@ -51,8 +51,8 @@ bool physics::Overlaps(const physics::Plane& a, const physics::Plane& b)
 
 bool physics::Overlaps(const physics::Box& a, const physics::Box& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     math::Matrix4x4 rot_matrix;
     math::Matrix4x4 abs_rot_matrix;
@@ -255,8 +255,8 @@ bool physics::Overlaps(const Sphere& a, const AABox& b)
 
 bool physics::Overlaps(const physics::AABox& a, const physics::Plane& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     const math::Point3& center = (a.max + a.min) * PHYSICS_REALC(0.5);
     const math::Vector3& half_extents = a.max - center;
@@ -278,8 +278,8 @@ bool physics::Overlaps(const physics::Plane& a, const physics::AABox& b)
 
 bool physics::Overlaps(const physics::Sphere& a, const physics::Plane& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
     const real distance = math::Dot(a.center - math::Point3::Zero, b.normal) - b.distance;
     return math::Abs(distance) <= a.radius;
 }
@@ -291,8 +291,8 @@ bool physics::Overlaps(const physics::Plane& a, const physics::Sphere& b)
 
 bool physics::Overlaps(const physics::Box& a, const physics::AABox& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
     const math::Point3 aabb_center = (b.min + b.max) * PHYSICS_REALC(0.5);
     const math::Vector3 aabb_half_extents = b.max - aabb_center;
     const physics::Box b_box(aabb_center, aabb_half_extents, math::Matrix4x4{});
@@ -306,8 +306,8 @@ bool physics::Overlaps(const physics::AABox& a, const physics::Box& b)
 
 bool physics::Overlaps(const physics::Box& a, const physics::Sphere& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     const math::Point3 point = ClosestPoint(b.center, a);
     const math::Vector3 distance_vector = point - b.center;
@@ -321,8 +321,8 @@ bool physics::Overlaps(const physics::Sphere& a, const physics::Box& b)
 
 bool physics::Overlaps(const physics::Box& a, const physics::Plane& b)
 {
-    assert(a.IsValid());
-    assert(b.IsValid());
+    PHYSICS_ASSERT(a.IsValid());
+    PHYSICS_ASSERT(b.IsValid());
 
     // Project the farthest point of the box onto the plane normal.
     const real projection = a.half_extents.X * math::Dot(a.axes[0], b.normal) +
