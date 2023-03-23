@@ -25,9 +25,9 @@ enum class ShapeType
  */
 struct Shape
 {
-    ShapeType Type;
+    ShapeType type;
 
-    Shape(ShapeType Type) : Type(Type) {}
+    Shape(ShapeType in_type) : type(in_type) {}
     virtual ~Shape() = default;
 
     /**
@@ -39,10 +39,10 @@ struct Shape
 
     /**
      * Checks if this shape overlaps with the given shape.
-     * @param Other The other shape to check for overlap.
+     * @param other The other shape to check for overlap.
      * @return Returns true if the shapes overlap, false otherwise.
      */
-    [[nodiscard]] virtual bool Overlaps(const Shape& Other) const = 0;
+    [[nodiscard]] virtual bool Overlaps(const Shape& other) const = 0;
 
     [[nodiscard]] virtual real GetSurfaceArea() const = 0;
     [[nodiscard]] virtual real GetVolume() const = 0;
@@ -50,11 +50,11 @@ struct Shape
 
 struct AABox : public Shape
 {
-    math::Point3 Min;
-    math::Point3 Max;
+    math::Point3 min;
+    math::Point3 max;
 
     AABox();
-    AABox(const math::Point3& Min, const math::Point3& Max);
+    AABox(const math::Point3& in_min, const math::Point3& in_max);
 
     /**
      * Check if the axis-aligned box is valid. An axis-aligned box is valid if the minimum point is
@@ -63,18 +63,18 @@ struct AABox : public Shape
      */
     [[nodiscard]] bool IsValid() const override;
 
-    [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] bool Overlaps(const Shape& other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;
     [[nodiscard]] real GetVolume() const override;
 };
 
 struct Sphere final : public Shape
 {
-    math::Point3 Center;
-    real Radius;
+    math::Point3 center;
+    real radius;
 
     Sphere();
-    Sphere(const math::Point3& Center, real Radius);
+    Sphere(const math::Point3& center, real radius);
 
     /**
      * Check if the sphere is valid. A sphere is valid if the radius is greater than or equal to 0.
@@ -82,7 +82,7 @@ struct Sphere final : public Shape
      */
     [[nodiscard]] bool IsValid() const override;
 
-    [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] bool Overlaps(const Shape& other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;
     [[nodiscard]] real GetVolume() const override;
 };
@@ -91,55 +91,57 @@ struct Sphere final : public Shape
 struct Plane : public Shape
 {
     /** Normal of the plane. */
-    math::Vector3 Normal;
+    math::Vector3 normal;
     /** Distance from the origin along the normal. */
-    real Distance;
+    real distance;
 
     Plane();
-    Plane(const math::Vector3& Normal, real Distance);
+    Plane(const math::Vector3& in_normal, real in_distance);
 
     /**
      * Creates a plane from 3 points. Assumes the points are specified in counter-clockwise order
      * and that the points are not collinear.
-     * @param A The first point.
-     * @param B The second point.
-     * @param C The third point.
+     * @param a The first point.
+     * @param b The second point.
+     * @param c The third point.
      * @return Returns the plane. If the points are collinear, the plane will be invalid.
      */
-    static Plane FromPoints(const math::Point3& A, const math::Point3& B, const math::Point3& C);
+    static Plane FromPoints(const math::Point3& a, const math::Point3& b, const math::Point3& c);
 
     [[nodiscard]] bool IsValid() const override;
-    [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] bool Overlaps(const Shape& other) const override;
     [[nodiscard]] real GetSurfaceArea() const override { return 0; }
     [[nodiscard]] real GetVolume() const override { return 0; }
 };
 
 struct Box : public Shape
 {
-    math::Point3 Center;
-    math::Vector3 Extents;
-    /** The column vector of the rotation matrix that transforms from local box space to world
-     * space. */
+    math::Point3 center;
+    math::Vector3 half_extents;
+    /**
+     * The column vectors of the rotation matrix that transforms from local box space to world
+     * space.
+     */
     union
     {
         struct
         {
-            math::Vector3 AxisX;
-            math::Vector3 AxisY;
-            math::Vector3 AxisZ;
+            math::Vector3 axis_x;
+            math::Vector3 axis_y;
+            math::Vector3 axis_z;
         };
-        StackArray<math::Vector3, 3> Axes;
+        StackArray<math::Vector3, 3> axes;
     };
 
     Box();
-    Box(const math::Point3& Center,
-        const math::Vector3& Extents,
-        const math::Vector3& AxisX,
-        const math::Vector3& AxisY,
-        const math::Vector3& AxisZ);
-    Box(const math::Point3& Center,
-        const math::Vector3& Extents,
-        const math::Matrix4x4& RotationMatrix);
+    Box(const math::Point3& in_center,
+        const math::Vector3& in_half_extents,
+        const math::Vector3& in_axis_x,
+        const math::Vector3& in_axis_y,
+        const math::Vector3& in_axis_z);
+    Box(const math::Point3& in_center,
+        const math::Vector3& in_half_extents,
+        const math::Matrix4x4& in_rotation_matrix);
 
     /**
      * Checks if the box is valid. A box is valid if all extents are larger then Epsilon and the
@@ -148,168 +150,9 @@ struct Box : public Shape
      * @return Returns true if the box is valid, false otherwise.
      */
     [[nodiscard]] bool IsValid() const override;
-    [[nodiscard]] bool Overlaps(const Shape& Other) const override;
+    [[nodiscard]] bool Overlaps(const Shape& other) const override;
     [[nodiscard]] real GetSurfaceArea() const override;
     [[nodiscard]] real GetVolume() const override;
 };
-
-/**
- * Checks if the given axis-aligned boxes overlap.
- * @param A The first box.
- * @param B The second box.
- * @return Returns true if the boxes overlap, false otherwise.
- */
-bool Overlaps(const AABox& A, const AABox& B);
-
-/**
- * Checks if the given spheres overlap.
- * @param A The first sphere.
- * @param B The second sphere.
- * @return Returns true if the spheres overlap, false otherwise.
- */
-bool Overlaps(const Sphere& A, const Sphere& B);
-
-/**
- * Checks if the given planes overlap.
- * @param A The first plane.
- * @param B The second plane.
- * @return Returns true if the planes overlap, false otherwise.
- */
-bool Overlaps(const Plane& A, const Plane& B);
-
-/**
- * Checks if the given boxes overlap.
- * @param A The first box.
- * @param B The second box.
- * @return Returns true if the boxes overlap, false otherwise.
- */
-bool Overlaps(const Box& A, const Box& B);
-
-/**
- * Checks if the given sphere overlaps with the given axis-aligned box.
- * @param A The sphere.
- * @param B The box.
- * @return Returns true if the sphere overlaps with the box, false otherwise.
- */
-bool Overlaps(const AABox& A, const Sphere& B);
-bool Overlaps(const Sphere& A, const AABox& B);
-
-/**
- * Checks if the given plane overlaps with the given axis-aligned box.
- * @param A The plane.
- * @param B The box.
- * @return Returns true if the plane overlaps with the box, false otherwise.
- */
-bool Overlaps(const AABox& A, const Plane& B);
-bool Overlaps(const Plane& A, const AABox& B);
-
-/**
- * Checks if the given plane overlaps with the given sphere.
- * @param A The plane.
- * @param B The sphere.
- * @return Returns true if the plane overlaps with the sphere, false otherwise.
- */
-bool Overlaps(const Sphere& A, const Plane& B);
-bool Overlaps(const Plane& A, const Sphere& B);
-
-/**
- * Checks if the given box overlaps with the given axis-aligned box.
- * @param A The box.
- * @param B The axis-aligned box.
- * @return Returns true if the box overlaps with the axis-aligned box, false otherwise.
- */
-bool Overlaps(const Box& A, const AABox& B);
-bool Overlaps(const AABox& A, const Box& B);
-
-/**
- * Checks if the given box overlaps with the given sphere.
- * @param A The box.
- * @param B The sphere.
- * @return Returns true if the box overlaps with the sphere, false otherwise.
- */
-bool Overlaps(const Box& A, const Sphere& B);
-bool Overlaps(const Sphere& A, const Box& B);
-
-/**
- * Checks if the given box overlaps with the given plane.
- * @param A The box.
- * @param B The plane.
- * @return Returns true if the box overlaps with the plane, false otherwise.
- */
-bool Overlaps(const Box& A, const Plane& B);
-bool Overlaps(const Plane& A, const Box& B);
-
-/**
- * Find the closest point on the plane to the given point.
- * @param Point Point to find the closest point on the plane to.
- * @param Plane Plane to find the closest point on.
- * @return Returns the closest point on the plane to the given point.
- */
-math::Point3 ClosestPoint(const math::Point3& Point, const Plane& Plane);
-
-/**
- * Find the closest point on the axis-aligned box to the given point.
- * @param Point Point to find the closest point on the box to.
- * @param Box Axis-aligned box to find the closest point on.
- * @return Returns the closest point on the axis-aligned box to the given point.
- */
-math::Point3 ClosestPoint(const math::Point3& Point, const AABox& Box);
-
-/**
- * Find the closest point on the sphere to the given point.
- * @param Point Point to find the closest point on the sphere to.
- * @param Sphere Sphere to find the closest point on.
- * @return Returns the closest point on the sphere to the given point.
- */
-math::Point3 ClosestPoint(const math::Point3& Point, const Sphere& Sphere);
-
-/**
- * Find the closest point on the box to the given point.
- * @param Point Point to find the closest point on the box to.
- * @param Box Box to find the closest point on.
- * @return Returns the closest point on the box to the given point.
- */
-math::Point3 ClosestPoint(const math::Point3& Point, const Box& Box);
-
-/**
- * Find the distance from the given point to the plane.
- * @param Point Point to find the distance to the plane.
- * @param Plane Plane to find the distance to.
- * @return Returns the distance from the point to the plane. The distance is negative if the point
- * is on the negative side of the plane.
- */
-real Distance(const math::Point3& Point, const Plane& Plane);
-
-/**
- * Find the distance from the given point to the axis-aligned box.
- * @param Point Point to find the distance to the box.
- * @param Box Axis-aligned box to find the distance to.
- * @return Returns the distance from the point to the axis-aligned box.
- */
-real Distance(const math::Point3& Point, const AABox& Box);
-
-/**
- * Find the distance from the given point to the sphere.
- * @param Point Point to find the distance to the sphere.
- * @param Sphere Sphere to find the distance to.
- * @return Returns the distance from the point to the sphere.
- */
-real Distance(const math::Point3& Point, const Sphere& Sphere);
-
-/**
- * Find the distance from the given point to the box.
- * @param Point Point to find the distance to the box.
- * @param Box Box to find the distance to.
- * @return Returns the distance from the point to the box.
- */
-real Distance(const math::Point3& Point, const Box& Box);
-
-/**
- * Find the square distance from the given point to the axis-aligned box.
- * @param Point Point to find the square distance to the box.
- * @param Box Axis-aligned box to find the square distance to.
- * @return Returns the square distance from the point to the axis-aligned box.
- */
-real SquareDistance(const math::Point3& Point, const AABox& Box);
 
 }  // namespace physics

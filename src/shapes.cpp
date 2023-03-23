@@ -1,11 +1,11 @@
 #include "physics/shapes.h"
 
-#include <cassert>
-
 #include "math/matrix4x4.h"
 
-physics::AABox::AABox(const math::Point3& Min, const math::Point3& Max)
-    : Shape(ShapeType::AABox), Min(Min), Max(Max)
+#include "physics/shapes-overlaps.h"
+
+physics::AABox::AABox(const math::Point3& in_min, const math::Point3& in_max)
+    : Shape(ShapeType::AABox), min(in_min), max(in_max)
 {
 }
 
@@ -13,22 +13,22 @@ physics::AABox::AABox() : Shape(ShapeType::AABox) {}
 
 bool physics::AABox::IsValid() const
 {
-    return !Min.HasNaNs() && !Max.HasNaNs() && math::Min(Min, Max) == Min &&
-           math::Max(Min, Max) == Max;
+    return !min.HasNaNs() && !max.HasNaNs() && math::Min(min, max) == min &&
+           math::Max(min, max) == max;
 }
 
-bool physics::AABox::Overlaps(const Shape& Other) const
+bool physics::AABox::Overlaps(const Shape& other) const
 {
-    switch (Other.Type)
+    switch (other.type)
     {
         case ShapeType::AABox:
-            return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const AABox&>(other));
         case ShapeType::Sphere:
-            return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Sphere&>(other));
         case ShapeType::Plane:
-            return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Plane&>(other));
         case ShapeType::Box:
-            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
             assert(false);
     }
@@ -37,40 +37,40 @@ bool physics::AABox::Overlaps(const Shape& Other) const
 
 physics::real physics::AABox::GetVolume() const
 {
-    const math::Vector3 Diagonal = Max - Min;
-    return Diagonal.X * Diagonal.Y * Diagonal.Z;
+    const math::Vector3 diagonal = max - min;
+    return diagonal.X * diagonal.Y * diagonal.Z;
 }
 
 physics::real physics::AABox::GetSurfaceArea() const
 {
-    const math::Vector3 Diagonal = Max - Min;
-    return 2 * Diagonal.X * Diagonal.Y + 2 * Diagonal.X * Diagonal.Z + 2 * Diagonal.Y * Diagonal.Z;
+    const math::Vector3 diagonal = max - min;
+    return 2 * diagonal.X * diagonal.Y + 2 * diagonal.X * diagonal.Z + 2 * diagonal.Y * diagonal.Z;
 }
 
-physics::Sphere::Sphere() : Shape(ShapeType::Sphere), Radius(PHYSICS_REALC(0.0)) {}
+physics::Sphere::Sphere() : Shape(ShapeType::Sphere), radius(PHYSICS_REALC(0.0)) {}
 
-physics::Sphere::Sphere(const math::Point3& Center, physics::real Radius)
-    : Shape(ShapeType::Sphere), Center(Center), Radius(Radius)
+physics::Sphere::Sphere(const math::Point3& center, physics::real radius)
+    : Shape(ShapeType::Sphere), center(center), radius(radius)
 {
 }
 
 bool physics::Sphere::IsValid() const
 {
-    return !Center.HasNaNs() && !math::IsNaN(Radius) && Radius >= PHYSICS_REALC(0.0);
+    return !center.HasNaNs() && !math::IsNaN(radius) && radius >= PHYSICS_REALC(0.0);
 }
 
-bool physics::Sphere::Overlaps(const physics::Shape& Other) const
+bool physics::Sphere::Overlaps(const physics::Shape& other) const
 {
-    switch (Other.Type)
+    switch (other.type)
     {
         case ShapeType::Sphere:
-            return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Sphere&>(other));
         case ShapeType::AABox:
-            return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const AABox&>(other));
         case ShapeType::Plane:
-            return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Plane&>(other));
         case ShapeType::Box:
-            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
             assert(false);
     }
@@ -79,55 +79,55 @@ bool physics::Sphere::Overlaps(const physics::Shape& Other) const
 
 physics::real physics::Sphere::GetSurfaceArea() const
 {
-    constexpr real kConstant = PHYSICS_REALC(4.0) * math::kPi;
-    return kConstant * Radius * Radius;
+    constexpr real k_constant = PHYSICS_REALC(4.0) * math::kPi;
+    return k_constant * radius * radius;
 }
 
 physics::real physics::Sphere::GetVolume() const
 {
-    constexpr real kConstant = PHYSICS_REALC(4.0) / PHYSICS_REALC(3.0) * math::kPi;
-    return kConstant * Radius * Radius * Radius;
+    constexpr real k_constant = PHYSICS_REALC(4.0) / PHYSICS_REALC(3.0) * math::kPi;
+    return k_constant * radius * radius * radius;
 }
 
-physics::Plane::Plane() : Shape(ShapeType::Plane), Distance(PHYSICS_REALC(0.0)) {}
+physics::Plane::Plane() : Shape(ShapeType::Plane), distance(PHYSICS_REALC(0.0)) {}
 
-physics::Plane::Plane(const math::Vector3& Normal, physics::real Distance)
-    : Shape(ShapeType::Plane), Normal(Normal), Distance(Distance)
+physics::Plane::Plane(const math::Vector3& in_normal, physics::real in_distance)
+    : Shape(ShapeType::Plane), normal(in_normal), distance(in_distance)
 {
-    if (this->Normal != math::Vector3::Zero)
+    if (normal != math::Vector3::Zero)
     {
-        this->Normal = math::Normalize(this->Normal);
+        normal = math::Normalize(normal);
     }
 }
 
-physics::Plane physics::Plane::FromPoints(const math::Point3& A,
-                                          const math::Point3& B,
-                                          const math::Point3& C)
+physics::Plane physics::Plane::FromPoints(const math::Point3& a,
+                                          const math::Point3& b,
+                                          const math::Point3& c)
 {
-    physics::Plane Result;
-    Result.Normal = math::Cross(B - A, C - A);
-    Result.Distance = math::Dot(Result.Normal, A - math::Point3::Zero);
-    return Result;
+    physics::Plane result;
+    result.normal = math::Cross(b - a, c - a);
+    result.distance = math::Dot(result.normal, a - math::Point3::Zero);
+    return result;
 }
 
 bool physics::Plane::IsValid() const
 {
-    return !Normal.HasNaNs() && !math::IsNaN(Distance) &&
-           Normal.LengthSquared() > PHYSICS_REALC(0.0);
+    return !normal.HasNaNs() && !math::IsNaN(distance) &&
+           normal.LengthSquared() > PHYSICS_REALC(0.0);
 }
 
-bool physics::Plane::Overlaps(const physics::Shape& Other) const
+bool physics::Plane::Overlaps(const physics::Shape& other) const
 {
-    switch (Other.Type)
+    switch (other.type)
     {
         case ShapeType::Plane:
-            return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Plane&>(other));
         case ShapeType::AABox:
-            return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const AABox&>(other));
         case ShapeType::Sphere:
-            return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Sphere&>(other));
         case ShapeType::Box:
-            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
             assert(false);
     }
@@ -136,69 +136,73 @@ bool physics::Plane::Overlaps(const physics::Shape& Other) const
 
 physics::Box::Box()
     : Shape(ShapeType::Box),
-      AxisX(math::Vector3::Zero),
-      AxisY(math::Vector3::Zero),
-      AxisZ(math::Vector3::Zero)
+      axis_x(math::Vector3::Zero),
+      axis_y(math::Vector3::Zero),
+      axis_z(math::Vector3::Zero)
 {
 }
 
-physics::Box::Box(const math::Point3& Center,
-                  const math::Vector3& Extents,
-                  const math::Vector3& AxisX,
-                  const math::Vector3& AxisY,
-                  const math::Vector3& AxisZ)
+physics::Box::Box(const math::Point3& in_center,
+                  const math::Vector3& in_half_extents,
+                  const math::Vector3& in_axis_x,
+                  const math::Vector3& in_axis_y,
+                  const math::Vector3& in_axis_z)
     : Shape(ShapeType::Box),
-      Center(Center),
-      Extents(Extents),
-      AxisX(AxisX),
-      AxisY(AxisY),
-      AxisZ(AxisZ)
+      center(in_center),
+      half_extents(in_half_extents),
+      axis_x(in_axis_x),
+      axis_y(in_axis_y),
+      axis_z(in_axis_z)
 {
     if (IsValid())
     {
-        this->AxisX = math::Normalize(this->AxisX);
-        this->AxisY = math::Normalize(this->AxisY);
-        this->AxisZ = math::Normalize(this->AxisZ);
+        axis_x = math::Normalize(axis_x);
+        axis_y = math::Normalize(axis_y);
+        axis_z = math::Normalize(axis_z);
     }
 }
 
-physics::Box::Box(const math::Point3& Center,
-                  const math::Vector3& Extents,
-                  const math::Matrix4x4& RotMat)
-    : Shape(ShapeType::Box), Center(Center), Extents(Extents)
+physics::Box::Box(const math::Point3& in_center,
+                  const math::Vector3& in_half_extents,
+                  const math::Matrix4x4& in_rotation_matrix)
+    : Shape(ShapeType::Box), center(in_center), half_extents(in_half_extents)
 {
-    Axes[0] = math::Vector3(RotMat.Data[0][0], RotMat.Data[1][0], RotMat.Data[2][0]);
-    Axes[1] = math::Vector3(RotMat.Data[0][1], RotMat.Data[1][1], RotMat.Data[2][1]);
-    Axes[2] = math::Vector3(RotMat.Data[0][2], RotMat.Data[1][2], RotMat.Data[2][2]);
+    axes[0] = math::Vector3(in_rotation_matrix.Data[0][0], in_rotation_matrix.Data[1][0],
+                            in_rotation_matrix.Data[2][0]);
+    axes[1] = math::Vector3(in_rotation_matrix.Data[0][1], in_rotation_matrix.Data[1][1],
+                            in_rotation_matrix.Data[2][1]);
+    axes[2] = math::Vector3(in_rotation_matrix.Data[0][2], in_rotation_matrix.Data[1][2],
+                            in_rotation_matrix.Data[2][2]);
     if (IsValid())
     {
-        AxisX = math::Normalize(Axes[0]);
-        AxisY = math::Normalize(Axes[1]);
-        AxisZ = math::Normalize(Axes[2]);
+        axes[0] = math::Normalize(axes[0]);
+        axes[1] = math::Normalize(axes[1]);
+        axes[2] = math::Normalize(axes[2]);
     }
 }
 
 bool physics::Box::IsValid() const
 {
-    constexpr real kEpsilon = PHYSICS_REALC(1e-6);
-    return !Center.HasNaNs() && !Extents.HasNaNs() && !AxisX.HasNaNs() && !AxisY.HasNaNs() &&
-           !AxisZ.HasNaNs() && Extents.X >= PHYSICS_REALC(0.0) && Extents.Y >= PHYSICS_REALC(0.0) &&
-           Extents.Z >= PHYSICS_REALC(0.0) && AxisX.LengthSquared() > kEpsilon &&
-           AxisY.LengthSquared() > kEpsilon && AxisZ.LengthSquared() > kEpsilon;
+    constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+    return !center.HasNaNs() && !half_extents.HasNaNs() && !axis_x.HasNaNs() && !axis_y.HasNaNs() &&
+           !axis_z.HasNaNs() && half_extents.X >= PHYSICS_REALC(0.0) &&
+           half_extents.Y >= PHYSICS_REALC(0.0) && half_extents.Z >= PHYSICS_REALC(0.0) &&
+           axis_x.LengthSquared() > k_epsilon && axis_y.LengthSquared() > k_epsilon &&
+           axis_z.LengthSquared() > k_epsilon;
 }
 
-bool physics::Box::Overlaps(const physics::Shape& Other) const
+bool physics::Box::Overlaps(const physics::Shape& other) const
 {
-    switch (Other.Type)
+    switch (other.type)
     {
         case ShapeType::AABox:
-            return ::physics::Overlaps(*this, static_cast<const AABox&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const AABox&>(other));
         case ShapeType::Sphere:
-            return ::physics::Overlaps(*this, static_cast<const Sphere&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Sphere&>(other));
         case ShapeType::Plane:
-            return ::physics::Overlaps(*this, static_cast<const Plane&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Plane&>(other));
         case ShapeType::Box:
-            return ::physics::Overlaps(*this, static_cast<const Box&>(Other));
+            return ::physics::Overlaps(*this, static_cast<const Box&>(other));
         default:
             assert(false);
     }
@@ -207,414 +211,10 @@ bool physics::Box::Overlaps(const physics::Shape& Other) const
 
 physics::real physics::Box::GetSurfaceArea() const
 {
-    return 2 * Extents.X * Extents.Y + 2 * Extents.X * Extents.Z + 2 * Extents.Y * Extents.Z;
+    return 2 * half_extents.X * half_extents.Y + 2 * half_extents.X * half_extents.Z + 2 * half_extents.Y * half_extents.Z;
 }
 
 physics::real physics::Box::GetVolume() const
 {
-    return Extents.X * Extents.Y * Extents.Z;
-}
-
-bool physics::Overlaps(const AABox& A, const AABox& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    if (A.Max.X < B.Min.X || A.Min.X > B.Max.X)
-    {
-        return false;
-    }
-    if (A.Max.Y < B.Min.Y || A.Min.Y > B.Max.Y)
-    {
-        return false;
-    }
-    if (A.Max.Z < B.Min.Z || A.Min.Z > B.Max.Z)
-    {
-        return false;
-    }
-    return true;
-}
-
-bool physics::Overlaps(const Sphere& A, const Sphere& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    const math::Vector3 CenterDiff = A.Center - B.Center;
-    const real RadiusSum = A.Radius + B.Radius;
-    return CenterDiff.LengthSquared() <= RadiusSum * RadiusSum;
-}
-
-bool physics::Overlaps(const physics::Plane& A, const physics::Plane& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-    constexpr real kEpsilon = PHYSICS_REALC(0.0001);
-    const bool AreParallel =
-        math::IsEqual(math::Abs(math::Dot(A.Normal, B.Normal)), PHYSICS_REALC(1.0), kEpsilon);
-
-    if (AreParallel)
-    {
-        return math::IsEqual(A.Distance, B.Distance, kEpsilon);
-    }
-    return true;
-}
-
-bool physics::Overlaps(const physics::Box& A, const physics::Box& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    math::Matrix4x4 R;
-    math::Matrix4x4 AbsR;
-
-    // Compute the rotation matrix that represents B's orientation in A's coordinate frame.
-    // This is equivalent to R = A_transpose * B.
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            R.Data[i][j] = math::Dot(A.Axes[i], B.Axes[j]);
-        }
-    }
-
-    // Convert distance between centers to A's coordinate frame.
-    math::Vector3 Distance = B.Center - A.Center;
-    Distance = math::Vector3(math::Dot(Distance, A.Axes[0]), math::Dot(Distance, A.Axes[1]),
-                             math::Dot(Distance, A.Axes[2]));
-
-    // Since we are projecting the extents, we don't really care about the sign of the rotation
-    // matrix. We can just take the absolute value of each component.
-    constexpr real kEpsilon = PHYSICS_REALC(0.0001);
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            AbsR.Data[i][j] = math::Abs(R.Data[i][j]) + kEpsilon;
-        }
-    }
-
-    // Separating-axis test for axes of A.
-    for (int i = 0; i < 3; ++i)
-    {
-        const real ProjectionA = A.Extents[i];
-        const real ProjectionB = B.Extents.X * AbsR.Data[i][0] + B.Extents.Y * AbsR.Data[i][1] +
-                                 B.Extents.Z * AbsR.Data[i][2];
-        if (math::Abs(Distance[i]) > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Separating-axis test for axes of B. We use a transpose of R effectively to get extents of A
-    // in B's coordinate frame.
-    for (int i = 0; i < 3; ++i)
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[0][i] + A.Extents.Y * AbsR.Data[1][i] +
-                                 A.Extents.Z * AbsR.Data[2][i];
-        const real ProjectionB = B.Extents[i];
-        const real DistanceProjection = math::Abs(
-            Distance.X * R.Data[0][i] + Distance.Y * R.Data[1][i] + Distance.Z * R.Data[2][i]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A0 x B0
-    {
-        const real ProjectionA = A.Extents.Y * AbsR.Data[2][0] + A.Extents.Z * AbsR.Data[1][0];
-        const real ProjectionB = B.Extents.Y * AbsR.Data[0][2] + B.Extents.Z * AbsR.Data[0][1];
-        const real DistanceProjection =
-            math::Abs(Distance.Z * R.Data[1][0] - Distance.Y * R.Data[2][0]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A0 x B1
-    {
-        const real ProjectionA = A.Extents.Y * AbsR.Data[2][1] + A.Extents.Z * AbsR.Data[1][1];
-        const real ProjectionB = B.Extents.X * AbsR.Data[0][2] + B.Extents.Z * AbsR.Data[0][0];
-        const real DistanceProjection =
-            math::Abs(Distance.Z * R.Data[1][1] - Distance.Y * R.Data[2][1]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A0 x B2
-    {
-        const real ProjectionA = A.Extents.Y * AbsR.Data[2][2] + A.Extents.Z * AbsR.Data[1][2];
-        const real ProjectionB = B.Extents.X * AbsR.Data[0][1] + B.Extents.Y * AbsR.Data[0][0];
-        const real DistanceProjection =
-            math::Abs(Distance.Z * R.Data[1][2] - Distance.Y * R.Data[2][2]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A1 x B0
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[2][0] + A.Extents.Z * AbsR.Data[0][0];
-        const real ProjectionB = B.Extents.Y * AbsR.Data[1][2] + B.Extents.Z * AbsR.Data[1][1];
-        const real DistanceProjection =
-            math::Abs(Distance.X * R.Data[2][0] - Distance.Z * R.Data[0][0]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A1 x B1
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[2][1] + A.Extents.Z * AbsR.Data[0][1];
-        const real ProjectionB = B.Extents.X * AbsR.Data[1][2] + B.Extents.Z * AbsR.Data[1][0];
-        const real DistanceProjection =
-            math::Abs(Distance.X * R.Data[2][1] - Distance.Z * R.Data[0][1]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A1 x B2
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[2][2] + A.Extents.Z * AbsR.Data[0][2];
-        const real ProjectionB = B.Extents.X * AbsR.Data[1][1] + B.Extents.Y * AbsR.Data[1][0];
-        const real DistanceProjection =
-            math::Abs(Distance.X * R.Data[2][2] - Distance.Z * R.Data[0][2]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A2 x B0
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[1][0] + A.Extents.Y * AbsR.Data[0][0];
-        const real ProjectionB = B.Extents.Y * AbsR.Data[2][2] + B.Extents.Z * AbsR.Data[2][1];
-        const real DistanceProjection =
-            math::Abs(Distance.Y * R.Data[0][0] - Distance.X * R.Data[1][0]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A2 x B1
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[1][1] + A.Extents.Y * AbsR.Data[0][1];
-        const real ProjectionB = B.Extents.X * AbsR.Data[2][2] + B.Extents.Z * AbsR.Data[2][0];
-        const real DistanceProjection =
-            math::Abs(Distance.Y * R.Data[0][1] - Distance.X * R.Data[1][1]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    // Test axis A2 x B2
-    {
-        const real ProjectionA = A.Extents.X * AbsR.Data[1][2] + A.Extents.Y * AbsR.Data[0][2];
-        const real ProjectionB = B.Extents.X * AbsR.Data[2][1] + B.Extents.Y * AbsR.Data[2][0];
-        const real DistanceProjection =
-            math::Abs(Distance.Y * R.Data[0][2] - Distance.X * R.Data[1][2]);
-        if (DistanceProjection > ProjectionA + ProjectionB)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool physics::Overlaps(const AABox& A, const Sphere& B)
-{
-    const real SquareDistance = physics::SquareDistance(B.Center, A);
-    return SquareDistance <= B.Radius * B.Radius;
-}
-
-bool physics::Overlaps(const Sphere& A, const AABox& B)
-{
-    return Overlaps(B, A);
-}
-
-bool physics::Overlaps(const physics::AABox& A, const physics::Plane& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    const math::Point3& Center = (A.Max + A.Min) * PHYSICS_REALC(0.5);
-    const math::Vector3& Extents = A.Max - Center;
-
-    // We need to project the extents onto the normal of the plane and find the largest possible
-    // projection. This is why we need to take the absolute value of each component of the normal.
-    const real Radius = Extents.X * math::Abs(B.Normal.X) + Extents.Y * math::Abs(B.Normal.Y) +
-                        Extents.Z * math::Abs(B.Normal.Z);
-    const real Distance = math::Dot(Center - math::Point3::Zero, B.Normal) - B.Distance;
-
-    return math::Abs(Distance) <= Radius;
-}
-
-bool physics::Overlaps(const physics::Plane& A, const physics::AABox& B)
-{
-    return Overlaps(B, A);
-}
-
-bool physics::Overlaps(const physics::Sphere& A, const physics::Plane& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-    const real Distance = math::Dot(A.Center - math::Point3::Zero, B.Normal) - B.Distance;
-    return math::Abs(Distance) <= A.Radius;
-}
-
-bool physics::Overlaps(const physics::Plane& A, const physics::Sphere& B)
-{
-    return Overlaps(B, A);
-}
-
-bool physics::Overlaps(const physics::Box& A, const physics::AABox& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-    const math::Point3 AABBCenter = (B.Min + B.Max) * PHYSICS_REALC(0.5);
-    const math::Vector3 AABBExtents = B.Max - AABBCenter;
-    const physics::Box BB(AABBCenter, AABBExtents, math::Matrix4x4{});
-    return Overlaps(A, BB);
-}
-
-bool physics::Overlaps(const physics::AABox& A, const physics::Box& B)
-{
-    return Overlaps(B, A);
-}
-
-bool physics::Overlaps(const physics::Box& A, const physics::Sphere& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    const math::Point3 Point = ClosestPoint(B.Center, A);
-    const math::Vector3 DistanceVector = Point - B.Center;
-    return math::Dot(DistanceVector, DistanceVector) <= B.Radius * B.Radius;
-}
-
-bool physics::Overlaps(const physics::Sphere& A, const physics::Box& B)
-{
-    return Overlaps(B, A);
-}
-
-bool physics::Overlaps(const physics::Box& A, const physics::Plane& B)
-{
-    assert(A.IsValid());
-    assert(B.IsValid());
-
-    // Project the farthest point of the box onto the plane normal.
-    const real Projection = A.Extents.X * math::Dot(A.Axes[0], B.Normal) +
-                            A.Extents.Y * math::Dot(A.Axes[1], B.Normal) +
-                            A.Extents.Z * math::Dot(A.Axes[2], B.Normal);
-    const real Distance = math::Dot(A.Center - math::Point3::Zero, B.Normal) - B.Distance;
-    return math::Abs(Distance) <= Projection;
-}
-
-bool physics::Overlaps(const physics::Plane& A, const physics::Box& B)
-{
-    return Overlaps(B, A);
-}
-
-math::Point3 physics::ClosestPoint(const math::Point3& Point, const physics::Plane& Plane)
-{
-    assert(Plane.IsValid());
-    assert(Plane.IsValid());
-    const real Distance = math::Dot(Point - math::Point3::Zero, Plane.Normal) - Plane.Distance;
-    return Point - Plane.Normal * Distance;
-}
-
-math::Point3 physics::ClosestPoint(const math::Point3& Point, const physics::AABox& Box)
-{
-    assert(Box.IsValid());
-    math::Point3 Result = Point;
-    Result.X = math::Clamp(Result.X, Box.Min.X, Box.Max.X);
-    Result.Y = math::Clamp(Result.Y, Box.Min.Y, Box.Max.Y);
-    Result.Z = math::Clamp(Result.Z, Box.Min.Z, Box.Max.Z);
-    return Result;
-}
-
-math::Point3 physics::ClosestPoint(const math::Point3& Point, const physics::Sphere& Sphere)
-{
-    assert(Sphere.IsValid());
-    math::Vector3 Direction = Point - Sphere.Center;
-    const real Distance = Direction.Length();
-    if (Distance >= Sphere.Radius)
-    {
-        Direction = math::Normalize(Direction);
-        return Sphere.Center + Direction * Sphere.Radius;
-    }
-    return Point;
-}
-
-math::Point3 physics::ClosestPoint(const math::Point3& Point, const physics::Box& Box)
-{
-    assert(Box.IsValid());
-    math::Point3 Result = Box.Center;
-    const math::Vector3 Direction = Point - Box.Center;
-    for (int AxisIdx = 0; AxisIdx < 3; ++AxisIdx)
-    {
-        real Distance = math::Dot(Direction, Box.Axes[AxisIdx]);
-        Distance = math::Clamp(Distance, -Box.Extents[AxisIdx], Box.Extents[AxisIdx]);
-        Result += Distance * Box.Axes[AxisIdx];
-    }
-    return Result;
-}
-
-physics::real physics::Distance(const math::Point3& Point, const physics::Plane& Plane)
-{
-    assert(Plane.IsValid());
-    return math::Dot(Point - math::Point3::Zero, Plane.Normal) - Plane.Distance;
-}
-
-physics::real physics::Distance(const math::Point3& Point, const physics::AABox& Box)
-{
-    assert(Box.IsValid());
-    return math::Sqrt(SquareDistance(Point, Box));
-}
-
-physics::real physics::Distance(const math::Point3& Point, const physics::Sphere& Sphere)
-{
-    assert(Sphere.IsValid());
-    const math::Vector3 Direction = Point - Sphere.Center;
-    const real Distance = Direction.Length();
-    return Distance >= Sphere.Radius ? Distance - Sphere.Radius : PHYSICS_REALC(0.0);
-}
-
-physics::real physics::Distance(const math::Point3& Point, const physics::Box& Box)
-{
-    assert(Box.IsValid());
-    const math::Point3 ClosestPointOnBox = ClosestPoint(Point, Box);
-    return math::Distance(Point, ClosestPointOnBox);
-}
-
-physics::real physics::SquareDistance(const math::Point3& Point, const physics::AABox& Box)
-{
-    assert(Box.IsValid());
-    real SquareDistance = PHYSICS_REALC(0.0);
-    for (int AxisIndex = 0; AxisIndex < 3; AxisIndex++)
-    {
-        const real AxisValue = Point[AxisIndex];
-        if (AxisValue < Box.Min[AxisIndex])
-        {
-            const real Diff = Box.Min[AxisIndex] - AxisValue;
-            SquareDistance += Diff * Diff;
-        }
-        else if (AxisValue > Box.Max[AxisIndex])
-        {
-            const real Diff = AxisValue - Box.Max[AxisIndex];
-            SquareDistance += Diff * Diff;
-        }
-    }
-    return SquareDistance;
+    return half_extents.X * half_extents.Y * half_extents.Z;
 }
