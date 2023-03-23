@@ -5,9 +5,7 @@
 #include "math/prettyprint.h"
 #include "math/vector3.h"
 
-#if !NDEBUG
 #include <cassert>
-#endif
 
 namespace physics
 {
