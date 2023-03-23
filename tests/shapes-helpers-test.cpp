@@ -261,3 +261,52 @@ TEST_CASE("Closest point on a oriented box to the given point", "[closestpoint][
         REQUIRE(result == point);
     }
 }
+
+TEST_CASE("Enclosing of two axis-aligned boxes with another", "[shape][aabox][enclose]")
+{
+    SECTION("Identical boxes")
+    {
+        const physics::AABox b1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox b2({0, 0, 0}, {1, 1, 1});
+        physics::AABox result;
+        physics::Enclose(result, b1, b2);
+        REQUIRE(result.min == b1.min);
+        REQUIRE(result.max == b1.max);
+    }
+    SECTION("Overlapping boxes")
+    {
+        const physics::AABox b1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox b2({0.5, 0.5, 0.5}, {2, 2, 2});
+        physics::AABox result;
+        physics::Enclose(result, b1, b2);
+        REQUIRE(result.min == b1.min);
+        REQUIRE(result.max == b2.max);
+    }
+    SECTION("Non-overlapping boxes")
+    {
+        const physics::AABox b1({0, 0, 0}, {1, 1, 1});
+        const physics::AABox b2({2, 2, 2}, {3, 3, 3});
+        physics::AABox result;
+        physics::Enclose(result, b1, b2);
+        REQUIRE(result.min == b1.min);
+        REQUIRE(result.max == b2.max);
+    }
+    SECTION("Point box and regular box that are overlapping")
+    {
+        const physics::AABox b1({0, 0, 0}, {0, 0, 0});
+        const physics::AABox b2({0, 0, 0}, {1, 1, 1});
+        physics::AABox result;
+        physics::Enclose(result, b1, b2);
+        REQUIRE(result.min == b1.min);
+        REQUIRE(result.max == b2.max);
+    }
+    SECTION("Point box and regular box that are not overlapping")
+    {
+        const physics::AABox b1({0, 0, 0}, {0, 0, 0});
+        const physics::AABox b2({1, 1, 1}, {2, 2, 2});
+        physics::AABox result;
+        physics::Enclose(result, b1, b2);
+        REQUIRE(result.min == b1.min);
+        REQUIRE(result.max == b2.max);
+    }
+}

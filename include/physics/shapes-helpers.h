@@ -83,4 +83,13 @@ real Distance(const math::Point3& point, const Box& box);
  */
 real SquareDistance(const math::Point3& point, const AABox& box);
 
+/**
+ * Enclose the two input axis-aligned boxes within a new, smallest possible, axis-aligned box and
+ * store the result in the out_box parameter.
+ * @param out_box The output box.
+ * @param in_box0 The first input box.
+ * @param in_box1 The second input box.
+ */
+void Enclose(AABox& out_box, const AABox& in_box0, const AABox& in_box1);
+
 }  // namespace physics

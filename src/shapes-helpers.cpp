@@ -93,3 +93,13 @@ physics::real physics::SquareDistance(const math::Point3& point, const physics::
     }
     return square_distance;
 }
+
+void physics::Enclose(physics::AABox& out_box,
+                      const physics::AABox& in_box0,
+                      const physics::AABox& in_box1)
+{
+    PHYSICS_ASSERT(in_box0.IsValid());
+    PHYSICS_ASSERT(in_box1.IsValid());
+    out_box.min = math::Min(in_box0.min, in_box1.min);
+    out_box.max = math::Max(in_box0.max, in_box1.max);
+}
