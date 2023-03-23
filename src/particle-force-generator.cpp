@@ -2,124 +2,125 @@
 
 #include "physics/particle.h"
 
-void physics::ParticleForceRegistry::Add(physics::Particle* Particle,
-                                         physics::ParticleForceGenerator* ForceGenerator)
+void physics::ParticleForceRegistry::Add(physics::Particle* particle,
+                                         physics::ParticleForceGenerator* force_generator)
 {
-    m_Entries.push_back({Particle, ForceGenerator});
+    m_entries.push_back({particle, force_generator});
 }
 
-void physics::ParticleForceRegistry::Remove(physics::Particle* Particle,
-                                            physics::ParticleForceGenerator* ForceGenerator)
+void physics::ParticleForceRegistry::Remove(physics::Particle* particle,
+                                            physics::ParticleForceGenerator* force_generator)
 {
-    std::erase_if(m_Entries, [Particle, ForceGenerator](const Entry& Entry)
-                  { return Entry.Particle == Particle && Entry.ForceGenerator == ForceGenerator; });
+    std::erase_if(
+        m_entries, [particle, force_generator](const Entry& entry)
+                  { return entry.particle == particle && entry.force_generator == force_generator; });
 }
 
 void physics::ParticleForceRegistry::Clear()
 {
-    m_Entries.clear();
+    m_entries.clear();
 }
 
-void physics::ParticleForceRegistry::UpdateForces(real DeltaSeconds)
+void physics::ParticleForceRegistry::UpdateForces(real delta_seconds)
 {
-    for (const Entry& Entry : m_Entries)
+    for (const Entry& entry : m_entries)
     {
-        Entry.ForceGenerator->UpdateForce(*Entry.Particle, DeltaSeconds);
+        entry.force_generator->UpdateForce(*entry.particle, delta_seconds);
     }
 }
 
-void physics::ParticleGravity::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
+void physics::ParticleGravity::UpdateForce(physics::Particle& particle, real delta_seconds)
 {
-    PHYSICS_UNUSED(DeltaSeconds);
+    PHYSICS_UNUSED(delta_seconds);
 
-    if (!Particle.HasFiniteMass())
-    {
-        return;
-    }
-    Particle.AddForce(m_Gravity * Particle.GetInverseMass());
-}
-
-void physics::ParticleDrag::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
-{
-    PHYSICS_UNUSED(DeltaSeconds);
-
-    if (!Particle.HasFiniteMass())
+    if (!particle.HasFiniteMass())
     {
         return;
     }
-
-    const math::Vector3 Velocity = Particle.GetVelocity();
-    const real DragCoefficient = Velocity.Length() * m_K1 + Velocity.LengthSquared() * m_K2;
-    const math::Vector3 DragForce = Normalize(Velocity) * -DragCoefficient;
-
-    Particle.AddForce(DragForce);
+    particle.AddForce(m_gravity * particle.GetInverseMass());
 }
 
-void physics::ParticleSpring::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
+void physics::ParticleDrag::UpdateForce(physics::Particle& particle, real delta_seconds)
 {
-    PHYSICS_UNUSED(DeltaSeconds);
+    PHYSICS_UNUSED(delta_seconds);
 
-    math::Vector3 LengthVector = Particle.GetPosition() - m_Other->GetPosition();
-    const real Length = LengthVector.Length();
-    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
-    LengthVector = math::Normalize(LengthVector);
-
-    Particle.AddForce(-LengthVector * SpringForce);
-}
-
-void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
-{
-    PHYSICS_UNUSED(DeltaSeconds);
-
-    math::Vector3 LengthVector = Particle.GetPosition() - m_Anchor;
-    const real Length = LengthVector.Length();
-    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
-    LengthVector = math::Normalize(LengthVector);
-
-    Particle.AddForce(-LengthVector * SpringForce);
-}
-
-void physics::ParticleBungee::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
-{
-    PHYSICS_UNUSED(DeltaSeconds);
-
-    math::Vector3 LengthVector = Particle.GetPosition() - m_Other->GetPosition();
-    const real Length = LengthVector.Length();
-    if (Length <= m_RestLength)
+    if (!particle.HasFiniteMass())
     {
         return;
     }
 
-    const real SpringForce = m_SpringConstant * (Length - m_RestLength);
-    LengthVector = math::Normalize(LengthVector);
+    const math::Vector3 velocity = particle.GetVelocity();
+    const real drag_coefficient = velocity.Length() * m_k1 + velocity.LengthSquared() * m_k2;
+    const math::Vector3 drag_force = Normalize(velocity) * -drag_coefficient;
 
-    Particle.AddForce(-LengthVector * SpringForce);
+    particle.AddForce(drag_force);
 }
 
-void physics::ParticleBuoyancy::UpdateForce(physics::Particle& Particle, real DeltaSeconds)
+void physics::ParticleSpring::UpdateForce(physics::Particle& particle, real delta_seconds)
 {
-    PHYSICS_UNUSED(DeltaSeconds);
+    PHYSICS_UNUSED(delta_seconds);
+
+    math::Vector3 length_vector = particle.GetPosition() - m_other->GetPosition();
+    const real length = length_vector.Length();
+    const real spring_force = m_spring_constant * (length - m_rest_length);
+    length_vector = math::Normalize(length_vector);
+
+    particle.AddForce(-length_vector * spring_force);
+}
+
+void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& particle, real delta_seconds)
+{
+    PHYSICS_UNUSED(delta_seconds);
+
+    math::Vector3 length_vector = particle.GetPosition() - m_anchor;
+    const real length = length_vector.Length();
+    const real spring_force = m_spring_constant * (length - m_rest_length);
+    length_vector = math::Normalize(length_vector);
+
+    particle.AddForce(-length_vector * spring_force);
+}
+
+void physics::ParticleBungee::UpdateForce(physics::Particle& particle, real delta_seconds)
+{
+    PHYSICS_UNUSED(delta_seconds);
+
+    math::Vector3 length_vector = particle.GetPosition() - m_other->GetPosition();
+    const real length = length_vector.Length();
+    if (length <= m_rest_length)
+    {
+        return;
+    }
+
+    const real spring_force = m_spring_constant * (length - m_rest_length);
+    length_vector = math::Normalize(length_vector);
+
+    particle.AddForce(-length_vector * spring_force);
+}
+
+void physics::ParticleBuoyancy::UpdateForce(physics::Particle& particle, real delta_seconds)
+{
+    PHYSICS_UNUSED(delta_seconds);
 
     // Current depth of the particle.
-    const real Depth = Particle.GetPosition().Y;
+    const real depth = particle.GetPosition().Y;
 
     // If we are completely out of the water, do nothing.
-    if (Depth >= m_WaterHeight + m_MaxDepth)
+    if (depth >= m_water_height + m_max_depth)
     {
         return;
     }
 
     // If we are fully submerged, apply the maximum buoyancy force.
-    if (Depth <= m_WaterHeight - m_MaxDepth)
+    if (depth <= m_water_height - m_max_depth)
     {
-        math::Vector3 Force = math::Vector3::Zero;
-        Force.Y = m_Volume * m_LiquidDensity;
-        Particle.AddForce(Force);
+        math::Vector3 force = math::Vector3::Zero;
+        force.Y = m_volume * m_liquid_density;
+        particle.AddForce(force);
         return;
     }
 
-    const real SubmergedAmount = (m_MaxDepth + m_WaterHeight - Depth) / (2 * m_MaxDepth);
-    math::Vector3 Force = math::Vector3::Zero;
-    Force.Y = m_Volume * m_LiquidDensity * SubmergedAmount;
-    Particle.AddForce(Force);
+    const real submerged_amount = (m_max_depth + m_water_height - depth) / (2 * m_max_depth);
+    math::Vector3 force = math::Vector3::Zero;
+    force.Y = m_volume * m_liquid_density * submerged_amount;
+    particle.AddForce(force);
 }

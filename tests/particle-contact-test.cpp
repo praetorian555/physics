@@ -3,192 +3,192 @@
 #include "physics/particle-contacts.h"
 #include "physics/particle.h"
 
-TEST_CASE("Creation", "ParticleContact")
+TEST_CASE("Creation of particle contact", "[creation][particle][contact]")
 {
     SECTION("Create with two particles")
     {
-        physics::Particle Particle1;
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 5, 3});
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 1.0f);
-        REQUIRE(Contact.IsValid());
-        REQUIRE(Contact.GetMainParticle() == &Particle1);
-        REQUIRE(Contact.GetOtherParticle() == &Particle2);
-        REQUIRE(Contact.GetRestitution() == 0.5f);
-        REQUIRE(Contact.GetPenetration() == 1.0f);
-        REQUIRE(Contact.GetContactNormal() ==
-                math::Normalize(Particle1.GetPosition() - Particle2.GetPosition()));
+        physics::Particle particle1;
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 5, 3});
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 1.0f);
+        REQUIRE(contact.IsValid());
+        REQUIRE(contact.GetMainParticle() == &particle1);
+        REQUIRE(contact.GetOtherParticle() == &particle2);
+        REQUIRE(contact.GetRestitution() == 0.5f);
+        REQUIRE(contact.GetPenetration() == 1.0f);
+        REQUIRE(contact.GetContactNormal() ==
+                math::Normalize(particle1.GetPosition() - particle2.GetPosition()));
 
-        Contact = physics::ParticleContact(&Particle2, nullptr, 0.5f, 1.0f);
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(nullptr, &Particle2, 0.5f, 1.0f);
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(&Particle1, &Particle2, -0.5f, 1.0f);
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(&Particle1, &Particle2, 1.5f, 1.0f);
-        REQUIRE(!Contact.IsValid());
+        contact = physics::ParticleContact(&particle2, nullptr, 0.5f, 1.0f);
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(nullptr, &particle2, 0.5f, 1.0f);
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(&particle1, &particle2, -0.5f, 1.0f);
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(&particle1, &particle2, 1.5f, 1.0f);
+        REQUIRE(!contact.IsValid());
     }
 
     SECTION("Create with one particle")
     {
-        physics::Particle Particle1;
-        physics::ParticleContact Contact(&Particle1, 0.5f, 2.0f, math::Vector3{0, 0, 3});
-        REQUIRE(Contact.IsValid());
-        REQUIRE(Contact.GetMainParticle() == &Particle1);
-        REQUIRE(Contact.GetOtherParticle() == nullptr);
-        REQUIRE(Contact.GetRestitution() == 0.5f);
-        REQUIRE(Contact.GetPenetration() == 2.0f);
-        REQUIRE(Contact.GetContactNormal() == math::Normalize(math::Vector3{0, 0, 1}));
+        physics::Particle particle1;
+        physics::ParticleContact contact(&particle1, 0.5f, 2.0f, math::Vector3{0, 0, 3});
+        REQUIRE(contact.IsValid());
+        REQUIRE(contact.GetMainParticle() == &particle1);
+        REQUIRE(contact.GetOtherParticle() == nullptr);
+        REQUIRE(contact.GetRestitution() == 0.5f);
+        REQUIRE(contact.GetPenetration() == 2.0f);
+        REQUIRE(contact.GetContactNormal() == math::Normalize(math::Vector3{0, 0, 1}));
 
-        Contact = physics::ParticleContact(nullptr, 0.5f, 1.0f, math::Vector3{0, 0, 3});
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(&Particle1, -0.5f, 1.0f, math::Vector3{0, 0, 3});
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(&Particle1, 1.5f, 1.0f, math::Vector3{0, 0, 3});
-        REQUIRE(!Contact.IsValid());
-        Contact = physics::ParticleContact(&Particle1, 0.5f, 1.0f, math::Vector3{0, 0, 0});
-        REQUIRE(!Contact.IsValid());
+        contact = physics::ParticleContact(nullptr, 0.5f, 1.0f, math::Vector3{0, 0, 3});
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(&particle1, -0.5f, 1.0f, math::Vector3{0, 0, 3});
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(&particle1, 1.5f, 1.0f, math::Vector3{0, 0, 3});
+        REQUIRE(!contact.IsValid());
+        contact = physics::ParticleContact(&particle1, 0.5f, 1.0f, math::Vector3{0, 0, 0});
+        REQUIRE(!contact.IsValid());
     }
 }
 
-TEST_CASE("Resolve", "ParticleContact")
+TEST_CASE("Resolving a contact", "[particle][contact]")
 {
     SECTION("Resolve velocity when approaching")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, 1});
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        Particle2.SetVelocity(math::Vector3{0, 0, -1});
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 1.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
-        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, 1});
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        particle2.SetVelocity(math::Vector3{0, 0, -1});
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 1.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        REQUIRE(particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
     }
     SECTION("Resolve velocity when separating")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, -1});
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        Particle2.SetVelocity(math::Vector3{0, 0, 1});
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 1.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, -1.0f});
-        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, -1});
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        particle2.SetVelocity(math::Vector3{0, 0, 1});
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 1.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, -1.0f});
+        REQUIRE(particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
     }
     SECTION("Resolve velocity when immovable objects")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(0.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, -1});
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(0.0f);
-        Particle2.SetVelocity(math::Vector3{0, 0, 1});
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 1.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, -1.0f});
-        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(0.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, -1});
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(0.0f);
+        particle2.SetVelocity(math::Vector3{0, 0, 1});
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 1.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, -1.0f});
+        REQUIRE(particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
     }
 
     SECTION("Resolve velocity with rest contact")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, -1});
-        Particle1.SetAcceleration(math::Vector3{0, 0, -1});
-        physics::ParticleContact Contact(&Particle1, 1.0f, 1.0f, math::Vector3{0, 0, 1});
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, -1});
+        particle1.SetAcceleration(math::Vector3{0, 0, -1});
+        physics::ParticleContact contact(&particle1, 1.0f, 1.0f, math::Vector3{0, 0, 1});
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
     }
 
     SECTION("Resolve interpenetration")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 3.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetPosition() == math::Point3{0, 0, -1.0f});
-        REQUIRE(Particle2.GetPosition() == math::Point3{0, 0, 7.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 3.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetPosition() == math::Point3{0, 0, -1.0f});
+        REQUIRE(particle2.GetPosition() == math::Point3{0, 0, 7.0f});
     }
 
     SECTION("Resolve interpenetration when touching")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 0.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetPosition() == math::Point3{0, 0, 0.0f});
-        REQUIRE(Particle2.GetPosition() == math::Point3{0, 0, 5.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 0.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetPosition() == math::Point3{0, 0, 0.0f});
+        REQUIRE(particle2.GetPosition() == math::Point3{0, 0, 5.0f});
     }
 
     SECTION("Resolve interpenetration when not touching")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, -1.0f);
-        Contact.Resolve(1.0f);
-        REQUIRE(Particle1.GetPosition() == math::Point3{0, 0, 0.0f});
-        REQUIRE(Particle2.GetPosition() == math::Point3{0, 0, 5.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, -1.0f);
+        contact.Resolve(1.0f);
+        REQUIRE(particle1.GetPosition() == math::Point3{0, 0, 0.0f});
+        REQUIRE(particle2.GetPosition() == math::Point3{0, 0, 5.0f});
     }
 }
 
-TEST_CASE("ParticleResolver", "ParticleContact")
+TEST_CASE("Check particle resolver", "[particle][contact]")
 {
     SECTION("Resolve contact")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, 1});
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        Particle2.SetVelocity(math::Vector3{0, 0, -1});
-        physics::ParticleContact Contact(&Particle1, &Particle2, 0.5f, 1.0f);
-        physics::ParticleContactResolver Resolver(1);
-        physics::ParticleContact Contacts[] = {Contact};
-        Resolver.ResolveContacts(Contacts, 1.0f);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
-        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, 1});
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        particle2.SetVelocity(math::Vector3{0, 0, -1});
+        physics::ParticleContact contact(&particle1, &particle2, 0.5f, 1.0f);
+        physics::ParticleContactResolver resolver(1);
+        physics::ParticleContact contacts[] = {contact};
+        resolver.ResolveContacts(contacts, 1.0f);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        REQUIRE(particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
     }
     SECTION("Choose smallest separating velocity")
     {
-        physics::Particle Particle1;
-        Particle1.SetInverseMass(2.0f);
-        Particle1.SetVelocity(math::Vector3{0, 0, 1});
-        physics::Particle Particle2;
-        Particle2.SetPosition(math::Point3{0, 0, 5});
-        Particle2.SetInverseMass(4.0f);
-        Particle2.SetVelocity(math::Vector3{0, 0, -1});
-        physics::Particle Particle3;
-        Particle3.SetPosition(math::Point3{0, 0, -1});
-        Particle3.SetInverseMass(2.0f);
-        Particle3.SetVelocity(math::Vector3{0, 0, PHYSICS_REALC(0.5)});
-        physics::ParticleContact Contact1(&Particle1, &Particle2, 0.5f, 1.0f);
-        physics::ParticleContact Contact2(&Particle3, &Particle2, 0.5f, 1.0f);
-        physics::ParticleContact Contacts[] = {Contact1, Contact2};
-        physics::ParticleContactResolver Resolver(1);
-        REQUIRE(Resolver.GetIterations() == 1);
-        Resolver.ResolveContacts(Contacts, 1.0f);
-        REQUIRE(Resolver.GetIterationsUsed() == 1);
-        REQUIRE(Particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
-        REQUIRE(Particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
+        physics::Particle particle1;
+        particle1.SetInverseMass(2.0f);
+        particle1.SetVelocity(math::Vector3{0, 0, 1});
+        physics::Particle particle2;
+        particle2.SetPosition(math::Point3{0, 0, 5});
+        particle2.SetInverseMass(4.0f);
+        particle2.SetVelocity(math::Vector3{0, 0, -1});
+        physics::Particle particle3;
+        particle3.SetPosition(math::Point3{0, 0, -1});
+        particle3.SetInverseMass(2.0f);
+        particle3.SetVelocity(math::Vector3{0, 0, PHYSICS_REALC(0.5)});
+        physics::ParticleContact contact1(&particle1, &particle2, 0.5f, 1.0f);
+        physics::ParticleContact contact2(&particle3, &particle2, 0.5f, 1.0f);
+        physics::ParticleContact contacts[] = {contact1, contact2};
+        physics::ParticleContactResolver resolver(1);
+        REQUIRE(resolver.GetIterations() == 1);
+        resolver.ResolveContacts(contacts, 1.0f);
+        REQUIRE(resolver.GetIterationsUsed() == 1);
+        REQUIRE(particle1.GetVelocity() == math::Vector3{0, 0, 0.0f});
+        REQUIRE(particle2.GetVelocity() == math::Vector3{0, 0, 1.0f});
 
-        Resolver.SetIterations(3);
-        REQUIRE(Resolver.GetIterations() == 3);
+        resolver.SetIterations(3);
+        REQUIRE(resolver.GetIterations() == 3);
     }
 }

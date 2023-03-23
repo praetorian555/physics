@@ -2,77 +2,77 @@
 
 #include "physics/particle.h"
 
-physics::ParticleLink::ParticleLink(physics::Particle* FirstParticle,
-                                    physics::Particle* SecondParticle)
-    : m_FirstParticle(FirstParticle), m_SecondParticle(SecondParticle)
+physics::ParticleLink::ParticleLink(physics::Particle* first_particle,
+                                    physics::Particle* second_particle)
+    : m_first_particle(first_particle), m_second_particle(second_particle)
 {
 }
 
 physics::real physics::ParticleLink::GetCurrentLength() const
 {
-    return math::Distance(m_FirstParticle->GetPosition(), m_SecondParticle->GetPosition());
+    return math::Distance(m_first_particle->GetPosition(), m_second_particle->GetPosition());
 }
 
-physics::ParticleCable::ParticleCable(physics::Particle* FirstParticle,
-                                      physics::Particle* SecondParticle,
-                                      physics::real MaxLength,
-                                      physics::real Restitution)
-    : ParticleLink(FirstParticle, SecondParticle),
-      m_MaxLength(MaxLength),
-      m_Restitution(Restitution)
+physics::ParticleCable::ParticleCable(physics::Particle* first_particle,
+                                      physics::Particle* second_particle,
+                                      physics::real max_length,
+                                      physics::real restitution)
+    : ParticleLink(first_particle, second_particle),
+      m_max_length(max_length),
+      m_restitution(restitution)
 {
 }
-uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> Contacts)
+uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> contacts)
 {
-    if (Contacts.empty())
+    if (contacts.empty())
     {
         return 0;
     }
 
-    const real CurrentLength = GetCurrentLength();
-    if (CurrentLength < m_MaxLength)
+    const real current_length = GetCurrentLength();
+    if (current_length < m_max_length)
     {
         return 0;
     }
 
-    ParticleContact* Contact = Contacts.data();
-    *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, m_Restitution,
-                               CurrentLength - m_MaxLength);
+    ParticleContact* contact = contacts.data();
+    *contact = ParticleContact(m_first_particle, m_second_particle, m_restitution,
+                               current_length - m_max_length);
     return 1;
 }
 
-physics::ParticleRod::ParticleRod(physics::Particle* FirstParticle,
-                                  physics::Particle* SecondParticle,
-                                  physics::real Length)
-    : ParticleLink(FirstParticle, SecondParticle), m_Length(Length)
+physics::ParticleRod::ParticleRod(physics::Particle* first_particle,
+                                  physics::Particle* second_particle,
+                                  physics::real length)
+    : ParticleLink(first_particle, second_particle), m_length(length)
 {
 }
 
-uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> Contacts)
+uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> contacts)
 {
-    if (Contacts.empty())
+    if (contacts.empty())
     {
         return 0;
     }
 
-    const real CurrentLength = GetCurrentLength();
-    if (CurrentLength == m_Length)
+    const real current_length = GetCurrentLength();
+    if (current_length == m_length)
     {
         return 0;
     }
 
-    const math::Vector3 Normal =
-        math::Normalize(m_SecondParticle->GetPosition() - m_FirstParticle->GetPosition());
-    ParticleContact* Contact = Contacts.data();
-    if (CurrentLength > m_Length)
+    const math::Vector3 normal =
+        math::Normalize(m_second_particle->GetPosition() - m_first_particle->GetPosition());
+    ParticleContact* contact = contacts.data();
+    if (current_length > m_length)
     {
-        *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, PHYSICS_REALC(0.0),
-                                   CurrentLength - m_Length, Normal);
+        *contact = ParticleContact(m_first_particle, m_second_particle, PHYSICS_REALC(0.0),
+                                   current_length - m_length, normal);
     }
     else
     {
-        *Contact = ParticleContact(m_FirstParticle, m_SecondParticle, PHYSICS_REALC(0.0),
-                                   m_Length - CurrentLength, -Normal);
+        *contact = ParticleContact(m_first_particle, m_second_particle, PHYSICS_REALC(0.0),
+                                   m_length - current_length, -normal);
     }
 
     return 1;

@@ -2,232 +2,241 @@
 
 #include "physics/particle.h"
 
-physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
-                                          physics::Particle* OtherParticle,
-                                          physics::real Restitution,
-                                          physics::real Penetration)
-    : m_MainParticle(MainParticle),
-      m_OtherParticle(OtherParticle),
-      m_Restitution(Restitution),
-      m_Penetration(Penetration)
+physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
+                                          physics::Particle* other_particle,
+                                          physics::real restitution,
+                                          physics::real penetration)
+    : m_main_particle(main_particle),
+      m_other_particle(other_particle),
+      m_restitution(restitution),
+      m_penetration(penetration)
 {
-    if (m_MainParticle == nullptr || m_OtherParticle == nullptr)
+    if (m_main_particle == nullptr || m_other_particle == nullptr)
     {
-        m_ContactNormal = math::Vector3::Zero;
+        m_contact_normal = math::Vector3::Zero;
     }
     else
     {
-        m_ContactNormal = MainParticle->GetPosition() - OtherParticle->GetPosition();
-        m_ContactNormal = math::Normalize(m_ContactNormal);
+        m_contact_normal = main_particle->GetPosition() - other_particle->GetPosition();
+        constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+        if (!math::IsEqual(m_contact_normal, math::Vector3::Zero, k_epsilon))
+        {
+            m_contact_normal = math::Normalize(m_contact_normal);
+        }
     }
 }
 
-physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
-                                          physics::real Restitution,
-                                          physics::real Penetration,
-                                          const math::Vector3& ContactNormal)
-    : m_MainParticle(MainParticle),
-      m_Restitution(Restitution),
-      m_Penetration(Penetration),
-      m_ContactNormal(ContactNormal)
+physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
+                                          physics::real restitution,
+                                          physics::real penetration,
+                                          const math::Vector3& contact_normal)
+    : m_main_particle(main_particle),
+      m_restitution(restitution),
+      m_penetration(penetration),
+      m_contact_normal(contact_normal)
 {
-    if (m_ContactNormal != math::Vector3::Zero)
+    constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+    if (!math::IsEqual(m_contact_normal, math::Vector3::Zero, k_epsilon))
     {
-        m_ContactNormal = math::Normalize(m_ContactNormal);
+        m_contact_normal = math::Normalize(m_contact_normal);
     }
 }
 
-physics::ParticleContact::ParticleContact(physics::Particle* MainParticle,
-                                          physics::Particle* OtherParticle,
-                                          physics::real Restitution,
-                                          physics::real Penetration,
-                                          const math::Vector3& ContactNormal)
-    : m_MainParticle(MainParticle),
-      m_OtherParticle(OtherParticle),
-      m_Restitution(Restitution),
-      m_Penetration(Penetration),
-      m_ContactNormal(ContactNormal)
+physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
+                                          physics::Particle* other_particle,
+                                          physics::real restitution,
+                                          physics::real penetration,
+                                          const math::Vector3& contact_normal)
+    : m_main_particle(main_particle),
+      m_other_particle(other_particle),
+      m_restitution(restitution),
+      m_penetration(penetration),
+      m_contact_normal(contact_normal)
 {
-    if (m_ContactNormal != math::Vector3::Zero)
+    constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+    if (!math::IsEqual(m_contact_normal, math::Vector3::Zero, k_epsilon))
     {
-        m_ContactNormal = math::Normalize(m_ContactNormal);
+        m_contact_normal = math::Normalize(m_contact_normal);
     }
 }
 
 bool physics::ParticleContact::IsValid() const
 {
-    if (m_MainParticle == nullptr)
+    if (m_main_particle == nullptr)
     {
         return false;
     }
-    if (m_ContactNormal == math::Vector3::Zero)
+    constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+    if (math::IsEqual(m_contact_normal, math::Vector3::Zero, k_epsilon))
     {
         return false;
     }
-    if (m_Restitution < PHYSICS_REALC(0.0) || m_Restitution > PHYSICS_REALC(1.0))
+    if (m_restitution < PHYSICS_REALC(0.0) || m_restitution > PHYSICS_REALC(1.0))
     {
         return false;
     }
-    if (math::IsNaN(m_Penetration) || math::IsNaN(m_Restitution) || m_ContactNormal.HasNaNs())
+    if (math::IsNaN(m_penetration) || math::IsNaN(m_restitution) || m_contact_normal.HasNaNs())
     {
         return false;
     }
     return true;
 }
 
-void physics::ParticleContact::Resolve(physics::real DeltaSeconds)
+void physics::ParticleContact::Resolve(physics::real delta_seconds)
 {
-    ResolveVelocity(DeltaSeconds);
-    ResolveInterpenetration(DeltaSeconds);
+    ResolveVelocity(delta_seconds);
+    ResolveInterpenetration(delta_seconds);
 }
 
-void physics::ParticleContact::ResolveVelocity(physics::real DeltaSeconds)
+void physics::ParticleContact::ResolveVelocity(physics::real delta_seconds)
 {
-    PHYSICS_UNUSED(DeltaSeconds);
+    PHYSICS_UNUSED(delta_seconds);
 
-    const real SeparatingVelocity = CalculateSeparatingVelocity();
+    const real separating_velocity = CalculateSeparatingVelocity();
 
     // If the particles are moving apart, do nothing.
-    if (SeparatingVelocity > PHYSICS_REALC(0.0))
+    if (separating_velocity > PHYSICS_REALC(0.0))
     {
         return;
     }
 
-    real NewSeparatingVelocity = -SeparatingVelocity * m_Restitution;
+    real new_separating_velocity = -separating_velocity * m_restitution;
 
-    math::Vector3 LastFrameAcceleration = m_MainParticle->GetAcceleration();
-    if (m_OtherParticle != nullptr)
+    math::Vector3 last_frame_acceleration = m_main_particle->GetAcceleration();
+    if (m_other_particle != nullptr)
     {
-        LastFrameAcceleration -= m_OtherParticle->GetAcceleration();
+        last_frame_acceleration -= m_other_particle->GetAcceleration();
     }
-    const real LastFrameSeparatingVelocity =
-        math::Dot(LastFrameAcceleration * DeltaSeconds, m_ContactNormal);
+    const real last_frame_separating_velocity =
+        math::Dot(last_frame_acceleration * delta_seconds, m_contact_normal);
 
     // Remove negative separating velocity due to acceleration of the last frame. This helps to
     // remove rest contact jitter.
-    if (LastFrameSeparatingVelocity < PHYSICS_REALC(0.0))
+    if (last_frame_separating_velocity < PHYSICS_REALC(0.0))
     {
-        NewSeparatingVelocity += m_Restitution * LastFrameSeparatingVelocity;
-        if (NewSeparatingVelocity < PHYSICS_REALC(0.0))
+        new_separating_velocity += m_restitution * last_frame_separating_velocity;
+        if (new_separating_velocity < PHYSICS_REALC(0.0))
         {
-            NewSeparatingVelocity = PHYSICS_REALC(0.0);
+            new_separating_velocity = PHYSICS_REALC(0.0);
         }
     }
 
-    const real DeltaVelocity = NewSeparatingVelocity - SeparatingVelocity;
+    const real delta_velocity = new_separating_velocity - separating_velocity;
 
-    real TotalInverseMass = m_MainParticle->GetInverseMass();
-    if (m_OtherParticle != nullptr)
+    real total_inverse_mass = m_main_particle->GetInverseMass();
+    if (m_other_particle != nullptr)
     {
-        TotalInverseMass += m_OtherParticle->GetInverseMass();
+        total_inverse_mass += m_other_particle->GetInverseMass();
     }
 
     // Both particles have infinite mass, so do nothing.
-    if (TotalInverseMass <= PHYSICS_REALC(0.0))
+    if (total_inverse_mass <= PHYSICS_REALC(0.0))
     {
         return;
     }
 
     // Calculate the impulse to apply.
-    const real TotalImpulse = DeltaVelocity / TotalInverseMass;
+    const real total_impulse = delta_velocity / total_inverse_mass;
 
     // Find the amount of impulse per unit of inverse mass.
-    const math::Vector3 TotalImpulseVector = m_ContactNormal * TotalImpulse;
+    const math::Vector3 total_impulse_vector = m_contact_normal * total_impulse;
 
     // Apply impulses: they are applied in the direction of the contact, and are proportional to the
     // inverse mass.
-    m_MainParticle->SetVelocity(m_MainParticle->GetVelocity() +
-                                TotalImpulseVector * m_MainParticle->GetInverseMass());
-    if (m_OtherParticle != nullptr)
+    m_main_particle->SetVelocity(m_main_particle->GetVelocity() +
+                                 total_impulse_vector * m_main_particle->GetInverseMass());
+    if (m_other_particle != nullptr)
     {
         // We subtract here since we are applying the impulse in the opposite direction of the
         // contact normal.
-        m_OtherParticle->SetVelocity(m_OtherParticle->GetVelocity() -
-                                     TotalImpulseVector * m_OtherParticle->GetInverseMass());
+        m_other_particle->SetVelocity(m_other_particle->GetVelocity() -
+                                      total_impulse_vector * m_other_particle->GetInverseMass());
     }
 }
 
-void physics::ParticleContact::ResolveInterpenetration(physics::real DeltaSeconds)
+void physics::ParticleContact::ResolveInterpenetration(physics::real delta_seconds)
 {
-    PHYSICS_UNUSED(DeltaSeconds);
+    PHYSICS_UNUSED(delta_seconds);
 
     // There is no interpenetration, so do nothing.
-    if (m_Penetration <= PHYSICS_REALC(0.0))
+    if (m_penetration <= PHYSICS_REALC(0.0))
     {
         return;
     }
 
-    real TotalInverseMass = m_MainParticle->GetInverseMass();
-    if (m_OtherParticle != nullptr)
+    real total_inverse_mass = m_main_particle->GetInverseMass();
+    if (m_other_particle != nullptr)
     {
-        TotalInverseMass += m_OtherParticle->GetInverseMass();
+        total_inverse_mass += m_other_particle->GetInverseMass();
     }
 
     // Both particles are immovable objects, so do nothing.
-    if (TotalInverseMass <= PHYSICS_REALC(0.0))
+    if (total_inverse_mass <= PHYSICS_REALC(0.0))
     {
         return;
     }
 
-    const math::Vector3 MovePerInverseMass = m_ContactNormal * (m_Penetration / TotalInverseMass);
+    const math::Vector3 move_per_inverse_mass =
+        m_contact_normal * (m_penetration / total_inverse_mass);
 
-    const math::Vector3 MainDeltaMovement = MovePerInverseMass * m_MainParticle->GetInverseMass();
-    math::Vector3 OtherDeltaMovement = math::Vector3::Zero;
-    if (m_OtherParticle != nullptr)
+    const math::Vector3 main_delta_movement =
+        move_per_inverse_mass * m_main_particle->GetInverseMass();
+    math::Vector3 other_delta_movement = math::Vector3::Zero;
+    if (m_other_particle != nullptr)
     {
-        OtherDeltaMovement = -MovePerInverseMass * m_OtherParticle->GetInverseMass();
+        other_delta_movement = -move_per_inverse_mass * m_other_particle->GetInverseMass();
     }
 
-    m_MainParticle->SetPosition(m_MainParticle->GetPosition() + MainDeltaMovement);
-    if (m_OtherParticle != nullptr)
+    m_main_particle->SetPosition(m_main_particle->GetPosition() + main_delta_movement);
+    if (m_other_particle != nullptr)
     {
-        m_OtherParticle->SetPosition(m_OtherParticle->GetPosition() + OtherDeltaMovement);
+        m_other_particle->SetPosition(m_other_particle->GetPosition() + other_delta_movement);
     }
 }
 
 physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
 {
-    math::Vector3 RelativeVelocity = m_MainParticle->GetVelocity();
-    if (m_OtherParticle != nullptr)
+    math::Vector3 relative_velocity = m_main_particle->GetVelocity();
+    if (m_other_particle != nullptr)
     {
-        RelativeVelocity -= m_OtherParticle->GetVelocity();
+        relative_velocity -= m_other_particle->GetVelocity();
     }
 
-    return math::Dot(RelativeVelocity, m_ContactNormal);
+    return math::Dot(relative_velocity, m_contact_normal);
 }
 
-void physics::ParticleContactResolver::ResolveContacts(Span<ParticleContact> Contacts,
-                                                       physics::real DeltaSeconds)
+void physics::ParticleContactResolver::ResolveContacts(Span<ParticleContact> contacts,
+                                                       physics::real delta_seconds)
 {
-    if (Contacts.empty())
+    if (contacts.empty())
     {
         return;
     }
 
-    m_IterationsUsed = 0;
-    while (m_IterationsUsed < m_Iterations)
+    m_iterations_used = 0;
+    while (m_iterations_used < m_iterations)
     {
-        real SmallestSeparatingVelocity = math::kInfinity;
-        ParticleContact* SmallestContact = nullptr;
-        for (ParticleContact& Contact : Contacts)
+        real smallest_separating_velocity = math::kInfinity;
+        ParticleContact* smallest_contact = nullptr;
+        for (ParticleContact& contact : contacts)
         {
-            const real SeparatingVelocity = Contact.CalculateSeparatingVelocity();
-            const bool IsActualContact = SeparatingVelocity < PHYSICS_REALC(0.0) ||
-                                         Contact.GetPenetration() > PHYSICS_REALC(0.0);
-            if (SeparatingVelocity < SmallestSeparatingVelocity && IsActualContact)
+            const real separating_velocity = contact.CalculateSeparatingVelocity();
+            const bool is_actual_contact = separating_velocity < PHYSICS_REALC(0.0) ||
+                                         contact.GetPenetration() > PHYSICS_REALC(0.0);
+            if (separating_velocity < smallest_separating_velocity && is_actual_contact)
             {
-                SmallestSeparatingVelocity = SeparatingVelocity;
-                SmallestContact = &Contact;
+                smallest_separating_velocity = separating_velocity;
+                smallest_contact = &contact;
             }
         }
         // No contacts left to resolve.
-        if (SmallestContact == nullptr)
+        if (smallest_contact == nullptr)
         {
             break;
         }
 
-        SmallestContact->Resolve(DeltaSeconds);
+        smallest_contact->Resolve(delta_seconds);
 
-        m_IterationsUsed++;
+        m_iterations_used++;
     }
 }
