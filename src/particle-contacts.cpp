@@ -1,4 +1,4 @@
-#include "physics/particlecontacts.h"
+#include "physics/particle-contacts.h"
 
 #include "physics/particle.h"
 

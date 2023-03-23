@@ -1,4 +1,4 @@
-#include "physics/particleworld.h"
+#include "physics/particle-world.h"
 
 #include "physics/particle.h"
 

@@ -1,4 +1,4 @@
-#include "physics/particleforcegenerator.h"
+#include "physics/particle-force-generator.h"
 
 #include "physics/particle.h"
 

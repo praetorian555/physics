@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "physics/particle-links.h"
 #include "physics/particle.h"
-#include "physics/particlelinks.h"
 
 TEST_CASE("Cable", "ParticleContact")
 {

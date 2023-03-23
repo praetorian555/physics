@@ -1,6 +1,6 @@
 #pragma once
 
-#include "physics/particlecontacts.h"
+#include "physics/particle-contacts.h"
 
 namespace physics
 {

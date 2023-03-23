@@ -1,8 +1,8 @@
 #pragma once
 
 #include "physics/containers.h"
-#include "physics/particlecontacts.h"
-#include "physics/particleforcegenerator.h"
+#include "physics/particle-contacts.h"
+#include "physics/particle-force-generator.h"
 
 namespace physics
 {
