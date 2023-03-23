@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "physics/base.h"
 #include "physics/containers.h"

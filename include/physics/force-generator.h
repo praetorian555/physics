@@ -18,10 +18,10 @@ public:
 
     /**
      * Calculates and applies the force to the given rigid body.
-     * @param Body Rigid body to apply the force to.
-     * @param DeltaSeconds Time since last frame.
+     * @param body Rigid body to apply the force to.
+     * @param delta_seconds Time since last frame.
      */
-    virtual void UpdateForce(RigidBody& Body, real DeltaSeconds) = 0;
+    virtual void UpdateForce(RigidBody& body, real delta_seconds) = 0;
 };
 
 /**
@@ -32,19 +32,19 @@ class ForceRegistry
 protected:
     struct Entry
     {
-        RigidBody* Body;
-        ForceGenerator* ForceGenerator;
+        RigidBody* body;
+        ForceGenerator* force_generator;
     };
 
 public:
-    void Add(RigidBody* Body, ForceGenerator* ForceGenerator);
-    void Remove(RigidBody* Body, ForceGenerator* ForceGenerator);
+    void Add(RigidBody* body, ForceGenerator* force_generator);
+    void Remove(RigidBody* entry, ForceGenerator* force_generator);
     void Clear();
 
-    void UpdateForces(real DeltaSeconds);
+    void UpdateForces(real delta_seconds);
 
 protected:
-    Array<Entry> m_Entries;
+    Array<Entry> m_entries;
 };
 
 /**
@@ -54,15 +54,15 @@ protected:
 class Gravity : public ForceGenerator
 {
 public:
-    explicit Gravity(const math::Vector3& Gravity) : m_Gravity(Gravity) {}
+    explicit Gravity(const math::Vector3& Gravity) : m_gravity(Gravity) {}
 
-    void UpdateForce(RigidBody& Body, real DeltaSeconds) override;
+    void UpdateForce(RigidBody& body, real delta_seconds) override;
 
-    void SetGravity(const math::Vector3& Gravity) { m_Gravity = Gravity; }
-    [[nodiscard]] const math::Vector3& GetGravity() const { return m_Gravity; }
+    void SetGravity(const math::Vector3& gravity) { m_gravity = gravity; }
+    [[nodiscard]] const math::Vector3& GetGravity() const { return m_gravity; }
 
 private:
-    math::Vector3 m_Gravity;
+    math::Vector3 m_gravity;
 };
 
 /**
@@ -73,36 +73,36 @@ class Spring : public ForceGenerator
 public:
     /**
      * Creates a new spring force generator.
-     * @param ConnectionPointLocal Connection point of the spring on the rigid body. This is expressed
+     * @param connection_point_local Connection point of the spring on the rigid body. This is expressed
      * in the local space of the rigid body that will be passed in UpdateForce.
-     * @param OtherBody Rigid body attached to the other side of the spring.
-     * @param OtherConnectionPointLocal Connection point of the spring on the other rigid body. This
+     * @param other_body Rigid body attached to the other side of the spring.
+     * @param other_connection_point_local Connection point of the spring on the other rigid body. This
      * is expressed in the local space of the other rigid body.
-     * @param SpringConstant Spring constant.
-     * @param RestLength Rest length of the spring.
+     * @param spring_constant Spring constant.
+     * @param rest_length Rest length of the spring.
      */
-    Spring(const math::Point3& ConnectionPointLocal,
-           RigidBody* OtherBody,
-           const math::Point3& OtherConnectionPointLocal,
-           real SpringConstant,
-           real RestLength);
+    Spring(const math::Point3& connection_point_local,
+           RigidBody* other_body,
+           const math::Point3& other_connection_point_local,
+           real spring_constant,
+           real rest_length);
 
-    void SetConnectionPointLocal(const math::Point3& ConnectionPointLocal);
+    void SetConnectionPointLocal(const math::Point3& connection_point_local);
     [[nodiscard]] const math::Point3& GetConnectionPointLocal() const;
 
-    void SetOtherBody(RigidBody* OtherBody);
+    void SetOtherBody(RigidBody* other_body);
     [[nodiscard]] RigidBody* GetOtherBody() const;
 
-    void SetOtherConnectionPointLocal(const math::Point3& OtherConnectionPointLocal);
+    void SetOtherConnectionPointLocal(const math::Point3& other_connection_point_local);
     [[nodiscard]] const math::Point3& GetOtherConnectionPointLocal() const;
 
-    void SetSpringConstant(real SpringConstant);
+    void SetSpringConstant(real spring_constant);
     [[nodiscard]] real GetSpringConstant() const;
 
-    void SetRestLength(real RestLength);
+    void SetRestLength(real rest_length);
     [[nodiscard]] real GetRestLength() const;
 
-    void UpdateForce(RigidBody& Body, real DeltaSeconds) override;
+    void UpdateForce(RigidBody& body, real delta_seconds) override;
 
 private:
     /**
@@ -111,21 +111,21 @@ private:
      * UpdateForce method, if we want to use this generator for different rigid bodies, we need to
      * change this value for each one.
      */
-    math::Point3 m_ConnectionPointLocal;
+    math::Point3 m_connection_point_local;
 
     /**
      * Rigid body attached to the other side of the spring.
      */
-    RigidBody* m_OtherBody;
+    RigidBody* m_other_body;
 
     /**
      * Point where the other rigid body is connected to the spring. This is expressed in the local
      * space of that rigid body.
      */
-    math::Point3 m_OtherConnectionPointLocal;
+    math::Point3 m_other_connection_point_local;
 
-    real m_SpringConstant;
-    real m_RestLength;
+    real m_spring_constant;
+    real m_rest_length;
 };
 
 }  // namespace physics

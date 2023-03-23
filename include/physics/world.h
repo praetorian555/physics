@@ -2,7 +2,7 @@
 
 #include "physics/base.h"
 #include "physics/containers.h"
-#include "physics/forcegenerator.h"
+#include "physics/force-generator.h"
 
 namespace physics
 {
@@ -24,22 +24,22 @@ public:
 
     /**
      * Runs the simulation for the current frame.
-     * @param DeltaSeconds The frame duration in seconds.
+     * @param delta_seconds The frame duration in seconds.
      */
-    void RunSimulation(real DeltaSeconds);
+    void RunSimulation(real delta_seconds);
 
 protected:
     /**
      * Integrates the rigid bodies in the world.
-     * @param DeltaSeconds The frame duration in seconds.
+     * @param delta_seconds The frame duration in seconds.
      */
-    void Integrate(real DeltaSeconds);
+    void Integrate(real delta_seconds);
 
     /** The rigid bodies in the world. */
-    Array<RigidBody*> m_Bodies;
+    Array<RigidBody*> m_bodies;
 
     /** The force registry used to apply forces to the rigid bodies. */
-    ForceRegistry m_ForceRegistry;
+    ForceRegistry m_force_registry;
 };
 
 }  // namespace physics

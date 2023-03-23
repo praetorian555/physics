@@ -14,19 +14,19 @@ namespace physics
 class RigidBody
 {
 public:
-    void SetMass(real Mass);
-    void SetInverseMass(real InverseMass);
+    void SetMass(real mass);
+    void SetInverseMass(real inverse_mass);
     [[nodiscard]] real GetMass() const;
     [[nodiscard]] real GetInverseMass() const;
 
-    bool HasFiniteMass() const;
+    [[nodiscard]] bool HasFiniteMass() const;
 
     /**
      * Sets the inertia tensor of the body in the body space.
-     * @param InertiaTensor Inertia tensor of the body in the body space.
+     * @param inertia_tensor Inertia tensor of the body in the body space.
      */
-    void SetInertiaTensor(const math::Transform& InertiaTensor);
-    void SetInverseInertiaTensor(const math::Transform& InverseInertiaTensor);
+    void SetInertiaTensor(const math::Transform& inertia_tensor);
+    void SetInverseInertiaTensor(const math::Transform& inverse_inertia_tensor);
 
     /**
      * Gets the inertia tensor of the body in the body space.
@@ -35,29 +35,29 @@ public:
     [[nodiscard]] math::Transform GetInertiaTensor() const;
     [[nodiscard]] math::Transform GetInverseInertiaTensor() const;
 
-    void SetDamping(real Damping);
+    void SetDamping(real damping);
     [[nodiscard]] real GetDamping() const;
-    void SetAngularDamping(real AngularDamping);
+    void SetAngularDamping(real angular_damping);
     [[nodiscard]] real GetAngularDamping() const;
 
-    void SetPosition(const math::Point3& Position);
+    void SetPosition(const math::Point3& position);
     [[nodiscard]] const math::Point3& GetPosition() const;
 
-    void SetOrientation(const math::Quaternion& Orientation);
+    void SetOrientation(const math::Quaternion& orientation);
     [[nodiscard]] const math::Quaternion& GetOrientation() const;
 
-    void SetVelocity(const math::Vector3& Velocity);
+    void SetVelocity(const math::Vector3& velocity);
     [[nodiscard]] const math::Vector3& GetVelocity() const;
 
-    void SetAngularVelocity(const math::Vector3& AngularVelocity);
+    void SetAngularVelocity(const math::Vector3& angular_velocity);
     [[nodiscard]] const math::Vector3& GetAngularVelocity() const;
 
     /**
      * Sets the linear acceleration of the rigid body in the world space. This will be added
      * to the acceleration by the forces during the integration step.
-     * @param Acceleration Linear acceleration of the rigid body in the world space.
+     * @param acceleration Linear acceleration of the rigid body in the world space.
      */
-    void SetAcceleration(const math::Vector3& Acceleration);
+    void SetAcceleration(const math::Vector3& acceleration);
     [[nodiscard]] const math::Vector3& GetAcceleration() const;
 
     /**
@@ -85,23 +85,23 @@ public:
 
     /**
      * Applies the force to the rigid body's center of mass.
-     * @param Force Force to apply in world space.
+     * @param force Force to apply in world space.
      */
-    void AddForce(const math::Vector3& Force);
+    void AddForce(const math::Vector3& force);
 
     /**
      * Applies the force to the rigid body at the given point.
-     * @param Force Force to apply in world space.
-     * @param Point Point of application in world space.
+     * @param force Force to apply in world space.
+     * @param point Point of application in world space.
      */
-    void AddForceAtPoint(const math::Vector3& Force, const math::Point3& Point);
+    void AddForceAtPoint(const math::Vector3& force, const math::Point3& point);
 
     /**
      * Applies the force to the rigid body at the given point.
-     * @param Force Force to apply in world space.
-     * @param Point Point of application in body space.
+     * @param force Force to apply in world space.
+     * @param point Point of application in body space.
      */
-    void AddForceAtLocalPoint(const math::Vector3& Force, const math::Point3& Point);
+    void AddForceAtLocalPoint(const math::Vector3& force, const math::Point3& point);
 
     [[nodiscard]] const math::Vector3& GetAccumulatedForce() const;
     [[nodiscard]] const math::Vector3& GetAccumulatedTorque() const;
@@ -109,34 +109,34 @@ public:
     /**
      * Updates the rigid body's position, orientation, velocity and angular velocity based on the
      * accumulated forces and torques.
-     * @param DeltaSeconds Time step.
+     * @param delta_seconds Time step.
      */
-    void Integrate(real DeltaSeconds);
+    void Integrate(real delta_seconds);
 
 protected:
     /** Holds linear position of the rigid body in the world space. */
-    math::Point3 m_Position;
+    math::Point3 m_position;
 
     /** Holds orientation of the rigid body in the world space. */
-    math::Quaternion m_Orientation;
+    math::Quaternion m_orientation;
 
     /** Holds linear velocity of the rigid body in the world space. */
-    math::Vector3 m_Velocity;
+    math::Vector3 m_velocity;
 
     /** Holds angular velocity of the rigid body in the world space. */
-    math::Vector3 m_AngularVelocity;
+    math::Vector3 m_angular_velocity;
 
     /**
      * Holds linear acceleration of the rigid body in the world space set by the user. Not a result
      * of force accumulator.
      */
-    math::Vector3 m_Acceleration;
+    math::Vector3 m_acceleration;
 
     /**
      * Represents value 1 / mass since we often need objects with infinite mass (immovable objects)
      * which then have inverse mass of 0.
      */
-    real m_InverseMass = PHYSICS_REALC(0.0);
+    real m_inverse_mass = PHYSICS_REALC(0.0);
 
     /**
      * Holds the inverse inertia tensor of the rigid body in the body space. It plays the same role
@@ -145,34 +145,34 @@ protected:
      * matrix can't be degenerated (all values on the main diagonal must be different from 0). As
      * long as the tensor is finite, it will be invertible.
      */
-    math::Transform m_InverseInertiaTensorLocal;
+    math::Transform m_inverse_inertia_tensor_local;
 
     /**
      * Simple representation of the drag force used to avoid numerical inaccuracies that can lead
      * to objects accelerating of their own accord.
      */
-    real m_Damping = PHYSICS_REALC(0.99);
+    real m_damping = PHYSICS_REALC(0.99);
 
     /**
      * Simple representation of the angular drag force used to avoid numerical inaccuracies that
      * can lead to objects accelerating of their own accord.
      */
-    real m_AngularDamping = PHYSICS_REALC(0.99);
+    real m_angular_damping = PHYSICS_REALC(0.99);
 
     /**
      * Holds transform used to move from body space to world space. Cached value calculated
      * based on the position and orientation.
      */
-    math::Transform m_ToWorldSpace;
+    math::Transform m_to_world_space;
 
     /**
      * Inverse inertia tensor of the rigid body in the world space. Cached value calculated based on
      * the inverse inertia tensor in the body space and the orientation of the rigid body.
      */
-    math::Transform m_InverseInertiaTensorWorld;
+    math::Transform m_inverse_inertia_tensor_world;
 
-    math::Vector3 m_ForceAccumulator;
-    math::Vector3 m_TorqueAccumulator;
+    math::Vector3 m_force_accumulator;
+    math::Vector3 m_torque_accumulator;
 };
 
 }  // namespace physics

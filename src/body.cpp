@@ -1,196 +1,195 @@
 #include "physics/body.h"
 
-#include <cassert>
-
-void physics::RigidBody::SetMass(physics::real Mass)
+void physics::RigidBody::SetMass(physics::real mass)
 {
-    assert(Mass > MATH_REALC(0.0));
-    m_InverseMass = MATH_REALC(1.0) / Mass;
+    assert(mass > MATH_REALC(0.0));
+    m_inverse_mass = MATH_REALC(1.0) / mass;
 }
 
-void physics::RigidBody::SetInverseMass(physics::real InverseMass)
+void physics::RigidBody::SetInverseMass(physics::real inverse_mass)
 {
-    m_InverseMass = InverseMass;
+    m_inverse_mass = inverse_mass;
 }
 
 physics::real physics::RigidBody::GetMass() const
 {
-    if (m_InverseMass == MATH_REALC(0.0))
+    if (m_inverse_mass == MATH_REALC(0.0))
     {
         return math::kInfinity;
     }
-    return MATH_REALC(1.0) / m_InverseMass;
+    return MATH_REALC(1.0) / m_inverse_mass;
 }
 
 physics::real physics::RigidBody::GetInverseMass() const
 {
-    return m_InverseMass;
+    return m_inverse_mass;
 }
 
 bool physics::RigidBody::HasFiniteMass() const
 {
-    return m_InverseMass != MATH_REALC(0.0);
+    return m_inverse_mass != MATH_REALC(0.0);
 }
 
-void physics::RigidBody::SetInertiaTensor(const math::Transform& InertiaTensor)
+void physics::RigidBody::SetInertiaTensor(const math::Transform& inertia_tensor)
 {
-    m_InverseInertiaTensorLocal = {InertiaTensor.GetInverse(), InertiaTensor.GetMatrix()};
+    m_inverse_inertia_tensor_local = {inertia_tensor.GetInverse(), inertia_tensor.GetMatrix()};
 }
 
-void physics::RigidBody::SetInverseInertiaTensor(const math::Transform& InverseInertiaTensor)
+void physics::RigidBody::SetInverseInertiaTensor(const math::Transform& inverse_inertia_tensor)
 {
-    m_InverseInertiaTensorLocal = InverseInertiaTensor;
+    m_inverse_inertia_tensor_local = inverse_inertia_tensor;
 }
 
 math::Transform physics::RigidBody::GetInertiaTensor() const
 {
-    return {m_InverseInertiaTensorLocal.GetInverse(), m_InverseInertiaTensorLocal.GetMatrix()};
+    return {m_inverse_inertia_tensor_local.GetInverse(),
+            m_inverse_inertia_tensor_local.GetMatrix()};
 }
 
 math::Transform physics::RigidBody::GetInverseInertiaTensor() const
 {
-    return m_InverseInertiaTensorLocal;
+    return m_inverse_inertia_tensor_local;
 }
 
-void physics::RigidBody::SetDamping(physics::real Damping)
+void physics::RigidBody::SetDamping(physics::real damping)
 {
-    m_Damping = Damping;
+    m_damping = damping;
 }
 
 physics::real physics::RigidBody::GetDamping() const
 {
-    return m_Damping;
+    return m_damping;
 }
 
 physics::real physics::RigidBody::GetAngularDamping() const
 {
-    return m_AngularDamping;
+    return m_angular_damping;
 }
 
-void physics::RigidBody::SetAngularDamping(physics::real AngularDamping)
+void physics::RigidBody::SetAngularDamping(physics::real angular_damping)
 {
-    m_AngularDamping = AngularDamping;
+    m_angular_damping = angular_damping;
 }
 
-void physics::RigidBody::SetPosition(const math::Point3& Position)
+void physics::RigidBody::SetPosition(const math::Point3& position)
 {
-    m_Position = Position;
+    m_position = position;
 }
 
 const math::Point3& physics::RigidBody::GetPosition() const
 {
-    return m_Position;
+    return m_position;
 }
 
-void physics::RigidBody::SetOrientation(const math::Quaternion& Orientation)
+void physics::RigidBody::SetOrientation(const math::Quaternion& orientation)
 {
-    m_Orientation = Orientation;
+    m_orientation = orientation;
 }
 
 const math::Quaternion& physics::RigidBody::GetOrientation() const
 {
-    return m_Orientation;
+    return m_orientation;
 }
 
-void physics::RigidBody::SetAngularVelocity(const math::Vector3& AngularVelocity)
+void physics::RigidBody::SetAngularVelocity(const math::Vector3& angular_velocity)
 {
-    m_AngularVelocity = AngularVelocity;
+    m_angular_velocity = angular_velocity;
 }
 
 const math::Vector3& physics::RigidBody::GetAngularVelocity() const
 {
-    return m_AngularVelocity;
+    return m_angular_velocity;
 }
 
-void physics::RigidBody::SetVelocity(const math::Vector3& Velocity)
+void physics::RigidBody::SetVelocity(const math::Vector3& velocity)
 {
-    m_Velocity = Velocity;
+    m_velocity = velocity;
 }
 
 const math::Vector3& physics::RigidBody::GetVelocity() const
 {
-    return m_Velocity;
+    return m_velocity;
 }
 
-void physics::RigidBody::SetAcceleration(const math::Vector3& Acceleration)
+void physics::RigidBody::SetAcceleration(const math::Vector3& acceleration)
 {
-    m_Acceleration = Acceleration;
+    m_acceleration = acceleration;
 }
 
 const math::Vector3& physics::RigidBody::GetAcceleration() const
 {
-    return m_Acceleration;
+    return m_acceleration;
 }
 
 const math::Transform& physics::RigidBody::GetTransform() const
 {
-    return m_ToWorldSpace;
+    return m_to_world_space;
 }
 
 const math::Transform& physics::RigidBody::GetInverseInertiaTensorWorld() const
 {
-    return m_InverseInertiaTensorWorld;
+    return m_inverse_inertia_tensor_world;
 }
 
 void physics::RigidBody::CalculateDerivedData()
 {
-    m_ToWorldSpace = math::Translate(m_Position) * math::Rotate(m_Orientation);
-    m_InverseInertiaTensorWorld = math::Rotate(m_Orientation) * m_InverseInertiaTensorLocal;
+    m_to_world_space = math::Translate(m_position) * math::Rotate(m_orientation);
+    m_inverse_inertia_tensor_world = math::Rotate(m_orientation) * m_inverse_inertia_tensor_local;
 }
 
 void physics::RigidBody::ClearAccumulators()
 {
-    m_ForceAccumulator = math::Vector3::Zero;
-    m_TorqueAccumulator = math::Vector3::Zero;
+    m_force_accumulator = math::Vector3::Zero;
+    m_torque_accumulator = math::Vector3::Zero;
 }
 
-void physics::RigidBody::AddForce(const math::Vector3& Force)
+void physics::RigidBody::AddForce(const math::Vector3& force)
 {
-    m_ForceAccumulator += Force;
+    m_force_accumulator += force;
 }
 
-void physics::RigidBody::AddForceAtPoint(const math::Vector3& Force, const math::Point3& Point)
+void physics::RigidBody::AddForceAtPoint(const math::Vector3& force, const math::Point3& point)
 {
-    const math::Vector3 PointVector = Point - m_Position;
-    m_ForceAccumulator += Force;
-    m_TorqueAccumulator = math::Cross(PointVector, Force);
+    const math::Vector3 point_vector = point - m_position;
+    m_force_accumulator += force;
+    m_torque_accumulator = math::Cross(point_vector, force);
 }
 
-void physics::RigidBody::AddForceAtLocalPoint(const math::Vector3& Force, const math::Point3& Point)
+void physics::RigidBody::AddForceAtLocalPoint(const math::Vector3& force, const math::Point3& point)
 {
-    const math::Point3 WorldPoint = m_ToWorldSpace(Point);
-    AddForceAtPoint(Force, WorldPoint);
+    const math::Point3 world_point = m_to_world_space(point);
+    AddForceAtPoint(force, world_point);
 }
 
 const math::Vector3& physics::RigidBody::GetAccumulatedForce() const
 {
-    return m_ForceAccumulator;
+    return m_force_accumulator;
 }
 
 const math::Vector3& physics::RigidBody::GetAccumulatedTorque() const
 {
-    return m_TorqueAccumulator;
+    return m_torque_accumulator;
 }
 
-void physics::RigidBody::Integrate(physics::real DeltaSeconds)
+void physics::RigidBody::Integrate(physics::real delta_seconds)
 {
-    math::Vector3 TotalAcceleration = m_Acceleration;
-    TotalAcceleration += m_ForceAccumulator * m_InverseMass;
+    math::Vector3 total_acceleration = m_acceleration;
+    total_acceleration += m_force_accumulator * m_inverse_mass;
 
-    const math::Vector3 AngularAcceleration = m_InverseInertiaTensorWorld(m_TorqueAccumulator);
+    const math::Vector3 angular_acceleration = m_inverse_inertia_tensor_world(m_torque_accumulator);
 
-    m_Velocity += TotalAcceleration * DeltaSeconds;
-    m_AngularVelocity += AngularAcceleration * DeltaSeconds;
+    m_velocity += total_acceleration * delta_seconds;
+    m_angular_velocity += angular_acceleration * delta_seconds;
 
     // Apply drag.
-    m_Velocity *= math::Power(m_Damping, DeltaSeconds);
-    m_AngularVelocity *= math::Power(m_AngularDamping, DeltaSeconds);
+    m_velocity *= math::Power(m_damping, delta_seconds);
+    m_angular_velocity *= math::Power(m_angular_damping, delta_seconds);
 
-    m_Position += m_Velocity * DeltaSeconds;
-    const math::Quaternion AngularVelocityQuaternion(m_AngularVelocity.X, m_AngularVelocity.Y,
-                                                     m_AngularVelocity.Z, PHYSICS_REALC(0.0));
-    m_Orientation +=
-        AngularVelocityQuaternion * m_Orientation * (PHYSICS_REALC(0.5) * DeltaSeconds);
+    m_position += m_velocity * delta_seconds;
+    const math::Quaternion angular_velocity_quaternion(m_angular_velocity.X, m_angular_velocity.Y,
+                                                     m_angular_velocity.Z, PHYSICS_REALC(0.0));
+    m_orientation +=
+        angular_velocity_quaternion * m_orientation * (PHYSICS_REALC(0.5) * delta_seconds);
 
     CalculateDerivedData();
     ClearAccumulators();

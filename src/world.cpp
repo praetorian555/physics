@@ -1,30 +1,28 @@
 #include "physics/world.h"
 
-#include <cassert>
-
 #include "physics/body.h"
 
 void physics::World::StartFrame()
 {
-    for (RigidBody* Body : m_Bodies)
+    for (RigidBody* body : m_bodies)
     {
-        assert(Body != nullptr);
-        Body->CalculateDerivedData();
-        Body->ClearAccumulators();
+        assert(body != nullptr);
+        body->CalculateDerivedData();
+        body->ClearAccumulators();
     }
 }
 
-void physics::World::RunSimulation(physics::real DeltaSeconds)
+void physics::World::RunSimulation(physics::real delta_seconds)
 {
-    m_ForceRegistry.UpdateForces(DeltaSeconds);
-    Integrate(DeltaSeconds);
+    m_force_registry.UpdateForces(delta_seconds);
+    Integrate(delta_seconds);
 }
 
-void physics::World::Integrate(physics::real DeltaSeconds)
+void physics::World::Integrate(physics::real delta_seconds)
 {
-    for (RigidBody* Body : m_Bodies)
+    for (RigidBody* body : m_bodies)
     {
-        assert(Body != nullptr);
-        Body->Integrate(DeltaSeconds);
+        assert(body != nullptr);
+        body->Integrate(delta_seconds);
     }
 }
