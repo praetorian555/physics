@@ -2,7 +2,7 @@
 
 #include "physics/containers.h"
 
-namespace physics
+namespace Physics
 {
 
 class Particle;
@@ -129,4 +129,4 @@ public:
     virtual uint32_t AddContact(Span<ParticleContact> contacts) = 0;
 };
 
-}  // namespace physics
+}  // namespace Physics

@@ -3,7 +3,7 @@
 #include "physics/base.h"
 #include "physics/containers.h"
 
-namespace physics
+namespace Physics
 {
 
 class RigidBody;
@@ -128,4 +128,4 @@ private:
     real m_rest_length;
 };
 
-}  // namespace physics
+}  // namespace Physics

@@ -2,7 +2,7 @@
 
 #include "physics/base.h"
 
-namespace physics
+namespace Physics
 {
 
 struct AABox;
@@ -96,4 +96,4 @@ bool Overlaps(const Sphere& a, const Box& b);
 bool Overlaps(const Box& a, const Plane& b);
 bool Overlaps(const Plane& a, const Box& b);
 
-}  // namespace physics
+}  // namespace Physics

@@ -2,19 +2,19 @@
 
 #include "physics/particle.h"
 
-physics::ParticleWorld::ParticleWorld(uint32_t MaxContacts, uint32_t Iterations)
+Physics::ParticleWorld::ParticleWorld(uint32_t MaxContacts, uint32_t Iterations)
     : m_Contacts(MaxContacts), m_ContactResolver(Iterations > 0 ? Iterations : 2 * MaxContacts)
 {
 }
 
-void physics::ParticleWorld::StartFrame() {
+void Physics::ParticleWorld::StartFrame() {
     for (Particle* Particle : m_Particles)
     {
         Particle->ClearAccumulator();
     }
 }
 
-void physics::ParticleWorld::Integrate(physics::real DeltaSeconds)
+void Physics::ParticleWorld::Integrate(Physics::real DeltaSeconds)
 {
     for (Particle* Particle : m_Particles)
     {
@@ -22,7 +22,7 @@ void physics::ParticleWorld::Integrate(physics::real DeltaSeconds)
     }
 }
 
-uint32_t physics::ParticleWorld::GenerateContacts()
+uint32_t Physics::ParticleWorld::GenerateContacts()
 {
     ParticleContact* NextContact = m_Contacts.data();
     size_t Limit = m_Contacts.size();
@@ -41,7 +41,7 @@ uint32_t physics::ParticleWorld::GenerateContacts()
     return static_cast<uint32_t>(ContactPosition);
 }
 
-void physics::ParticleWorld::Run(physics::real DeltaSeconds)
+void Physics::ParticleWorld::Run(Physics::real DeltaSeconds)
 {
     m_ForceRegistry.UpdateForces(DeltaSeconds);
 

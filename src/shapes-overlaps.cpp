@@ -5,7 +5,7 @@
 #include "physics/shapes-helpers.h"
 #include "physics/shapes.h"
 
-bool physics::Overlaps(const AABox& a, const AABox& b)
+bool Physics::Overlaps(const AABox& a, const AABox& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -25,7 +25,7 @@ bool physics::Overlaps(const AABox& a, const AABox& b)
     return true;
 }
 
-bool physics::Overlaps(const Sphere& a, const Sphere& b)
+bool Physics::Overlaps(const Sphere& a, const Sphere& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -35,7 +35,7 @@ bool physics::Overlaps(const Sphere& a, const Sphere& b)
     return center_diff.LengthSquared() <= radius_sum * radius_sum;
 }
 
-bool physics::Overlaps(const physics::Plane& a, const physics::Plane& b)
+bool Physics::Overlaps(const Physics::Plane& a, const Physics::Plane& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -49,7 +49,7 @@ bool physics::Overlaps(const physics::Plane& a, const physics::Plane& b)
     return true;
 }
 
-bool physics::Overlaps(const physics::Box& a, const physics::Box& b)
+bool Physics::Overlaps(const Physics::Box& a, const Physics::Box& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -242,18 +242,18 @@ bool physics::Overlaps(const physics::Box& a, const physics::Box& b)
     return true;
 }
 
-bool physics::Overlaps(const AABox& a, const Sphere& b)
+bool Physics::Overlaps(const AABox& a, const Sphere& b)
 {
-    const real square_distance = physics::SquareDistance(b.center, a);
+    const real square_distance = Physics::SquareDistance(b.center, a);
     return square_distance <= b.radius * b.radius;
 }
 
-bool physics::Overlaps(const Sphere& a, const AABox& b)
+bool Physics::Overlaps(const Sphere& a, const AABox& b)
 {
     return Overlaps(b, a);
 }
 
-bool physics::Overlaps(const physics::AABox& a, const physics::Plane& b)
+bool Physics::Overlaps(const Physics::AABox& a, const Physics::Plane& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -271,12 +271,12 @@ bool physics::Overlaps(const physics::AABox& a, const physics::Plane& b)
     return math::Abs(distance) <= radius;
 }
 
-bool physics::Overlaps(const physics::Plane& a, const physics::AABox& b)
+bool Physics::Overlaps(const Physics::Plane& a, const Physics::AABox& b)
 {
     return Overlaps(b, a);
 }
 
-bool physics::Overlaps(const physics::Sphere& a, const physics::Plane& b)
+bool Physics::Overlaps(const Physics::Sphere& a, const Physics::Plane& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -284,27 +284,27 @@ bool physics::Overlaps(const physics::Sphere& a, const physics::Plane& b)
     return math::Abs(distance) <= a.radius;
 }
 
-bool physics::Overlaps(const physics::Plane& a, const physics::Sphere& b)
+bool Physics::Overlaps(const Physics::Plane& a, const Physics::Sphere& b)
 {
     return Overlaps(b, a);
 }
 
-bool physics::Overlaps(const physics::Box& a, const physics::AABox& b)
+bool Physics::Overlaps(const Physics::Box& a, const Physics::AABox& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
     const math::Point3 aabb_center = (b.min + b.max) * PHYSICS_REALC(0.5);
     const math::Vector3 aabb_half_extents = b.max - aabb_center;
-    const physics::Box b_box(aabb_center, aabb_half_extents, math::Matrix4x4{});
+    const Physics::Box b_box(aabb_center, aabb_half_extents, math::Matrix4x4{});
     return Overlaps(a, b_box);
 }
 
-bool physics::Overlaps(const physics::AABox& a, const physics::Box& b)
+bool Physics::Overlaps(const Physics::AABox& a, const Physics::Box& b)
 {
     return Overlaps(b, a);
 }
 
-bool physics::Overlaps(const physics::Box& a, const physics::Sphere& b)
+bool Physics::Overlaps(const Physics::Box& a, const Physics::Sphere& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -314,12 +314,12 @@ bool physics::Overlaps(const physics::Box& a, const physics::Sphere& b)
     return math::Dot(distance_vector, distance_vector) <= b.radius * b.radius;
 }
 
-bool physics::Overlaps(const physics::Sphere& a, const physics::Box& b)
+bool Physics::Overlaps(const Physics::Sphere& a, const Physics::Box& b)
 {
     return Overlaps(b, a);
 }
 
-bool physics::Overlaps(const physics::Box& a, const physics::Plane& b)
+bool Physics::Overlaps(const Physics::Box& a, const Physics::Plane& b)
 {
     PHYSICS_ASSERT(a.IsValid());
     PHYSICS_ASSERT(b.IsValid());
@@ -332,7 +332,7 @@ bool physics::Overlaps(const physics::Box& a, const physics::Plane& b)
     return math::Abs(distance) <= projection;
 }
 
-bool physics::Overlaps(const physics::Plane& a, const physics::Box& b)
+bool Physics::Overlaps(const Physics::Plane& a, const Physics::Box& b)
 {
     return Overlaps(b, a);
 }

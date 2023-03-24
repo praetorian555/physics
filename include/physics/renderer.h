@@ -6,7 +6,7 @@
 
 #include "rndr/render/graphicscontext.h"
 
-namespace physics
+namespace Physics
 {
 
 class Renderer
@@ -23,6 +23,6 @@ private:
     int m_Height = 0;
 };
 
-}  // namespace physics
+}  // namespace Physics
 
 #endif

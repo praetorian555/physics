@@ -2,27 +2,27 @@
 
 #include "physics/particle.h"
 
-physics::ParticleLink::ParticleLink(physics::Particle* first_particle,
-                                    physics::Particle* second_particle)
+Physics::ParticleLink::ParticleLink(Physics::Particle* first_particle,
+                                    Physics::Particle* second_particle)
     : m_first_particle(first_particle), m_second_particle(second_particle)
 {
 }
 
-physics::real physics::ParticleLink::GetCurrentLength() const
+Physics::real Physics::ParticleLink::GetCurrentLength() const
 {
     return math::Distance(m_first_particle->GetPosition(), m_second_particle->GetPosition());
 }
 
-physics::ParticleCable::ParticleCable(physics::Particle* first_particle,
-                                      physics::Particle* second_particle,
-                                      physics::real max_length,
-                                      physics::real restitution)
+Physics::ParticleCable::ParticleCable(Physics::Particle* first_particle,
+                                      Physics::Particle* second_particle,
+                                      Physics::real max_length,
+                                      Physics::real restitution)
     : ParticleLink(first_particle, second_particle),
       m_max_length(max_length),
       m_restitution(restitution)
 {
 }
-uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> contacts)
+uint32_t Physics::ParticleCable::AddContact(Span<ParticleContact> contacts)
 {
     if (contacts.empty())
     {
@@ -41,14 +41,14 @@ uint32_t physics::ParticleCable::AddContact(Span<ParticleContact> contacts)
     return 1;
 }
 
-physics::ParticleRod::ParticleRod(physics::Particle* first_particle,
-                                  physics::Particle* second_particle,
-                                  physics::real length)
+Physics::ParticleRod::ParticleRod(Physics::Particle* first_particle,
+                                  Physics::Particle* second_particle,
+                                  Physics::real length)
     : ParticleLink(first_particle, second_particle), m_length(length)
 {
 }
 
-uint32_t physics::ParticleRod::AddContact(physics::Span<physics::ParticleContact> contacts)
+uint32_t Physics::ParticleRod::AddContact(Physics::Span<Physics::ParticleContact> contacts)
 {
     if (contacts.empty())
     {

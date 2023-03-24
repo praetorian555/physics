@@ -2,10 +2,10 @@
 
 #include "physics/particle.h"
 
-physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
-                                          physics::Particle* other_particle,
-                                          physics::real restitution,
-                                          physics::real penetration)
+Physics::ParticleContact::ParticleContact(Physics::Particle* main_particle,
+                                          Physics::Particle* other_particle,
+                                          Physics::real restitution,
+                                          Physics::real penetration)
     : m_main_particle(main_particle),
       m_other_particle(other_particle),
       m_restitution(restitution),
@@ -26,9 +26,9 @@ physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
     }
 }
 
-physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
-                                          physics::real restitution,
-                                          physics::real penetration,
+Physics::ParticleContact::ParticleContact(Physics::Particle* main_particle,
+                                          Physics::real restitution,
+                                          Physics::real penetration,
                                           const math::Vector3& contact_normal)
     : m_main_particle(main_particle),
       m_restitution(restitution),
@@ -42,10 +42,10 @@ physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
     }
 }
 
-physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
-                                          physics::Particle* other_particle,
-                                          physics::real restitution,
-                                          physics::real penetration,
+Physics::ParticleContact::ParticleContact(Physics::Particle* main_particle,
+                                          Physics::Particle* other_particle,
+                                          Physics::real restitution,
+                                          Physics::real penetration,
                                           const math::Vector3& contact_normal)
     : m_main_particle(main_particle),
       m_other_particle(other_particle),
@@ -60,7 +60,7 @@ physics::ParticleContact::ParticleContact(physics::Particle* main_particle,
     }
 }
 
-bool physics::ParticleContact::IsValid() const
+bool Physics::ParticleContact::IsValid() const
 {
     if (m_main_particle == nullptr)
     {
@@ -82,13 +82,13 @@ bool physics::ParticleContact::IsValid() const
     return true;
 }
 
-void physics::ParticleContact::Resolve(physics::real delta_seconds)
+void Physics::ParticleContact::Resolve(Physics::real delta_seconds)
 {
     ResolveVelocity(delta_seconds);
     ResolveInterpenetration(delta_seconds);
 }
 
-void physics::ParticleContact::ResolveVelocity(physics::real delta_seconds)
+void Physics::ParticleContact::ResolveVelocity(Physics::real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -154,7 +154,7 @@ void physics::ParticleContact::ResolveVelocity(physics::real delta_seconds)
     }
 }
 
-void physics::ParticleContact::ResolveInterpenetration(physics::real delta_seconds)
+void Physics::ParticleContact::ResolveInterpenetration(Physics::real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -194,7 +194,7 @@ void physics::ParticleContact::ResolveInterpenetration(physics::real delta_secon
     }
 }
 
-physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
+Physics::real Physics::ParticleContact::CalculateSeparatingVelocity() const
 {
     math::Vector3 relative_velocity = m_main_particle->GetVelocity();
     if (m_other_particle != nullptr)
@@ -205,8 +205,8 @@ physics::real physics::ParticleContact::CalculateSeparatingVelocity() const
     return math::Dot(relative_velocity, m_contact_normal);
 }
 
-void physics::ParticleContactResolver::ResolveContacts(Span<ParticleContact> contacts,
-                                                       physics::real delta_seconds)
+void Physics::ParticleContactResolver::ResolveContacts(Span<ParticleContact> contacts,
+                                                       Physics::real delta_seconds)
 {
     if (contacts.empty())
     {

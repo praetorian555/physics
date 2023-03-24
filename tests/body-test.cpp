@@ -5,7 +5,7 @@
 
 TEST_CASE("Creation of a body and getters and setters", "[creation][body]")
 {
-    physics::RigidBody body;
+    Physics::RigidBody body;
     body.SetMass(5);
     REQUIRE(body.GetMass() == 5);
     REQUIRE(body.GetInverseMass() == PHYSICS_REALC(0.2));
@@ -51,7 +51,7 @@ TEST_CASE("Creation of a body and getters and setters", "[creation][body]")
 
 TEST_CASE("Body's derived data", "[body]")
 {
-    physics::RigidBody body;
+    Physics::RigidBody body;
     const math::Point3 position = {1, 2, 3};
     const math::Quaternion orientation = math::Quaternion::FromAxisAngleDegrees({1, 0, 0}, 90);
     const math::Transform inverse_inertia_tensor = math::Scale(5);
@@ -70,7 +70,7 @@ TEST_CASE("Adding force to the body", "[body]")
 {
     SECTION("Applying it to the center of the mass")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         const math::Vector3 force = {1, 2, 3};
         body.AddForce(force);
         REQUIRE(body.GetAccumulatedForce() == force);
@@ -84,7 +84,7 @@ TEST_CASE("Adding force to the body", "[body]")
     }
     SECTION("Applying it at the point on the body in the world space")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetPosition({1, 2, 3});
         const math::Vector3 force = {1, 1, 1};
         body.AddForceAtPoint(force, {0, 0, 0});
@@ -93,7 +93,7 @@ TEST_CASE("Adding force to the body", "[body]")
     }
     SECTION("Applying it at the point on the body in the body's local space")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetPosition({1, 2, 3});
         body.CalculateDerivedData();
         const math::Vector3 force = {1, 1, 1};
@@ -105,9 +105,9 @@ TEST_CASE("Adding force to the body", "[body]")
 
 TEST_CASE("Applying gravity force generator to the body", "[body][forcegenerator]")
 {
-    physics::RigidBody body;
+    Physics::RigidBody body;
     body.SetMass(5);
-    physics::Gravity gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
+    Physics::Gravity gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
     gravity.UpdateForce(body, 1);
     REQUIRE(body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
     REQUIRE(body.GetAccumulatedTorque() == math::Vector3::Zero);
@@ -120,10 +120,10 @@ TEST_CASE("Applying spring force generator to the body", "[body][forcegenerator]
 {
     SECTION("Creation and getters and setters")
     {
-        physics::RigidBody other_body;
+        Physics::RigidBody other_body;
         const math::Point3 connection_point = {1, 2, 3};
         const math::Point3 other_connection_point = {4, 5, 6};
-        physics::Spring S(connection_point, &other_body, other_connection_point, 5, 10);
+        Physics::Spring S(connection_point, &other_body, other_connection_point, 5, 10);
         REQUIRE(S.GetConnectionPointLocal() == connection_point);
         REQUIRE(S.GetOtherConnectionPointLocal() == other_connection_point);
         REQUIRE(S.GetOtherBody() == &other_body);
@@ -143,22 +143,22 @@ TEST_CASE("Applying spring force generator to the body", "[body][forcegenerator]
     }
     SECTION("Spring applying force to the bodies")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetPosition({1, 2, 3});
         body.CalculateDerivedData();
-        physics::RigidBody other_body;
+        Physics::RigidBody other_body;
         other_body.SetPosition({1, 5, 7});
         other_body.CalculateDerivedData();
         const math::Point3 connection_point = {0, 0, 0};
-        physics::Spring S(connection_point, &other_body, connection_point, 5, 10);
+        Physics::Spring S(connection_point, &other_body, connection_point, 5, 10);
         S.UpdateForce(body, 1);
         REQUIRE(body.GetAccumulatedForce().X == 0);
         REQUIRE(body.GetAccumulatedForce().Z == -20);
 
 #if PHYSICS_REAL_AS_DOUBLE
-        constexpr physics::real k_epsilon = PHYSICS_REALC(1e-6);
+        constexpr Physics::real k_epsilon = PHYSICS_REALC(1e-6);
 #else
-        constexpr physics::real k_epsilon = PHYSICS_REALC(1e-3);
+        constexpr Physics::real k_epsilon = PHYSICS_REALC(1e-3);
 #endif
         REQUIRE(math::IsEqual(body.GetAccumulatedForce().Y, -15, k_epsilon));
     }
@@ -166,10 +166,10 @@ TEST_CASE("Applying spring force generator to the body", "[body][forcegenerator]
 
 TEST_CASE("Force registry", "[body][forcegenerator]")
 {
-    physics::RigidBody body;
+    Physics::RigidBody body;
     body.SetMass(5);
-    physics::ForceRegistry registry;
-    physics::Gravity gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
+    Physics::ForceRegistry registry;
+    Physics::Gravity gravity{math::Vector3{0, -PHYSICS_REALC(10.0), 0}};
     registry.Add(&body, &gravity);
     registry.UpdateForces(1);
     REQUIRE(body.GetAccumulatedForce() == math::Vector3{0, -PHYSICS_REALC(50.0), 0});
@@ -189,7 +189,7 @@ TEST_CASE("Moving body based on the forces and velocity", "[body][integration]")
 {
     SECTION("Force at center of the mass")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetMass(2);
         body.SetDamping(0.5);
         body.SetPosition({1, 2, 3});
@@ -205,7 +205,7 @@ TEST_CASE("Moving body based on the forces and velocity", "[body][integration]")
     }
     SECTION("Force at the point on the body in world space")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetMass(2);
         body.SetDamping(0.5);
         body.SetPosition({1, 2, 3});
@@ -220,7 +220,7 @@ TEST_CASE("Moving body based on the forces and velocity", "[body][integration]")
     }
     SECTION("Force at the point on the body in body's local space")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetMass(2);
         body.SetDamping(0.5);
         body.SetPosition({1, 2, 3});
@@ -235,7 +235,7 @@ TEST_CASE("Moving body based on the forces and velocity", "[body][integration]")
     }
     SECTION("Force that triggers rotational movement as well")
     {
-        physics::RigidBody body;
+        Physics::RigidBody body;
         body.SetInverseInertiaTensor(math::Scale(3));
         body.CalculateDerivedData();
         body.SetAngularDamping(0.5);
@@ -247,7 +247,7 @@ TEST_CASE("Moving body based on the forces and velocity", "[body][integration]")
         REQUIRE(body.GetAccumulatedTorque() == math::Vector3::Zero);
         const math::Quaternion orientation = body.GetOrientation();
         const math::Vector3 axis = math::Normalize(orientation.Vec);
-        physics::real angle = std::acos(orientation.W) * 2;
+        Physics::real angle = std::acos(orientation.W) * 2;
         angle = math::Degrees(angle);
         REQUIRE(axis == math::Vector3{0, 0, 1});
         REQUIRE(angle > 90);

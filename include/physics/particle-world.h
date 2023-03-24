@@ -4,7 +4,7 @@
 #include "physics/particle-contacts.h"
 #include "physics/particle-force-generator.h"
 
-namespace physics
+namespace Physics
 {
 
 class Particle;
@@ -43,4 +43,4 @@ protected:
     ParticleContactResolver m_ContactResolver;
 };
 
-}  // namespace physics
+}  // namespace Physics

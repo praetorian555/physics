@@ -2,7 +2,7 @@
 
 #include "physics/containers.h"
 
-namespace physics
+namespace Physics
 {
 
 class RigidBody;
@@ -77,4 +77,4 @@ namespace BroadPhasePrivate
 
 
 
-}  // namespace physics
+}  // namespace Physics

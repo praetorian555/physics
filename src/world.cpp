@@ -2,7 +2,7 @@
 
 #include "physics/body.h"
 
-void physics::World::StartFrame()
+void Physics::World::StartFrame()
 {
     for (RigidBody* body : m_bodies)
     {
@@ -12,13 +12,13 @@ void physics::World::StartFrame()
     }
 }
 
-void physics::World::RunSimulation(physics::real delta_seconds)
+void Physics::World::RunSimulation(Physics::real delta_seconds)
 {
     m_force_registry.UpdateForces(delta_seconds);
     Integrate(delta_seconds);
 }
 
-void physics::World::Integrate(physics::real delta_seconds)
+void Physics::World::Integrate(Physics::real delta_seconds)
 {
     for (RigidBody* body : m_bodies)
     {

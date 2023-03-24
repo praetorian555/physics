@@ -8,7 +8,7 @@ namespace math
 struct Matrix4x4;
 }
 
-namespace physics
+namespace Physics
 {
 
 enum class ShapeType
@@ -155,4 +155,4 @@ struct Box : public Shape
     [[nodiscard]] real GetVolume() const override;
 };
 
-}  // namespace physics
+}  // namespace Physics

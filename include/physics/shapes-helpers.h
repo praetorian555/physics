@@ -2,7 +2,7 @@
 
 #include "physics/base.h"
 
-namespace physics
+namespace Physics
 {
 
 struct AABox;
@@ -101,4 +101,4 @@ void Enclose(AABox& out_box, const AABox& in_box0, const AABox& in_box1);
  */
 void Enclose(Sphere& out_sphere, const Sphere& in_sphere0, const Sphere& in_sphere1);
 
-}  // namespace physics
+}  // namespace Physics

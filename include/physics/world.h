@@ -4,7 +4,7 @@
 #include "physics/containers.h"
 #include "physics/force-generator.h"
 
-namespace physics
+namespace Physics
 {
 
 class RigidBody;
@@ -42,4 +42,4 @@ protected:
     ForceRegistry m_force_registry;
 };
 
-}  // namespace physics
+}  // namespace Physics

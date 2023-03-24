@@ -2,7 +2,7 @@
 
 #include "physics/body.h"
 
-void physics::ForceRegistry::Add(physics::RigidBody* body, physics::ForceGenerator* force_generator)
+void Physics::ForceRegistry::Add(Physics::RigidBody* body, Physics::ForceGenerator* force_generator)
 {
     PHYSICS_ASSERT(body != nullptr);
     PHYSICS_ASSERT(force_generator != nullptr);
@@ -10,19 +10,19 @@ void physics::ForceRegistry::Add(physics::RigidBody* body, physics::ForceGenerat
     m_entries.push_back({body, force_generator});
 }
 
-void physics::ForceRegistry::Remove(physics::RigidBody* body,
-                                    physics::ForceGenerator* force_generator)
+void Physics::ForceRegistry::Remove(Physics::RigidBody* body,
+                                    Physics::ForceGenerator* force_generator)
 {
     std::erase_if(m_entries, [body, force_generator](const Entry& entry)
                   { return entry.body == body && entry.force_generator == force_generator; });
 }
 
-void physics::ForceRegistry::Clear()
+void Physics::ForceRegistry::Clear()
 {
     m_entries.clear();
 }
 
-void physics::ForceRegistry::UpdateForces(physics::real delta_seconds)
+void Physics::ForceRegistry::UpdateForces(Physics::real delta_seconds)
 {
     for (const Entry& entry : m_entries)
     {
@@ -30,7 +30,7 @@ void physics::ForceRegistry::UpdateForces(physics::real delta_seconds)
     }
 }
 
-void physics::Gravity::UpdateForce(RigidBody& body, real delta_seconds)
+void Physics::Gravity::UpdateForce(RigidBody& body, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
     if (!body.HasFiniteMass())
@@ -40,11 +40,11 @@ void physics::Gravity::UpdateForce(RigidBody& body, real delta_seconds)
     body.AddForce(m_gravity * body.GetMass());
 }
 
-physics::Spring::Spring(const math::Point3& connection_point_local,
-                        physics::RigidBody* other_body,
+Physics::Spring::Spring(const math::Point3& connection_point_local,
+                        Physics::RigidBody* other_body,
                         const math::Point3& other_connection_point_local,
-                        physics::real spring_constant,
-                        physics::real rest_length)
+                        Physics::real spring_constant,
+                        Physics::real rest_length)
     : m_connection_point_local(connection_point_local),
       m_other_body(other_body),
       m_other_connection_point_local(other_connection_point_local),
@@ -53,57 +53,57 @@ physics::Spring::Spring(const math::Point3& connection_point_local,
 {
 }
 
-void physics::Spring::SetConnectionPointLocal(const math::Point3& connection_point_local)
+void Physics::Spring::SetConnectionPointLocal(const math::Point3& connection_point_local)
 {
     m_connection_point_local = connection_point_local;
 }
 
-const math::Point3& physics::Spring::GetConnectionPointLocal() const
+const math::Point3& Physics::Spring::GetConnectionPointLocal() const
 {
     return m_connection_point_local;
 }
 
-void physics::Spring::SetOtherBody(physics::RigidBody* other_body)
+void Physics::Spring::SetOtherBody(Physics::RigidBody* other_body)
 {
     m_other_body = other_body;
 }
 
-physics::RigidBody* physics::Spring::GetOtherBody() const
+Physics::RigidBody* Physics::Spring::GetOtherBody() const
 {
     return m_other_body;
 }
 
-void physics::Spring::SetOtherConnectionPointLocal(const math::Point3& other_connection_point_local)
+void Physics::Spring::SetOtherConnectionPointLocal(const math::Point3& other_connection_point_local)
 {
     m_other_connection_point_local = other_connection_point_local;
 }
 
-const math::Point3& physics::Spring::GetOtherConnectionPointLocal() const
+const math::Point3& Physics::Spring::GetOtherConnectionPointLocal() const
 {
     return m_other_connection_point_local;
 }
 
-void physics::Spring::SetSpringConstant(physics::real spring_constant)
+void Physics::Spring::SetSpringConstant(Physics::real spring_constant)
 {
     m_spring_constant = spring_constant;
 }
 
-physics::real physics::Spring::GetSpringConstant() const
+Physics::real Physics::Spring::GetSpringConstant() const
 {
     return m_spring_constant;
 }
 
-void physics::Spring::SetRestLength(physics::real rest_length)
+void Physics::Spring::SetRestLength(Physics::real rest_length)
 {
     m_rest_length = rest_length;
 }
 
-physics::real physics::Spring::GetRestLength() const
+Physics::real Physics::Spring::GetRestLength() const
 {
     return m_rest_length;
 }
 
-void physics::Spring::UpdateForce(physics::RigidBody& body, physics::real delta_seconds)
+void Physics::Spring::UpdateForce(Physics::RigidBody& body, Physics::real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 

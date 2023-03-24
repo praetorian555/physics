@@ -2,26 +2,26 @@
 
 #include "physics/particle.h"
 
-void physics::ParticleForceRegistry::Add(physics::Particle* particle,
-                                         physics::ParticleForceGenerator* force_generator)
+void Physics::ParticleForceRegistry::Add(Physics::Particle* particle,
+                                         Physics::ParticleForceGenerator* force_generator)
 {
     m_entries.push_back({particle, force_generator});
 }
 
-void physics::ParticleForceRegistry::Remove(physics::Particle* particle,
-                                            physics::ParticleForceGenerator* force_generator)
+void Physics::ParticleForceRegistry::Remove(Physics::Particle* particle,
+                                            Physics::ParticleForceGenerator* force_generator)
 {
     std::erase_if(
         m_entries, [particle, force_generator](const Entry& entry)
                   { return entry.particle == particle && entry.force_generator == force_generator; });
 }
 
-void physics::ParticleForceRegistry::Clear()
+void Physics::ParticleForceRegistry::Clear()
 {
     m_entries.clear();
 }
 
-void physics::ParticleForceRegistry::UpdateForces(real delta_seconds)
+void Physics::ParticleForceRegistry::UpdateForces(real delta_seconds)
 {
     for (const Entry& entry : m_entries)
     {
@@ -29,7 +29,7 @@ void physics::ParticleForceRegistry::UpdateForces(real delta_seconds)
     }
 }
 
-void physics::ParticleGravity::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleGravity::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -40,7 +40,7 @@ void physics::ParticleGravity::UpdateForce(physics::Particle& particle, real del
     particle.AddForce(m_gravity * particle.GetInverseMass());
 }
 
-void physics::ParticleDrag::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleDrag::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -56,7 +56,7 @@ void physics::ParticleDrag::UpdateForce(physics::Particle& particle, real delta_
     particle.AddForce(drag_force);
 }
 
-void physics::ParticleSpring::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleSpring::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -68,7 +68,7 @@ void physics::ParticleSpring::UpdateForce(physics::Particle& particle, real delt
     particle.AddForce(-length_vector * spring_force);
 }
 
-void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleAnchoredSpring::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -80,7 +80,7 @@ void physics::ParticleAnchoredSpring::UpdateForce(physics::Particle& particle, r
     particle.AddForce(-length_vector * spring_force);
 }
 
-void physics::ParticleBungee::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleBungee::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 
@@ -97,7 +97,7 @@ void physics::ParticleBungee::UpdateForce(physics::Particle& particle, real delt
     particle.AddForce(-length_vector * spring_force);
 }
 
-void physics::ParticleBuoyancy::UpdateForce(physics::Particle& particle, real delta_seconds)
+void Physics::ParticleBuoyancy::UpdateForce(Physics::Particle& particle, real delta_seconds)
 {
     PHYSICS_UNUSED(delta_seconds);
 

@@ -5,7 +5,7 @@
 
 TEST_CASE("Default particle constructor", "[particle][creation]")
 {
-    const physics::Particle particle;
+    const Physics::Particle particle;
     REQUIRE(particle.GetPosition() == math::Point3());
     REQUIRE(particle.GetVelocity() == math::Vector3());
     REQUIRE(particle.GetAcceleration() == math::Vector3());
@@ -16,7 +16,7 @@ TEST_CASE("Default particle constructor", "[particle][creation]")
 
 TEST_CASE("Particle setters", "[particle][creation]")
 {
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetPosition(math::Point3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
     REQUIRE(particle.GetPosition() ==
             math::Point3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
@@ -39,7 +39,7 @@ TEST_CASE("Particle setters", "[particle][creation]")
 
 TEST_CASE("Particle integration", "[particle]")
 {
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetPosition(math::Point3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
     particle.SetAcceleration(
@@ -59,7 +59,7 @@ TEST_CASE("Particle integration", "[particle]")
 TEST_CASE("Applying force to particle", "[particle]")
 {
     // Setup particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
@@ -84,13 +84,13 @@ TEST_CASE("Applying force to particle", "[particle]")
 TEST_CASE("Gravity particle generator", "[particle][forcegenerator]")
 {
     // Setup particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(2.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
 
     // Add a gravity force and verify the force accumulator.
-    physics::ParticleGravity gravity(
+    Physics::ParticleGravity gravity(
         math::Vector3(PHYSICS_REALC(2.0), PHYSICS_REALC(4.0), PHYSICS_REALC(6.0)));
     REQUIRE(gravity.GetGravity() ==
             math::Vector3(PHYSICS_REALC(2.0), PHYSICS_REALC(4.0), PHYSICS_REALC(6.0)));
@@ -116,13 +116,13 @@ TEST_CASE("Gravity particle generator", "[particle][forcegenerator]")
 TEST_CASE("Applying drag force to particle", "[particle][forcegenerator]")
 {
     // Setup particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
 
     // Add a drag force and verify the force accumulator.
-    physics::ParticleDrag drag(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0));
+    Physics::ParticleDrag drag(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0));
     REQUIRE(drag.GetK1() == PHYSICS_REALC(1.0));
     REQUIRE(drag.GetK2() == PHYSICS_REALC(2.0));
     drag.UpdateForce(particle, PHYSICS_REALC(1.0));
@@ -148,15 +148,15 @@ TEST_CASE("Applying drag force to particle", "[particle][forcegenerator]")
 TEST_CASE("Particle force generator", "[particle][forcegenerator]")
 {
     // Setup particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(4.0), PHYSICS_REALC(5.0), PHYSICS_REALC(6.0)));
-    physics::ParticleGravity gravity(
+    Physics::ParticleGravity gravity(
         math::Vector3(PHYSICS_REALC(1.0), PHYSICS_REALC(2.0), PHYSICS_REALC(3.0)));
 
     // Add a force registry, apply forces using it and verify the force accumulator.
-    physics::ParticleForceRegistry registry;
+    Physics::ParticleForceRegistry registry;
     registry.Add(&particle, &gravity);
     registry.UpdateForces(PHYSICS_REALC(1.0));
     REQUIRE(particle.GetForceAccumulator() ==
@@ -192,7 +192,7 @@ TEST_CASE("Particle force generator", "[particle][forcegenerator]")
 TEST_CASE("Applying spring force to particle", "[particle][forcegenerator]")
 {
     // Setup first particle.
-    physics::Particle particle1;
+    Physics::Particle particle1;
     particle1.SetMass(PHYSICS_REALC(1.0));
     particle1.SetDamping(PHYSICS_REALC(0.5));
     particle1.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
@@ -200,7 +200,7 @@ TEST_CASE("Applying spring force to particle", "[particle][forcegenerator]")
         math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 
     // Setup second particle.
-    physics::Particle particle2;
+    Physics::Particle particle2;
     particle2.SetMass(PHYSICS_REALC(1.0));
     particle2.SetDamping(PHYSICS_REALC(0.5));
     particle2.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
@@ -208,7 +208,7 @@ TEST_CASE("Applying spring force to particle", "[particle][forcegenerator]")
         math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 
     // Setup spring.
-    physics::ParticleSpring spring_gen(&particle1, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
+    Physics::ParticleSpring spring_gen(&particle1, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
 
     // Verify that getters work.
     REQUIRE(spring_gen.GetOther() == &particle1);
@@ -244,12 +244,12 @@ TEST_CASE("Applying spring force to particle", "[particle][forcegenerator]")
 TEST_CASE("Applying anchored spring force to particle", "[particle][forcegenerator]")
 {
     // Write a test for ParticleAnchoredSpring in Particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
-    physics::ParticleAnchoredSpring spring_gen(
+    Physics::ParticleAnchoredSpring spring_gen(
         math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)),
         PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(spring_gen.GetAnchor() ==
@@ -278,14 +278,14 @@ TEST_CASE("Applying anchored spring force to particle", "[particle][forcegenerat
 TEST_CASE("Applying bungee force to particle", "[particle][forcegenerator]")
 {
     // Setup first particle at origin with no velocity.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 
     // Setup second particle which we will apply the force to.
-    physics::Particle particle2;
+    Physics::Particle particle2;
     particle2.SetMass(PHYSICS_REALC(1.0));
     particle2.SetDamping(PHYSICS_REALC(0.5));
     particle2.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(4.0)));
@@ -293,7 +293,7 @@ TEST_CASE("Applying bungee force to particle", "[particle][forcegenerator]")
         math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 
     // Setup the bungee spring generator.
-    physics::ParticleBungee spring_gen(&particle, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
+    Physics::ParticleBungee spring_gen(&particle, PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(spring_gen.GetOther() == &particle);
     REQUIRE(spring_gen.GetSpringConstant() == PHYSICS_REALC(2.0));
     REQUIRE(spring_gen.GetRestLength() == PHYSICS_REALC(2.0));
@@ -329,14 +329,14 @@ TEST_CASE("Applying bungee force to particle", "[particle][forcegenerator]")
 TEST_CASE("Applying buoyancy force to the particle", "[particle][forcegenerator]")
 {
     // Setup particle.
-    physics::Particle particle;
+    Physics::Particle particle;
     particle.SetMass(PHYSICS_REALC(1.0));
     particle.SetDamping(PHYSICS_REALC(0.5));
     particle.SetPosition(math::Point3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
     particle.SetVelocity(math::Vector3(PHYSICS_REALC(0.0), PHYSICS_REALC(0.0), PHYSICS_REALC(0.0)));
 
     // Setup buoyancy generator.
-    physics::ParticleBuoyancy buoyancy_gen(PHYSICS_REALC(2.0), PHYSICS_REALC(2.0),
+    Physics::ParticleBuoyancy buoyancy_gen(PHYSICS_REALC(2.0), PHYSICS_REALC(2.0),
                                           PHYSICS_REALC(2.0), PHYSICS_REALC(2.0));
     REQUIRE(buoyancy_gen.GetMaxDepth() == PHYSICS_REALC(2.0));
     REQUIRE(buoyancy_gen.GetVolume() == PHYSICS_REALC(2.0));

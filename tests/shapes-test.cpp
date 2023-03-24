@@ -8,8 +8,8 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
 {
     SECTION("Default constructor")
     {
-        physics::Sphere s;
-        REQUIRE(s.type == physics::ShapeType::Sphere);
+        Physics::Sphere s;
+        REQUIRE(s.type == Physics::ShapeType::Sphere);
         REQUIRE(s.center == math::Point3(0, 0, 0));
         REQUIRE(s.radius == 0);
         REQUIRE(s.GetVolume() == 0);
@@ -18,8 +18,8 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     }
     SECTION("Constructor with center and radius")
     {
-        physics::Sphere s({1, 1, 1}, 5);
-        REQUIRE(s.type == physics::ShapeType::Sphere);
+        Physics::Sphere s({1, 1, 1}, 5);
+        REQUIRE(s.type == Physics::ShapeType::Sphere);
         REQUIRE(s.center == math::Point3(1, 1, 1));
         REQUIRE(s.radius == 5);
         REQUIRE(
@@ -29,8 +29,8 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     }
     SECTION("Constructor with radius 0")
     {
-        physics::Sphere s({1, 1, 1}, 0);
-        REQUIRE(s.type == physics::ShapeType::Sphere);
+        Physics::Sphere s({1, 1, 1}, 0);
+        REQUIRE(s.type == Physics::ShapeType::Sphere);
         REQUIRE(s.center == math::Point3(1, 1, 1));
         REQUIRE(s.radius == 0);
         REQUIRE(s.GetVolume() == 0);
@@ -39,8 +39,8 @@ TEST_CASE("Creation of a sphere shape", "[creation][shape][sphere]")
     }
     SECTION("Constructor with center and invalid radius")
     {
-        physics::Sphere s({1, 1, 1}, -5);
-        REQUIRE(s.type == physics::ShapeType::Sphere);
+        Physics::Sphere s({1, 1, 1}, -5);
+        REQUIRE(s.type == Physics::ShapeType::Sphere);
         REQUIRE(s.center == math::Point3(1, 1, 1));
         REQUIRE(s.radius == -5);
         REQUIRE(!s.IsValid());
@@ -51,8 +51,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
 {
     SECTION("Default constructor")
     {
-        const physics::AABox b;
-        REQUIRE(b.type == physics::ShapeType::AABox);
+        const Physics::AABox b;
+        REQUIRE(b.type == Physics::ShapeType::AABox);
         REQUIRE(b.min == math::Point3(0, 0, 0));
         REQUIRE(b.max == math::Point3(0, 0, 0));
         REQUIRE(b.GetVolume() == 0);
@@ -61,8 +61,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     }
     SECTION("Constructor with valid min and max")
     {
-        physics::AABox b({0, 0, 0}, {1, 1, 1});
-        REQUIRE(b.type == physics::ShapeType::AABox);
+        Physics::AABox b({0, 0, 0}, {1, 1, 1});
+        REQUIRE(b.type == Physics::ShapeType::AABox);
         REQUIRE(b.min == math::Point3(0, 0, 0));
         REQUIRE(b.max == math::Point3(1, 1, 1));
         REQUIRE(b.GetVolume() == 1);
@@ -71,8 +71,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     }
     SECTION("Constructor with equal min and max")
     {
-        physics::AABox b({0, 0, 0}, {0, 0, 0});
-        REQUIRE(b.type == physics::ShapeType::AABox);
+        Physics::AABox b({0, 0, 0}, {0, 0, 0});
+        REQUIRE(b.type == Physics::ShapeType::AABox);
         REQUIRE(b.min == math::Point3(0, 0, 0));
         REQUIRE(b.max == math::Point3(0, 0, 0));
         REQUIRE(b.GetVolume() == 0);
@@ -81,8 +81,8 @@ TEST_CASE("Creation of a axis-aligned box shape", "[creation][shape][aabox]")
     }
     SECTION("Constructor with invalid min and max")
     {
-        physics::AABox b({1, 1, 1}, {0, 0, 0});
-        REQUIRE(b.type == physics::ShapeType::AABox);
+        Physics::AABox b({1, 1, 1}, {0, 0, 0});
+        REQUIRE(b.type == Physics::ShapeType::AABox);
         REQUIRE(b.min == math::Point3(1, 1, 1));
         REQUIRE(b.max == math::Point3(0, 0, 0));
         REQUIRE(!b.IsValid());
@@ -93,50 +93,50 @@ TEST_CASE("Creation of a plane shape", "[creation][shape][plane]")
 {
     SECTION("Default constructor")
     {
-        const physics::Plane p;
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        const Physics::Plane p;
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 0));
         REQUIRE(p.distance == 0);
         REQUIRE(!p.IsValid());
     }
     SECTION("Constructor with normalized normal")
     {
-        physics::Plane p({0, 0, 1}, 5);
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        Physics::Plane p({0, 0, 1}, 5);
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 1));
         REQUIRE(p.distance == 5);
         REQUIRE(p.IsValid());
     }
     SECTION("Constructor with non-normalized normal")
     {
-        physics::Plane p({0, 0, 3}, 5);
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        Physics::Plane p({0, 0, 3}, 5);
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 1));
         REQUIRE(p.distance == 5);
         REQUIRE(p.IsValid());
     }
     SECTION("Constructor with invalid normal")
     {
-        physics::Plane p({0, 0, 0}, 5);
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        Physics::Plane p({0, 0, 0}, 5);
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 0));
         REQUIRE(p.distance == 5);
         REQUIRE(!p.IsValid());
     }
     SECTION("Construction of a plane from three points that are not collinear")
     {
-        const physics::Plane p = physics::Plane::FromPoints(
+        const Physics::Plane p = Physics::Plane::FromPoints(
             math::Point3(0, 0, 0), math::Point3(1, 0, 0), math::Point3(0, 1, 0));
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 1));
         REQUIRE(p.distance == 0);
         REQUIRE(p.IsValid());
     }
     SECTION("Construction of a plane from three points that are collinear")
     {
-        const physics::Plane p = physics::Plane::FromPoints(
+        const Physics::Plane p = Physics::Plane::FromPoints(
             math::Point3(0, 0, 0), math::Point3(1, 0, 0), math::Point3(2, 0, 0));
-        REQUIRE(p.type == physics::ShapeType::Plane);
+        REQUIRE(p.type == Physics::ShapeType::Plane);
         REQUIRE(p.normal == math::Vector3(0, 0, 0));
         REQUIRE(p.distance == 0);
         REQUIRE(!p.IsValid());
@@ -147,8 +147,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
 {
     SECTION("Default constructor")
     {
-        physics::Box b;
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b;
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(0, 0, 0));
         REQUIRE(b.axis_x == math::Vector3(0, 0, 0));
@@ -158,8 +158,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     }
     SECTION("Constructor with valid parameters and axes vectors")
     {
-        physics::Box b({0, 0, 0}, {1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {1, 1, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(1, 1, 1));
         REQUIRE(b.axis_x == math::Vector3(1, 0, 0));
@@ -171,8 +171,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     }
     SECTION("Constructor with zero extent")
     {
-        physics::Box b({0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(0, 0, 0));
         REQUIRE(b.axis_x == math::Vector3(1, 0, 0));
@@ -184,8 +184,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     }
     SECTION("Constructor with invalid extent")
     {
-        physics::Box b({0, 0, 0}, {-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {-1, -1, -1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1});
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(-1, -1, -1));
         REQUIRE(b.axis_x == math::Vector3(1, 0, 0));
@@ -195,8 +195,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     }
     SECTION("Constructor with valid parameters and non-normalized axes vectors")
     {
-        physics::Box b({0, 0, 0}, {1, 1, 1}, {3, 0, 0}, {0, 5, 0}, {0, 0, 2});
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {1, 1, 1}, {3, 0, 0}, {0, 5, 0}, {0, 0, 2});
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(1, 1, 1));
         REQUIRE(b.axis_x == math::Vector3(1, 0, 0));
@@ -209,8 +209,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     SECTION("Constructor with valid parameters and rotation matrix")
     {
         const math::Transform t = math::RotateZ(90);
-        physics::Box b({0, 0, 0}, {1, 1, 1}, t.GetMatrix());
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {1, 1, 1}, t.GetMatrix());
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(1, 1, 1));
         REQUIRE(math::IsEqual(b.axis_x, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));
@@ -223,8 +223,8 @@ TEST_CASE("Creation of a oriented box shape", "[creation][shape][box]")
     SECTION("Constructor with invalid extent and rotation matrix")
     {
         const math::Transform t = math::RotateZ(90);
-        physics::Box b({0, 0, 0}, {-1, -1, -1}, t.GetMatrix());
-        REQUIRE(b.type == physics::ShapeType::Box);
+        Physics::Box b({0, 0, 0}, {-1, -1, -1}, t.GetMatrix());
+        REQUIRE(b.type == Physics::ShapeType::Box);
         REQUIRE(b.center == math::Point3(0, 0, 0));
         REQUIRE(b.half_extents == math::Vector3(-1, -1, -1));
         REQUIRE(math::IsEqual(b.axis_x, math::Vector3(0, 1, 0), PHYSICS_REALC(0.0001)));

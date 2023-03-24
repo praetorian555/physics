@@ -12,10 +12,10 @@
 #define PHYSICS_ASSERT(x)
 #endif
 
-namespace physics
+namespace Physics
 {
 using real = math::real;
-}  // namespace physics
+}  // namespace Physics
 
 // Used to represent a constant of type real
 #define PHYSICS_REALC(X) MATH_REALC(X)

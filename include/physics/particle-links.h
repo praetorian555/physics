@@ -2,7 +2,7 @@
 
 #include "physics/particle-contacts.h"
 
-namespace physics
+namespace Physics
 {
 
 /**
@@ -73,4 +73,4 @@ private:
     real m_length = PHYSICS_REALC(0.0);
 };
 
-}  // namespace physics
+}  // namespace Physics

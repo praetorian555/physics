@@ -2,7 +2,7 @@
 
 #include "physics/base.h"
 
-namespace physics
+namespace Physics
 {
 
 /**
@@ -72,4 +72,4 @@ protected:
     math::Vector3 m_force_accumulator;
 };
 
-}  // namespace physics
+}  // namespace Physics

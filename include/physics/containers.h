@@ -6,8 +6,9 @@
 
 #include "physics/base.h"
 
-namespace physics
+namespace Physics
 {
+
 template <typename T>
 using Array = std::vector<T>;
 
@@ -16,4 +17,5 @@ using StackArray = std::array<T, N>;
 
 template <typename T>
 using Span = std::span<T>;
-}  // namespace physics
+
+}  // namespace Physics

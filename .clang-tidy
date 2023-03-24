@@ -42,6 +42,7 @@ CheckOptions:
     readability-identifier-naming.GlobalVariablePrefix: 'g_'
     readability-identifier-naming.ParameterCase: "lower_case"
     readability-identifier-naming.PointerParameterCase: "lower_case"
+    readability-identifier-naming.NamespaceCase: 'CamelCase'
     readability-identifier-naming.ClassCase: 'CamelCase'
     readability-identifier-naming.ClassMethodCase: 'CamelCase'
     readability-identifier-naming.StructCase: 'CamelCase'

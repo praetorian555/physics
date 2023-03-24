@@ -2,14 +2,14 @@
 
 #include "physics/shapes.h"
 
-math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::Plane& plane)
+math::Point3 Physics::ClosestPoint(const math::Point3& point, const Physics::Plane& plane)
 {
     PHYSICS_ASSERT(plane.IsValid());
     const real distance = math::Dot(point - math::Point3::Zero, plane.normal) - plane.distance;
     return point - plane.normal * distance;
 }
 
-math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::AABox& box)
+math::Point3 Physics::ClosestPoint(const math::Point3& point, const Physics::AABox& box)
 {
     PHYSICS_ASSERT(box.IsValid());
     math::Point3 result = point;
@@ -19,7 +19,7 @@ math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::AAB
     return result;
 }
 
-math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::Sphere& sphere)
+math::Point3 Physics::ClosestPoint(const math::Point3& point, const Physics::Sphere& sphere)
 {
     PHYSICS_ASSERT(sphere.IsValid());
     math::Vector3 direction = point - sphere.center;
@@ -32,7 +32,7 @@ math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::Sph
     return point;
 }
 
-math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::Box& box)
+math::Point3 Physics::ClosestPoint(const math::Point3& point, const Physics::Box& box)
 {
     PHYSICS_ASSERT(box.IsValid());
     math::Point3 result = box.center;
@@ -46,19 +46,19 @@ math::Point3 physics::ClosestPoint(const math::Point3& point, const physics::Box
     return result;
 }
 
-physics::real physics::Distance(const math::Point3& point, const physics::Plane& plane)
+Physics::real Physics::Distance(const math::Point3& point, const Physics::Plane& plane)
 {
     PHYSICS_ASSERT(plane.IsValid());
     return math::Dot(point - math::Point3::Zero, plane.normal) - plane.distance;
 }
 
-physics::real physics::Distance(const math::Point3& point, const physics::AABox& box)
+Physics::real Physics::Distance(const math::Point3& point, const Physics::AABox& box)
 {
     PHYSICS_ASSERT(box.IsValid());
     return math::Sqrt(SquareDistance(point, box));
 }
 
-physics::real physics::Distance(const math::Point3& point, const physics::Sphere& sphere)
+Physics::real Physics::Distance(const math::Point3& point, const Physics::Sphere& sphere)
 {
     PHYSICS_ASSERT(sphere.IsValid());
     const math::Vector3 direction = point - sphere.center;
@@ -66,14 +66,14 @@ physics::real physics::Distance(const math::Point3& point, const physics::Sphere
     return distance >= sphere.radius ? distance - sphere.radius : PHYSICS_REALC(0.0);
 }
 
-physics::real physics::Distance(const math::Point3& point, const physics::Box& box)
+Physics::real Physics::Distance(const math::Point3& point, const Physics::Box& box)
 {
     PHYSICS_ASSERT(box.IsValid());
     const math::Point3 closest_point = ClosestPoint(point, box);
     return math::Distance(point, closest_point);
 }
 
-physics::real physics::SquareDistance(const math::Point3& point, const physics::AABox& box)
+Physics::real Physics::SquareDistance(const math::Point3& point, const Physics::AABox& box)
 {
     PHYSICS_ASSERT(box.IsValid());
     real square_distance = PHYSICS_REALC(0.0);
@@ -94,9 +94,9 @@ physics::real physics::SquareDistance(const math::Point3& point, const physics::
     return square_distance;
 }
 
-void physics::Enclose(physics::AABox& out_box,
-                      const physics::AABox& in_box0,
-                      const physics::AABox& in_box1)
+void Physics::Enclose(Physics::AABox& out_box,
+                      const Physics::AABox& in_box0,
+                      const Physics::AABox& in_box1)
 {
     PHYSICS_ASSERT(in_box0.IsValid());
     PHYSICS_ASSERT(in_box1.IsValid());
@@ -104,9 +104,9 @@ void physics::Enclose(physics::AABox& out_box,
     out_box.max = math::Max(in_box0.max, in_box1.max);
 }
 
-void physics::Enclose(physics::Sphere& out_sphere,
-                      const physics::Sphere& in_sphere0,
-                      const physics::Sphere& in_sphere1)
+void Physics::Enclose(Physics::Sphere& out_sphere,
+                      const Physics::Sphere& in_sphere0,
+                      const Physics::Sphere& in_sphere1)
 {
     const math::Vector3 direction = in_sphere1.center - in_sphere0.center;
     const real distance2 = direction.LengthSquared();

@@ -2,7 +2,7 @@
 
 #include "physics/containers.h"
 
-namespace physics
+namespace Physics
 {
 
 class Particle;
@@ -199,4 +199,4 @@ private:
     real m_liquid_density;
 };
 
-}  // namespace physics
+}  // namespace Physics
