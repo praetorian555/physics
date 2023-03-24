@@ -310,3 +310,79 @@ TEST_CASE("Enclosing of two axis-aligned boxes with another", "[shape][aabox][en
         REQUIRE(result.max == b2.max);
     }
 }
+
+TEST_CASE("Enclosing of two spheres", "[shape][sphere][enclose]")
+{
+    SECTION("Identical spheres")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({0, 0, 0}, 1);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == s1.center);
+        REQUIRE(result.radius == s1.radius);
+    }
+    SECTION("Identical point spheres")
+    {
+        const physics::Sphere s1({0, 0, 0}, 0);
+        const physics::Sphere s2({0, 0, 0}, 0);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == s1.center);
+        REQUIRE(result.radius == s1.radius);
+    }
+    SECTION("One sphere in the another")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({0.5, 0, 0}, 0.5);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == s1.center);
+        REQUIRE(result.radius == s1.radius);
+    }
+    SECTION("One sphere in the another and their centers match")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({0, 0, 0}, 0.5);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == s1.center);
+        REQUIRE(result.radius == s1.radius);
+    }
+    SECTION("Two sphere overlapping")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({1, 0, 0}, 1);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == math::Point3(0.5, 0, 0));
+        REQUIRE(result.radius == 1.5);
+    }
+    SECTION("Two sphere not overlapping")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({2, 0, 0}, 1);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == math::Point3(1, 0, 0));
+        REQUIRE(result.radius == 2);
+    }
+    SECTION("Regular sphere and point sphere overlapping")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({0.5, 0, 0}, 0);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == s1.center);
+        REQUIRE(result.radius == s1.radius);
+    }
+    SECTION("Regular sphere and point sphere not overlapping")
+    {
+        const physics::Sphere s1({0, 0, 0}, 1);
+        const physics::Sphere s2({2, 0, 0}, 0);
+        physics::Sphere result;
+        physics::Enclose(result, s1, s2);
+        REQUIRE(result.center == math::Point3(0.5, 0, 0));
+        REQUIRE(result.radius == 1.5);
+    }
+}

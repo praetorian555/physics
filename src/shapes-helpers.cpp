@@ -103,3 +103,30 @@ void physics::Enclose(physics::AABox& out_box,
     out_box.min = math::Min(in_box0.min, in_box1.min);
     out_box.max = math::Max(in_box0.max, in_box1.max);
 }
+
+void physics::Enclose(physics::Sphere& out_sphere,
+                      const physics::Sphere& in_sphere0,
+                      const physics::Sphere& in_sphere1)
+{
+    const math::Vector3 direction = in_sphere1.center - in_sphere0.center;
+    const real distance2 = direction.LengthSquared();
+    const real radius_diff = in_sphere1.radius - in_sphere0.radius;
+    if (radius_diff * radius_diff >= distance2)
+    {
+        // One sphere is in the another, so enclosing sphere is the larger one of the two.
+        out_sphere = in_sphere1.radius >= in_sphere0.radius ? in_sphere1 : in_sphere0;
+        return;
+    }
+    // Spheres not overlapping of partially overlapping.
+    const real distance = math::Sqrt(distance2);
+    const real new_radius = (in_sphere0.radius + in_sphere1.radius + distance) * PHYSICS_REALC(0.5);
+    // New center is on the line between the two sphere centers, at the distance of new_radius -
+    // in_sphere0.radius. This is optimized expression that does this.
+    out_sphere.radius = new_radius;
+    constexpr real k_epsilon = PHYSICS_REALC(1e-6);
+    out_sphere.center = in_sphere0.center;
+    if (distance > k_epsilon)
+    {
+        out_sphere.center += direction * ((new_radius - in_sphere0.radius) / distance);
+    }
+}

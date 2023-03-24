@@ -92,4 +92,13 @@ real SquareDistance(const math::Point3& point, const AABox& box);
  */
 void Enclose(AABox& out_box, const AABox& in_box0, const AABox& in_box1);
 
+/**
+ * Enclose the two input spheres within a new, smallest possible, sphere and store the result in the
+ * out_sphere parameter.
+ * @param out_sphere The output sphere.
+ * @param in_sphere0 The first input sphere.
+ * @param in_sphere1 The second input sphere.
+ */
+void Enclose(Sphere& out_sphere, const Sphere& in_sphere0, const Sphere& in_sphere1);
+
 }  // namespace physics
