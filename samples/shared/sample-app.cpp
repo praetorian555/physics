@@ -41,7 +41,7 @@ SampleApp::SampleApp()
     const Opal::Ref<Rndr::FrameBuffer> default_framebuffer{nullptr};
     m_grid_renderer = Opal::New<Rndr::GridRenderer>(Opal::GetDefaultAllocator(), "Grid Renderer", renderer_desc, default_framebuffer);
     m_shape_renderer = Opal::New<Rndr::Shape3DRenderer>(Opal::GetDefaultAllocator(), "Shape Renderer", renderer_desc, default_framebuffer);
-    Rndr::MaterialDesc material_desc{.albedo_texture_path = Opal::Paths::Combine(RNDR_CORE_ASSETS_DIR, "default-material.png")};
+    Rndr::MaterialDesc material_desc{.albedo_texture_path = Opal::Paths::Combine(RNDR_CORE_ASSETS_DIR, "default-texture.png")};
     m_default_material = Opal::New<Rndr::Material>(Opal::GetDefaultAllocator(), m_graphics_context, material_desc);
 }
 
