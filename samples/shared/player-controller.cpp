@@ -1,6 +1,6 @@
-#include "example-controller.h"
+#include "shared/player-controller.hpp"
 
-ExampleController::ExampleController(Rndr::Application& app, Rndr::i32 screen_width, Rndr::i32 screen_height,
+PlayerController::PlayerController(Rndr::Application& app, Rndr::i32 screen_width, Rndr::i32 screen_height,
                                      const Rndr::FlyCameraDesc& camera_desc, Rndr::f32 move_speed, Rndr::f32 yaw_speed,
                                      Rndr::f32 pitch_speed)
     : m_fly_camera(screen_width, screen_height, camera_desc),
@@ -65,22 +65,22 @@ ExampleController::ExampleController(Rndr::Application& app, Rndr::i32 screen_wi
 
     app.GetInputSystemChecked().PushContext(Opal::Ref(&m_input_context));
 }
-void ExampleController::Enable(bool enable)
+void PlayerController::Enable(bool enable)
 {
     m_input_context.SetEnabled(enable);
 }
 
-bool ExampleController::IsEnabled() const
+bool PlayerController::IsEnabled() const
 {
     return m_input_context.IsEnabled();
 }
 
-void ExampleController::SetScreenSize(Rndr::i32 width, Rndr::i32 height)
+void PlayerController::SetScreenSize(Rndr::i32 width, Rndr::i32 height)
 {
     m_fly_camera.SetScreenSize(width, height);
 }
 
-void ExampleController::Tick(Rndr::f32 delta_seconds)
+void PlayerController::Tick(Rndr::f32 delta_seconds)
 {
     if (m_vertical_value != 0)
     {
@@ -102,12 +102,12 @@ void ExampleController::Tick(Rndr::f32 delta_seconds)
     m_fly_camera.Tick(delta_seconds);
 }
 
-void ExampleController::HandleLookVertical(Rndr::InputPrimitive, Rndr::f32 axis_value)
+void PlayerController::HandleLookVertical(Rndr::InputPrimitive, Rndr::f32 axis_value)
 {
     m_fly_camera.AddPitch(-m_pitch_speed * axis_value);
 }
 
-void ExampleController::HandleLookVerticalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
+void PlayerController::HandleLookVerticalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
 {
     if (trigger == Rndr::InputTrigger::ButtonPressed)
     {
@@ -119,12 +119,12 @@ void ExampleController::HandleLookVerticalButton(Rndr::InputPrimitive, Rndr::Inp
     }
 }
 
-void ExampleController::HandleLookHorizontal(Rndr::InputPrimitive, Rndr::f32 axis_value)
+void PlayerController::HandleLookHorizontal(Rndr::InputPrimitive, Rndr::f32 axis_value)
 {
     m_fly_camera.AddYaw(-m_yaw_speed * axis_value);
 }
 
-void ExampleController::HandleLookHorizontalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
+void PlayerController::HandleLookHorizontalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
 {
     if (trigger == Rndr::InputTrigger::ButtonPressed)
     {
@@ -136,7 +136,7 @@ void ExampleController::HandleLookHorizontalButton(Rndr::InputPrimitive, Rndr::I
     }
 }
 
-void ExampleController::HandleMoveForward(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
+void PlayerController::HandleMoveForward(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
 {
     if (trigger == Rndr::InputTrigger::ButtonPressed)
     {
@@ -148,7 +148,7 @@ void ExampleController::HandleMoveForward(Rndr::InputPrimitive, Rndr::InputTrigg
     }
 }
 
-void ExampleController::HandleMoveRight(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
+void PlayerController::HandleMoveRight(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool)
 {
     if (trigger == Rndr::InputTrigger::ButtonPressed)
     {

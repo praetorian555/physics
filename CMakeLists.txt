@@ -48,7 +48,7 @@ if (NOT TARGET opal)
     FetchContent_MakeAvailable(opal)
 endif ()
 
-set(PHYSICS_FILES include/physics/core.hpp)
+set(PHYSICS_FILES ${PROJECT_SOURCE_DIR}/include/physics/core.hpp ${PROJECT_SOURCE_DIR}/src/body.cpp)
 add_library(physics ${PHYSICS_FILES})
 target_link_libraries(physics PRIVATE physics_options physics_warnings opal)
 target_compile_features(physics PRIVATE cxx_std_20)
@@ -69,10 +69,12 @@ if (PHYSICS_BUILD_SAMPLES)
     endif ()
 
     add_executable(physics_sample_spheres
-            samples/shared/player-controller.h
+            samples/shared/player-controller.hpp
             samples/shared/player-controller.cpp
+            samples/shared/sample-app.hpp
+            samples/shared/sample-app.cpp
             samples/sample-spheres/sample-spheres.cpp)
-    target_link_libraries(physics_sample_spheres PRIVATE physics rndr)
+    target_link_libraries(physics_sample_spheres PRIVATE physics rndr physics_options physics_warnings)
     target_compile_features(physics_sample_spheres PRIVATE cxx_std_20)
     target_include_directories(physics_sample_spheres PRIVATE ${PROJECT_SOURCE_DIR}/samples)
 
