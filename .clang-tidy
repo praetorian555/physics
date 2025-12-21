@@ -13,6 +13,11 @@ Checks: '-*,
          -cppcoreguidelines-macro-usage,
          -cppcoreguidelines-pro-bounds-pointer-arithmetic,
          -cppcoreguidelines-non-private-member-variables-in-classes,
+         -cppcoreguidelines-avoid-magic-numbers,
+         -cppcoreguidelines-avoid-do-while,
+         -cppcoreguidelines-avoid-goto,
+         -cppcoreguidelines-special-member-functions,
+         -cppcoreguidelines-avoid-c-arrays,
          modernize-*,
          -modernize-use-trailing-return-type,
          -modernize-avoid-bind,
@@ -23,8 +28,11 @@ Checks: '-*,
          -readability-identifier-length,
          -readability-uppercase-literal-suffix,
          -readability-function-cognitive-complexity,
+         -readability-redundant-preprocessor,
+         -readability-magic-numbers,
          misc-*,
          -misc-non-private-member-variables-in-classes,
+         -misc-include-cleaner,
          google-*'
 HeaderFilterRegex: 'rndr/.*\.h'
 CheckOptions:
@@ -46,4 +54,4 @@ CheckOptions:
     readability-identifier-naming.ClassCase: 'CamelCase'
     readability-identifier-naming.ClassMethodCase: 'CamelCase'
     readability-identifier-naming.StructCase: 'CamelCase'
-    readability-inconsistent-declaration-parameter-name.Strict: 'true'
+    readability-inconsistent-declaration-parameter-name.Strict: true

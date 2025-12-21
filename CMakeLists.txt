@@ -2,111 +2,78 @@ cmake_minimum_required(VERSION 3.20)
 
 project(
         PHYSICS
-        VERSION 0.11
+        VERSION 0.1.0
         DESCRIPTION "3D Physics Engine with C++"
         LANGUAGES CXX)
 
 # Library options
-option(PHYSICS_UNITY "Enable unity builds" ON)
-option(PHYSICS_SANITIZER "Enable address sanitizer" ON)
-option(PHYSICS_RENDER "Enable built-in renderer" ON)
+option(PHYSICS_HARDENING "Enable address sanitizer" ON)
 option(PHYSICS_REAL_AS_DOUBLE "Use double-precision floating point numbers" OFF)
+option(PHYSICS_BUILD_SAMPLES "Build sample projects" ON)
 
-message(STATUS "PHYSICS_UNITY ${PHYSICS_UNITY}")
-message(STATUS "PHYSICS_SANITIZER ${PHYSICS_SANITIZER}")
-message(STATUS "PHYSICS_RENDER ${PHYSICS_RENDER}")
+message(STATUS "PHYSICS_HARDENING ${PHYSICS_HARDENING}")
 message(STATUS "PHYSICS_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE}")
+message(STATUS "PHYSICS_BUILD_SAMPLES ${PHYSICS_BUILD_SAMPLES}")
 
-# Only do these if this is the main project, and not if it is included through add_subdirectory
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+# Don't use C++ 20 modules
+set(CMAKE_CXX_SCAN_FOR_MODULES 0)
 
-    # Let's ensure -std=c++xx instead of -std=g++xx
-    set(CMAKE_CXX_EXTENSIONS OFF)
-
-    include(cmake/optimized-debug.cmake)
-
-    # Configuration types
-    SET(CMAKE_CONFIGURATION_TYPES "Debug;OptimizedDebug;Release" CACHE STRING "Choose configuration: Debug OptimizedDebug Release" FORCE)
-
-    # Let's nicely support folders in IDEs
-    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-    # Include cmake scripts here
-    include(cmake/clang-format.cmake)
-
-    # Global compiler configuration
-    if (MSVC)
-        # Treat warnings as errors and highest warning level
-        add_compile_options(/W4 /WX /wd4201)
-        # Multiprocessor compilation
-        add_compile_options(/MP)
-        # Turn on address sanitizer unless its Release build
-        if (PHYSICS_SANITIZER)
-            add_compile_options($<$<NOT:$<CONFIG:Release>>:/fsanitize=address>)
-        endif ()
-    endif ()
-    # Use C++ 20 and make it required
-    set(CMAKE_CXX_STANDARD 20)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+## C++ language configuration boilerplate, hide symbols by default
+if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND NOT DEFINED CMAKE_VISIBILITY_INLINES_HIDDEN)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
 endif ()
 
-# Enable unity build
-if (PHYSICS_UNITY)
-    set(CMAKE_UNITY_BUILD TRUE)
+# Configure desired compilation options and warnings
+include(cmake/compiler-warnings.cmake)
+include(cmake/compiler-options.cmake)
+add_library(physics_warnings INTERFACE)
+add_library(physics_options INTERFACE)
+setup_compiler_warnings(physics_warnings)
+setup_compiler_options(physics_options)
+
+if (PHYSICS_HARDENING)
+    include(cmake/sanitizers.cmake)
+    setup_sanitizers(physics_options)
 endif ()
 
 include(FetchContent)
-
-# Include math only if it is not already present
-if (NOT TARGET math)
+if (NOT TARGET opal)
     FetchContent_Declare(
-            math
-            GIT_REPOSITORY https://github.com/praetorian555/math
+            opal
+            GIT_REPOSITORY https://github.com/praetorian555/opal
             GIT_TAG main
     )
-    set(MATH_UNITY ${PHYSICS_UNITY} CACHE BOOL "" FORCE)
-    set(MATH_SANITIZER ${PHYSICS_SANITIZER} CACHE BOOL "" FORCE)
-    set(MATH_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE} CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(math)
-    set_target_properties(math PROPERTIES FOLDER Extern)
+    set(OPAL_HARDENING ${PHYSICS_HARDENING} CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(opal)
 endif ()
 
-if (NOT TARGET rndr AND PHYSICS_RENDER)
-    FetchContent_Declare(
-            rndr
-            GIT_REPOSITORY https://github.com/praetorian555/rndr
-            GIT_TAG master
-    )
+set(PHYSICS_FILES include/physics/core.hpp)
+add_library(physics ${PHYSICS_FILES})
+target_link_libraries(physics PRIVATE physics_options physics_warnings opal)
+target_compile_features(physics PRIVATE cxx_std_20)
+target_include_directories(physics PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(physics PRIVATE ${PROJECT_SOURCE_DIR}/samples)
 
-    set(RNDR_UNITY ${PHYSICS_UNITY} CACHE BOOL "" FORCE)
-    set(RNDR_SANITIZER ${PHYSICS_SANITIZER} CACHE BOOL "" FORCE)
-    set(RNDR_ASSIMP ON CACHE BOOL "" FORCE)
-    set(RNDR_IMGUI ON CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(rndr)
-    set_target_properties(rndr PROPERTIES FOLDER Extern)
-endif ()
+if (PHYSICS_BUILD_SAMPLES)
 
-# The compiled library code is here
-add_subdirectory(src)
-
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    # Add catch2 dependency
-    if (NOT TARGET Catch2)
+    if (NOT TARGET rndr)
         FetchContent_Declare(
-                Catch2
-                GIT_REPOSITORY https://github.com/catchorg/Catch2
-                GIT_TAG ab6c7375be9a8e71ee84c6f8537113f9f47daf99 # release-3.2.1
+                rndr
+                GIT_REPOSITORY https://github.com/praetorian555/rndr
+                GIT_TAG master
         )
-        FetchContent_MakeAvailable(Catch2)
-        set_target_properties(Catch2 PROPERTIES FOLDER Extern)
-        set_target_properties(Catch2WithMain PROPERTIES FOLDER Extern)
+        set(RNDR_HARDENING ${PHYSICS_HARDENING} CACHE BOOL "" FORCE)
+        set(RNDR_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+        FetchContent_MakeAvailable(rndr)
     endif ()
 
-    # Tests
-    add_subdirectory(tests)
-    enable_testing()
-    add_test(NAME main_test COMMAND physics_test)
+    add_executable(physics_sample_spheres
+            samples/shared/player-controller.h
+            samples/shared/player-controller.cpp
+            samples/sample-spheres/sample-spheres.cpp)
+    target_link_libraries(physics_sample_spheres PRIVATE physics rndr)
+    target_compile_features(physics_sample_spheres PRIVATE cxx_std_20)
+    target_include_directories(physics_sample_spheres PRIVATE ${PROJECT_SOURCE_DIR}/samples)
 
-    # Examples
-
-endif ()
+endif()
