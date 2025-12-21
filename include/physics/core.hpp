@@ -1,6 +1,9 @@
 #pragma once
 
 #include "opal/defines.h"
+#include "opal/math-base.h"
+#include "opal/math/point3.h"
+#include "opal/math/quaternion.h"
 #include "opal/types.h"
 
 namespace Physics
@@ -29,4 +32,9 @@ using real = Opal::f64;
 using real = Opal::f32;
 #endif
 
-}
+using Point3r = Opal::Point3<real>;
+using Vector3r = Opal::Vector3<real>;
+using Quatr = Opal::Quaternion<real>;
+using Matrix4x4r = Opal::Matrix4x4<real>;
+
+}  // namespace Physics

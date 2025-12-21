@@ -1,5 +1,6 @@
 #include "shared/sample-app.hpp"
 
+#include "opal/paths.h"
 #include "opal/time.h"
 
 SampleApp::SampleApp()
@@ -40,6 +41,8 @@ SampleApp::SampleApp()
     const Opal::Ref<Rndr::FrameBuffer> default_framebuffer{nullptr};
     m_grid_renderer = Opal::New<Rndr::GridRenderer>(Opal::GetDefaultAllocator(), "Grid Renderer", renderer_desc, default_framebuffer);
     m_shape_renderer = Opal::New<Rndr::Shape3DRenderer>(Opal::GetDefaultAllocator(), "Shape Renderer", renderer_desc, default_framebuffer);
+    Rndr::MaterialDesc material_desc{.albedo_texture_path = Opal::Paths::Combine(RNDR_CORE_ASSETS_DIR, "default-material.png")};
+    m_default_material = Opal::New<Rndr::Material>(Opal::GetDefaultAllocator(), m_graphics_context, material_desc);
 }
 
 SampleApp::~SampleApp()
@@ -93,6 +96,10 @@ void SampleApp::RenderFrame(Physics::f32 delta_seconds)
     cmd_list.CmdClearAll(Rndr::Colors::k_black);
     m_grid_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
     m_grid_renderer->Render(delta_seconds, cmd_list);
+    for (const auto& body : m_bodies)
+    {
+        DrawBody(body);
+    }
     m_shape_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
     m_shape_renderer->Render(delta_seconds, cmd_list);
     RenderImGui(delta_seconds, cmd_list);
@@ -124,4 +131,28 @@ void SampleApp::PauseSimulation()
 void SampleApp::AdvanceSimulationFrame()
 {
     m_advance_frame = true;
+}
+
+void SampleApp::AddBody(Physics::Body body)
+{
+    m_bodies.PushBack(std::move(body));
+}
+
+void SampleApp::DrawBody(const Physics::Body& body)
+{
+    Physics::Matrix4x4r mat = Opal::Translate(body.position) * Opal::Rotate(body.orientation);
+    switch (body.shape->GetType())
+    {
+        case Physics::ShapeType::Sphere:
+        {
+            const Physics::SphereShape* sphere = static_cast<Physics::SphereShape*>(body.shape);
+            mat *= Opal::Scale(sphere->GetRadius());
+            m_shape_renderer->DrawSphere(mat, m_default_material);
+            break;
+        }
+        default:
+        {
+            throw Opal::Exception("Invalid shape type");
+        }
+    }
 }

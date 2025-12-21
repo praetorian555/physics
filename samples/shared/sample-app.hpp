@@ -1,11 +1,12 @@
 #pragma once
 
 #include "physics/core.hpp"
+#include "physics/body.hpp"
 
 #include "opal/container/ref.h"
 
-#include "rndr/render-api.hpp"
 #include "rndr/application.hpp"
+#include "rndr/render-api.hpp"
 #include "rndr/renderers/grid-renderer.hpp"
 #include "rndr/renderers/shape-3d-renderer.hpp"
 
@@ -27,6 +28,8 @@ public:
     void PauseSimulation();
     void AdvanceSimulationFrame();
     virtual void ResetSimulation() {}
+    void AddBody(Physics::Body body);
+    void DrawBody(const Physics::Body& body);
 
 private:
     Opal::Ref<Rndr::Application> m_rndr_app;
@@ -36,7 +39,10 @@ private:
     Opal::Ref<PlayerController> m_player_controller;
     Opal::Ref<Rndr::GridRenderer> m_grid_renderer;
     Opal::Ref<Rndr::Shape3DRenderer> m_shape_renderer;
+    Opal::Ref<const Rndr::Material> m_default_material;
 
     bool m_is_paused = false;
     bool m_advance_frame = false;
+
+    Opal::DynamicArray<Physics::Body> m_bodies;
 };
