@@ -52,6 +52,8 @@ set(PHYSICS_FILES
         ${PROJECT_SOURCE_DIR}/include/physics/core.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/shape.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/body.hpp
+        ${PROJECT_SOURCE_DIR}/include/physics/scene.hpp
+        ${PROJECT_SOURCE_DIR}/src/scene.cpp
         ${PROJECT_SOURCE_DIR}/src/body.cpp)
 add_library(physics ${PHYSICS_FILES})
 target_link_libraries(physics PRIVATE physics_options physics_warnings opal)
