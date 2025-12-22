@@ -1,8 +1,18 @@
-//
-// Created by Korisnik on 22/12/2025.
-//
+#pragma once
 
-#ifndef PHYSICS_SCENE_HPP
-#define PHYSICS_SCENE_HPP
+#include "physics/body.hpp"
 
-#endif //PHYSICS_SCENE_HPP
+namespace Physics
+{
+class Scene
+{
+public:
+    Scene();
+    ~Scene();
+
+    void Update(f32 delta_seconds);
+
+private:
+    Opal::DynamicArray<Body> m_bodies;
+};
+}  // namespace Physics

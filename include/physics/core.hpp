@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "opal/defines.h"
 #include "opal/math-base.h"
 #include "opal/math/point3.h"
@@ -38,3 +40,9 @@ using Quatr = Opal::Quaternion<real>;
 using Matrix4x4r = Opal::Matrix4x4<real>;
 
 }  // namespace Physics
+
+#ifdef OPAL_DEBUG
+#define PHYSICS_ASSERT(expression, message) assert(expression && message)
+#else
+#define PHYSICS_ASSERT(expression, message)
+#endif
