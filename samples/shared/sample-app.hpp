@@ -28,11 +28,12 @@ public:
     void ToggleMovementControls();
     void PauseSimulation();
     void AdvanceSimulationFrame();
-    virtual void ResetSimulation() {}
+    virtual void ResetSimulation();
     void AddBody(Physics::Body body);
     void DrawBody(const Physics::Body& body);
+    void SetPhysicsUpdateInterval(Physics::f32 interval) { m_physics_update_interval = interval; }
 
-private:
+protected:
     Opal::Ref<Rndr::Application> m_rndr_app;
     Opal::Ref<Rndr::GenericWindow> m_window;
     Opal::Ref<Rndr::GraphicsContext> m_graphics_context;
@@ -45,5 +46,7 @@ private:
     bool m_is_paused = false;
     bool m_advance_frame = false;
 
+    Physics::f32 m_physics_update_interval = 0.033f;
+    Physics::f32 m_time_until_physics_update = 0.033f;
     Physics::Scene m_scene;
 };

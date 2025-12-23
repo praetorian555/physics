@@ -11,7 +11,7 @@ SampleApp::SampleApp()
     m_graphics_context = Opal::New<Rndr::GraphicsContext>(
         Opal::GetDefaultAllocator(), Rndr::GraphicsContextDesc{.enable_debug_layer = true, .window_handle = m_window->GetNativeHandle()});
     m_swap_chain = Opal::New<Rndr::SwapChain>(Opal::GetDefaultAllocator(), m_graphics_context,
-                                              Rndr::SwapChainDesc{.width = 1920, .height = 1080, .enable_vsync = true});
+                                              Rndr::SwapChainDesc{.width = 1920, .height = 1080, .enable_vsync = false});
 
     // Setup input handling
     Rndr::InputSystem& input_system = m_rndr_app->GetInputSystemChecked();
@@ -66,7 +66,7 @@ void SampleApp::Run()
         const Rndr::f64 start_seconds = Opal::GetSeconds();
         m_rndr_app->ProcessSystemEvents(delta_seconds);
         m_player_controller->Tick(delta_seconds);
-        SimulateFrame(delta_seconds);
+        ConditionallySimulateFrame(delta_seconds);
         RenderFrame(delta_seconds);
         const Rndr::f64 end_seconds = Opal::GetSeconds();
         delta_seconds = static_cast<Rndr::f32>(end_seconds - start_seconds);
@@ -75,15 +75,25 @@ void SampleApp::Run()
 
 void SampleApp::ConditionallySimulateFrame(Physics::f32 delta_seconds)
 {
+    bool should_update = false;
+    m_time_until_physics_update -= delta_seconds;
+    if (m_time_until_physics_update <= 0.0f)
+    {
+        m_time_until_physics_update = m_physics_update_interval;
+        should_update = true;
+    }
     if (!m_is_paused)
     {
-        SimulateFrame(delta_seconds);
+        if (should_update)
+        {
+            SimulateFrame(m_physics_update_interval);
+        }
     }
     else
     {
-        if (m_advance_frame)
+        if (m_advance_frame && should_update)
         {
-            SimulateFrame(delta_seconds);
+            SimulateFrame(m_physics_update_interval);
             m_advance_frame = false;
         }
     }
@@ -131,6 +141,12 @@ void SampleApp::PauseSimulation()
 void SampleApp::AdvanceSimulationFrame()
 {
     m_advance_frame = true;
+}
+
+void SampleApp::ResetSimulation()
+{
+    m_scene.Reset();
+    m_time_until_physics_update = m_physics_update_interval;
 }
 
 void SampleApp::AddBody(Physics::Body body)
