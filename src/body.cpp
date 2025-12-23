@@ -24,6 +24,20 @@ Physics::Vector3r Physics::Body::BodySpaceToWorldSpace(const Vector3r& body_poin
     return GetCenterOfMassWorldSpace() + orientation * body_point;
 }
 
+Physics::Matrix3x3r Physics::Body::GetInverseInertiaTensorWorldSpace() const
+{
+    const Matrix3x3r inertia_tensor_local = shape->GetInertiaTensor();
+    const Matrix3x3r inverse_inertia_tensor_local = inverse_mass * Opal::Inverse(inertia_tensor_local);
+    const Matrix3x3r orientation_mat = orientation.ToMatrix3x3();
+    return orientation_mat * inverse_inertia_tensor_local * Transpose(orientation_mat);
+}
+
+Physics::Matrix3x3r Physics::Body::GetInverseInertiaTensorBodySpace() const
+{
+    const Matrix3x3r inertia_tensor_local = shape->GetInertiaTensor();
+    return inverse_mass * Opal::Inverse(inertia_tensor_local);
+}
+
 void Physics::Body::ApplyImpulseLinear(const Vector3r& impulse)
 {
     if (0.0 == inverse_mass)

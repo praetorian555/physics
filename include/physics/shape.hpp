@@ -16,6 +16,7 @@ struct Shape
     virtual ~Shape() = default;
     [[nodiscard]] virtual ShapeType GetType() const = 0;
     [[nodiscard]] virtual Vector3r GetCenterOfMass() const { return m_center_mass; }
+    [[nodiscard]] virtual Matrix3x3r GetInertiaTensor() const = 0;
 
 protected:
     Vector3r m_center_mass;
@@ -25,6 +26,7 @@ struct SphereShape : Shape
 {
     explicit SphereShape(real radius) : m_radius(radius) { m_center_mass = Vector3r::Zero(); }
     [[nodiscard]] ShapeType GetType() const override { return ShapeType::Sphere; }
+    [[nodiscard]] Matrix3x3r GetInertiaTensor() const override;
     [[nodiscard]] real GetRadius() const { return m_radius; }
 
 private:

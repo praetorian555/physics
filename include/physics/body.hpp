@@ -21,6 +21,9 @@ struct Body
     [[nodiscard]] Vector3r WorldSpaceToBodySpace(const Vector3r& world_point) const;
     [[nodiscard]] Vector3r BodySpaceToWorldSpace(const Vector3r& body_point) const;
 
+    [[nodiscard]] Matrix3x3r GetInverseInertiaTensorWorldSpace() const;
+    [[nodiscard]] Matrix3x3r GetInverseInertiaTensorBodySpace() const;
+
     void ApplyImpulseLinear(const Vector3r& impulse);
 };
 
