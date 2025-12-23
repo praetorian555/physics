@@ -13,6 +13,7 @@ public:
         body.position = Physics::Vector3r{0, 10, -10};
         body.orientation = Physics::Quatr::Identity();
         body.inverse_mass = 1.0f;
+        body.elasticity = 0.5f;
         Opal::ScopePtr<Physics::SphereShape> sphere(allocator, PHYSICS_CONST(1.0));
         body.shape = sphere.Get();
         AddBody(body);

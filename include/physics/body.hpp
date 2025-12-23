@@ -12,6 +12,7 @@ struct Body
     Quatr orientation;
     Vector3r linear_velocity = Vector3r::Zero();
     real inverse_mass;
+    real elasticity = 1.0f;
     Shape* shape;
 
     [[nodiscard]] Vector3r GetCenterOfMassWorldSpace() const;

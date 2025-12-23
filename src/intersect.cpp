@@ -30,7 +30,8 @@ void Physics::ResolveContact(Contact& contact)
 
     const Vector3r n = contact.normal;
     const Vector3r vab = a.linear_velocity - b.linear_velocity;
-    const real impulse_scalar = -PHYSICS_CONST(2.0) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass);
+    const real elasticity = a.elasticity * b.elasticity;
+    const real impulse_scalar = -(PHYSICS_CONST(1.0) + elasticity) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass);
     const Vector3r impulse = impulse_scalar * n;
     a.ApplyImpulseLinear(impulse);
     b.ApplyImpulseLinear(-impulse);
