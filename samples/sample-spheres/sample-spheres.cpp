@@ -5,7 +5,7 @@ class SpheresSampleApp : public SampleApp
 public:
     void SetupSimulation() override
     {
-        SetPhysicsUpdateInterval(0.033f);
+        SetPhysicsUpdateInterval(0.016f);
 
         Opal::AllocatorBase* allocator = Opal::GetDefaultAllocator();
 

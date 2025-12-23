@@ -3,6 +3,7 @@
 #include "opal/container/dynamic-array.h"
 
 #include "physics/body.hpp"
+#include "physics/intersect.hpp"
 
 namespace Physics
 {
@@ -21,5 +22,9 @@ public:
 private:
     Opal::DynamicArray<Body> m_bodies;
     Vector3r m_gravity = Vector3r(0.0, -10.0, 0.0);
+
+#ifdef OPAL_DEBUG
+    Opal::DynamicArray<Contact> m_last_simulation_frame_contacts;
+#endif
 };
 }  // namespace Physics

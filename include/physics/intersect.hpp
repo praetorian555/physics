@@ -17,11 +17,18 @@ struct Contact
     // In world space
     Vector3r normal;
     // Positive when non-penetrating, negative when penetrating
-    real separation_distance;
-    f32 time_of_impact;
+    real separation_distance = PHYSICS_CONST(0.0);
+    f32 time_of_impact = 0.0f;
 
     Opal::Ref<Body> a;
     Opal::Ref<Body> b;
+
+#ifdef OPAL_DEBUG
+    Vector3r a_prev_position;
+    Vector3r b_prev_position;
+    Vector3r a_prev_linear_velocity;
+    Vector3r b_prev_linear_velocity;
+#endif
 };
 
 bool Intersect(Body& a, Body& b, Contact& contact);

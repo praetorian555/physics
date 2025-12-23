@@ -4,6 +4,10 @@
 
 void Physics::Scene::Update(f32 delta_seconds)
 {
+#ifdef OPAL_DEBUG
+    m_last_simulation_frame_contacts.Clear();
+#endif
+
     for (Body& body : m_bodies)
     {
         // Calculate impulse of a gravity force
@@ -27,6 +31,9 @@ void Physics::Scene::Update(f32 delta_seconds)
             if (Intersect(a, b, contact))
             {
                 ResolveContact(contact);
+#ifdef OPAL_DEBUG
+                m_last_simulation_frame_contacts.PushBack(contact);
+#endif
             }
         }
     }
