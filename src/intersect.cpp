@@ -21,8 +21,20 @@ void Physics::ResolveContact(Contact& contact)
 {
     Body& a = contact.a;
     Body& b = contact.b;
-    a.linear_velocity = Vector3r::Zero();
-    b.linear_velocity = Vector3r::Zero();
+#ifdef OPAL_DEBUG
+    contact.a_prev_position = a.position;
+    contact.b_prev_position = b.position;
+    contact.a_prev_linear_velocity = a.linear_velocity;
+    contact.b_prev_linear_velocity = b.linear_velocity;
+#endif
+
+    const Vector3r n = contact.normal;
+    const Vector3r vab = a.linear_velocity - b.linear_velocity;
+    const real impulse_scalar = -PHYSICS_CONST(2.0) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass);
+    const Vector3r impulse = impulse_scalar * n;
+    a.ApplyImpulseLinear(impulse);
+    b.ApplyImpulseLinear(-impulse);
+
     const Vector3r dist = contact.point_on_b_world_space - contact.point_on_a_world_space;
     a.position += dist * a.inverse_mass / (a.inverse_mass + b.inverse_mass);
     b.position -= dist * b.inverse_mass / (b.inverse_mass + a.inverse_mass);
