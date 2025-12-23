@@ -42,7 +42,13 @@ using Matrix4x4r = Opal::Matrix4x4<real>;
 }  // namespace Physics
 
 #ifdef OPAL_DEBUG
-#define PHYSICS_ASSERT(expression, message) assert(expression && message)
+#define PHYSICS_ASSERT(expression, message) assert(expression&& message)
 #else
 #define PHYSICS_ASSERT(expression, message)
+#endif
+
+#ifdef PHYSICS_REAL_AS_DOUBLE
+#define PHYSICS_CONST(x) x
+#else
+#define PHYSICS_CONST(x) static_cast<Opal::f32>(x)
 #endif

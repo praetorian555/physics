@@ -1,9 +1,10 @@
 #pragma once
 
-#include "physics/core.hpp"
-#include "physics/body.hpp"
-
 #include "opal/container/ref.h"
+
+#include "physics/body.hpp"
+#include "physics/core.hpp"
+#include "physics/scene.hpp"
 
 #include "rndr/application.hpp"
 #include "rndr/render-api.hpp"
@@ -21,7 +22,7 @@ public:
     virtual void SetupSimulation() {}
     void Run();
     void ConditionallySimulateFrame(Physics::f32 delta_seconds);
-    virtual void SimulateFrame(Physics::f32) {}
+    virtual void SimulateFrame(Physics::f32 delta_seconds) { m_scene.Update(delta_seconds); }
     void RenderFrame(Physics::f32 delta_seconds);
     virtual void RenderImGui(Physics::f32, Rndr::CommandList&) {}
     void ToggleMovementControls();
@@ -44,5 +45,5 @@ private:
     bool m_is_paused = false;
     bool m_advance_frame = false;
 
-    Opal::DynamicArray<Physics::Body> m_bodies;
+    Physics::Scene m_scene;
 };

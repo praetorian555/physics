@@ -33,7 +33,7 @@ SampleApp::SampleApp()
                                 Rndr::InputPrimitive::N, Rndr::InputTrigger::ButtonReleased,
                                 [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { AdvanceSimulationFrame(); })});
 
-    const Rndr::FlyCameraDesc fly_camera_desc{.start_position = {0.0f, 1.0f, 0.0f}, .start_yaw_radians = 0};
+    const Rndr::FlyCameraDesc fly_camera_desc{.start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}};
     m_player_controller =
         New<PlayerController>(Opal::GetDefaultAllocator(), m_rndr_app, 1920, 1080, fly_camera_desc, 10.0f, 0.005f, 0.005f);
 
@@ -96,7 +96,7 @@ void SampleApp::RenderFrame(Physics::f32 delta_seconds)
     cmd_list.CmdClearAll(Rndr::Colors::k_black);
     m_grid_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
     m_grid_renderer->Render(delta_seconds, cmd_list);
-    for (const auto& body : m_bodies)
+    for (const auto& body : m_scene.GetBodies())
     {
         DrawBody(body);
     }
@@ -135,7 +135,7 @@ void SampleApp::AdvanceSimulationFrame()
 
 void SampleApp::AddBody(Physics::Body body)
 {
-    m_bodies.PushBack(std::move(body));
+    m_scene.AddBody(body);
 }
 
 void SampleApp::DrawBody(const Physics::Body& body)

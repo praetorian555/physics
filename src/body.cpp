@@ -23,3 +23,15 @@ Physics::Vector3r Physics::Body::BodySpaceToWorldSpace(const Vector3r& body_poin
 {
     return GetCenterOfMassWorldSpace() + orientation * body_point;
 }
+
+void Physics::Body::ApplyImpulseLinear(const Vector3r& impulse)
+{
+    if (0.0 == inverse_mass)
+    {
+        return;
+    }
+    // p = m * v
+    // dp = J = m * dv
+    // dv = J / m
+    linear_velocity += impulse * inverse_mass;
+}
