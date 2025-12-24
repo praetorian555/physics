@@ -40,6 +40,6 @@ void Physics::Scene::Update(f32 delta_seconds)
 
     for (Body& body : m_bodies)
     {
-        body.position += body.linear_velocity * delta_seconds;
+        body.Update(delta_seconds);
     }
 }

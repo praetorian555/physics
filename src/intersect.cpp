@@ -2,7 +2,8 @@
 
 bool Physics::Intersect(Body& a, Body& b, Contact& contact)
 {
-    PHYSICS_ASSERT(a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere, "We only support intersect of two spheres!");
+    PHYSICS_ASSERT(a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere,
+                   "We only support intersect of two spheres!");
     contact.a = &a;
     contact.b = &b;
     const Vector3r dist = b.position - a.position;
@@ -21,6 +22,7 @@ void Physics::ResolveContact(Contact& contact)
 {
     Body& a = contact.a;
     Body& b = contact.b;
+
 #ifdef OPAL_DEBUG
     contact.a_prev_position = a.position;
     contact.b_prev_position = b.position;
@@ -29,9 +31,18 @@ void Physics::ResolveContact(Contact& contact)
 #endif
 
     const Vector3r n = contact.normal;
-    const Vector3r vab = a.linear_velocity - b.linear_velocity;
     const real elasticity = a.elasticity * b.elasticity;
-    const real impulse_scalar = -(PHYSICS_CONST(1.0) + elasticity) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass);
+    const Vector3r ra = contact.point_on_a_world_space - a.GetCenterOfMassWorldSpace();
+    const Vector3r rb = contact.point_on_b_world_space - b.GetCenterOfMassWorldSpace();
+    const Matrix3x3r inverse_inertia_a_world = a.GetInverseInertiaTensorWorldSpace();
+    const Matrix3x3r inverse_inertia_b_world = b.GetInverseInertiaTensorWorldSpace();
+    const Vector3r impulse_angular_a = Opal::Cross(inverse_inertia_a_world * Opal::Cross(ra, n), ra);
+    const Vector3r impulse_angular_b = Opal::Cross(inverse_inertia_b_world * Opal::Cross(rb, n), rb);
+    const real angular_factor = Opal::Dot(impulse_angular_a + impulse_angular_b, n);
+    const Vector3r va = a.linear_velocity + Opal::Cross(a.angular_velocity, ra);
+    const Vector3r vb = b.linear_velocity + Opal::Cross(b.angular_velocity, rb);
+    const Vector3r vab = va - vb;
+    const real impulse_scalar = -(PHYSICS_CONST(1.0) + elasticity) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass + angular_factor);
     const Vector3r impulse = impulse_scalar * n;
     a.ApplyImpulseLinear(impulse);
     b.ApplyImpulseLinear(-impulse);

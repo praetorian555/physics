@@ -9,8 +9,9 @@ namespace Physics
 struct Body
 {
     Vector3r position;
-    Quatr orientation;
+    Quatr orientation = Quatr::Identity();
     Vector3r linear_velocity = Vector3r::Zero();
+    Vector3r angular_velocity = Vector3r::Zero();
     real inverse_mass;
     real elasticity = 1.0f;
     Shape* shape;
@@ -25,6 +26,10 @@ struct Body
     [[nodiscard]] Matrix3x3r GetInverseInertiaTensorBodySpace() const;
 
     void ApplyImpulseLinear(const Vector3r& impulse);
+    void ApplyImpulseAngular(const Vector3r& impulse);
+    void ApplyImpulse(const Vector3r& impulse, const Vector3r& world_point);
+
+    void Update(real delta_seconds);
 };
 
 }  // namespace Physics
