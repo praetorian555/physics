@@ -33,5 +33,7 @@ struct Contact
 
 bool Intersect(Body& a, Body& b, Contact& contact);
 void ResolveContact(Contact& contact);
+bool RaySphereIntersect(const Vector3r& ray_start, const Vector3r& ray_direction, const Vector3r& sphere_center, real sphere_radius,
+                        f32& t1, f32& t2);
 
-}
+}  // namespace Physics

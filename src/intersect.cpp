@@ -68,3 +68,23 @@ void Physics::ResolveContact(Contact& contact)
     a.position += dist * a.inverse_mass / (a.inverse_mass + b.inverse_mass);
     b.position -= dist * b.inverse_mass / (b.inverse_mass + a.inverse_mass);
 }
+
+bool Physics::RaySphereIntersect(const Vector3r& ray_start, const Vector3r& ray_direction, const Vector3r& sphere_center,
+                                 real sphere_radius, f32& t1, f32& t2)
+{
+    const Vector3r m = sphere_center - ray_start;
+    const real a = Opal::Dot(ray_direction, ray_direction);
+    const real b = Opal::Dot(m, ray_direction);
+    const real c = Opal::Dot(m, m) - sphere_radius * sphere_radius;
+    const real delta = b * b - a * c;
+    const real inverse_a = PHYSICS_CONST(1.0) / delta;
+    if (delta < 0)
+    {
+        // No real solutions
+        return false;
+    }
+    const real delta_root = Opal::Sqrt(delta);
+    t1 = inverse_a * (b - delta_root);
+    t2 = inverse_a * (b + delta_root);
+    return true;
+}
