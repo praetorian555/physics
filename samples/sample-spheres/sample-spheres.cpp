@@ -12,8 +12,10 @@ public:
         Physics::Body body;
         body.position = Physics::Vector3r{0, 10, -10};
         body.orientation = Physics::Quatr::Identity();
+        body.linear_velocity = Physics::Vector3r{1, 0, 0};
         body.inverse_mass = 1.0f;
-        body.elasticity = 0.5f;
+        body.elasticity = 0.0f;
+        body.friction = 0.5f;
         Opal::ScopePtr<Physics::SphereShape> sphere(allocator, PHYSICS_CONST(1.0));
         body.shape = sphere.Get();
         AddBody(body);
@@ -23,6 +25,8 @@ public:
         ground.position = Physics::Vector3r{0, -998, -10};
         ground.orientation = Physics::Quatr::FromAxisAngleDegrees(Physics::Vector3r{1, 0, 0}, 45.0f);
         ground.inverse_mass = 0.0f;
+        ground.elasticity = 1.0f;
+        ground.friction = 0.5f;
         Opal::ScopePtr<Physics::SphereShape> ground_sphere(allocator, PHYSICS_CONST(1000.0));
         ground.shape = ground_sphere.Get();
         AddBody(ground);

@@ -14,6 +14,7 @@ struct Body
     Vector3r angular_velocity = Vector3r::Zero();
     real inverse_mass;
     real elasticity = 1.0f;
+    real friction;
     Shape* shape;
 
     [[nodiscard]] Vector3r GetCenterOfMassWorldSpace() const;
