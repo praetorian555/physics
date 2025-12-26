@@ -33,7 +33,8 @@ SampleApp::SampleApp()
                                 Rndr::InputPrimitive::N, Rndr::InputTrigger::ButtonReleased,
                                 [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { AdvanceSimulationFrame(); })});
 
-    const Rndr::FlyCameraDesc fly_camera_desc{.start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}};
+    const Rndr::FlyCameraDesc fly_camera_desc{
+        .start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}};
     m_player_controller =
         New<PlayerController>(Opal::GetDefaultAllocator(), m_rndr_app, 1920, 1080, fly_camera_desc, 10.0f, 0.005f, 0.005f);
 
@@ -163,7 +164,14 @@ void SampleApp::DrawBody(const Physics::Body& body)
         {
             const Physics::SphereShape* sphere = static_cast<Physics::SphereShape*>(body.shape);
             mat *= Opal::Scale(sphere->GetRadius());
-            m_shape_renderer->DrawSphere(mat, m_default_material);
+            if (sphere->GetRadius() > 100.0f)
+            {
+                m_shape_renderer->DrawSphere(mat, m_default_material, 40, 40, 128, 128);
+            }
+            else
+            {
+                m_shape_renderer->DrawSphere(mat, m_default_material);
+            }
             break;
         }
         default:
