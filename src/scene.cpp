@@ -28,7 +28,7 @@ void Physics::Scene::Update(f32 delta_seconds)
                 continue;
             }
             Contact contact;
-            if (Intersect(a, b, contact))
+            if (Intersect(a, b, delta_seconds, contact))
             {
                 ResolveContact(contact);
 #ifdef OPAL_DEBUG

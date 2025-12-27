@@ -1,21 +1,44 @@
 #include "physics/intersect.hpp"
 
-bool Physics::Intersect(Body& a, Body& b, Contact& contact)
+bool Physics::Intersect(Body& a, Body& b, f32 delta_seconds, Contact& contact)
 {
     PHYSICS_ASSERT(a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere,
                    "We only support intersect of two spheres!");
     contact.a = &a;
     contact.b = &b;
-    const Vector3r dist = b.position - a.position;
-    contact.normal = dist;
-    contact.normal = Opal::Normalize(contact.normal);
-    const SphereShape* sphere_a = static_cast<const SphereShape*>(a.shape);
-    const SphereShape* sphere_b = static_cast<const SphereShape*>(b.shape);
-    contact.point_on_a_world_space = a.position + sphere_a->GetRadius() * contact.normal;
-    contact.point_on_b_world_space = b.position - sphere_b->GetRadius() * contact.normal;
-    const real radius_sum = sphere_a->GetRadius() + sphere_b->GetRadius();
-    const real distance_sq = LengthSquared(dist);
-    return distance_sq <= radius_sum * radius_sum;
+
+    if (a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere)
+    {
+        const SphereShape* sphere_a = static_cast<const SphereShape*>(a.shape);
+        const SphereShape* sphere_b = static_cast<const SphereShape*>(b.shape);
+
+        const Vector3r position_a = a.position;
+        const Vector3r position_b = b.position;
+        const Vector3r velocity_a = a.linear_velocity;
+        const Vector3r velocity_b = b.linear_velocity;
+
+        if (SphereSphereDynamic(sphere_a, sphere_b, position_a, position_b, velocity_a, velocity_b, delta_seconds,
+                                contact.point_on_a_world_space, contact.point_on_b_world_space, contact.time_of_impact))
+        {
+            // Advance simulation until the time of impact on these bodies
+            a.Update(contact.time_of_impact);
+            b.Update(contact.time_of_impact);
+            contact.point_on_a_local_space = a.WorldSpaceToBodySpace(contact.point_on_a_world_space);
+            contact.point_on_b_local_space = b.WorldSpaceToBodySpace(contact.point_on_b_world_space);
+            contact.normal = Opal::Normalize(a.position - b.position);
+
+            // Undo the simulation until the time of impact
+            a.Update(-contact.time_of_impact);
+            b.Update(-contact.time_of_impact);
+
+            // Calculate the separation distance
+            const Vector3r ab = a.position - b.position;
+            contact.separation_distance = static_cast<real>(Opal::Length(ab)) - (sphere_a->GetRadius() + sphere_b->GetRadius());
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Physics::ResolveContact(Contact& contact)
@@ -62,7 +85,6 @@ void Physics::ResolveContact(Contact& contact)
     a.ApplyImpulse(-friction_impulse, contact.point_on_a_world_space);
     b.ApplyImpulse(friction_impulse, contact.point_on_b_world_space);
 
-
     // Move bodies so they don't penetrate one another
     const Vector3r dist = contact.point_on_b_world_space - contact.point_on_a_world_space;
     a.position += dist * a.inverse_mass / (a.inverse_mass + b.inverse_mass);
@@ -86,5 +108,61 @@ bool Physics::RaySphereIntersect(const Vector3r& ray_start, const Vector3r& ray_
     const real delta_root = Opal::Sqrt(delta);
     t1 = inverse_a * (b - delta_root);
     t2 = inverse_a * (b + delta_root);
+    return true;
+}
+
+bool Physics::SphereSphereDynamic(const SphereShape* shape_a, const SphereShape* shape_b, const Vector3r& position_a,
+                                  const Vector3r& position_b, const Vector3r& velocity_a, const Vector3r& velocity_b, f32 delta_seconds,
+                                  Vector3r& point_on_a, Vector3r& point_on_b, f32& time_of_impact)
+{
+    const Vector3r relative_velocity = velocity_a - velocity_b;
+
+    const Vector3r start_point_a = position_a;
+    const Vector3r end_point_a = position_a + relative_velocity * delta_seconds;
+    const Vector3r ray_direction = end_point_a - start_point_a;
+
+    f32 t0 = 0.0f;
+    f32 t1 = 0.0f;
+    constexpr real k_kinda_small_number = PHYSICS_CONST(0.001);
+    if (Opal::LengthSquared(ray_direction) < k_kinda_small_number * k_kinda_small_number)
+    {
+        // Ray is too short, just check if spheres intersect
+        const Vector3r ab = position_b - position_a;
+        real radius = shape_a->GetRadius() + shape_b->GetRadius() + k_kinda_small_number;
+        if (Opal::LengthSquared(ab) > radius * radius)
+        {
+            // Spheres don't intersect
+            return false;
+        }
+    }
+    else if (!RaySphereIntersect(position_a, ray_direction, position_b, shape_a->GetRadius() + shape_b->GetRadius(), t0, t1))
+    {
+        // Sphere paths don't intersect
+        return false;
+    }
+
+    // Convert from [0, 1] to [0, delta_seconds]
+    t0 *= delta_seconds;
+    t1 *= delta_seconds;
+
+    // If collisions are only in the past it means that there are no collisions this frame
+    if (t1 < 0)
+    {
+        return false;
+    }
+
+    // Get the earliest positive time of impact
+    time_of_impact = t0 < 0 ? 0 : t0;
+    if (time_of_impact > delta_seconds)
+    {
+        // Collision is too far into the future, so we ignore it this frame
+        return false;
+    }
+
+    const Vector3r new_position_a = position_a + time_of_impact * velocity_a;
+    const Vector3r new_position_b = position_b + time_of_impact * velocity_b;
+    const Vector3r ab = Opal::Normalize(new_position_b - new_position_a);
+    point_on_a = new_position_a + ab * shape_a->GetRadius();
+    point_on_b = new_position_b - ab * shape_b->GetRadius();
     return true;
 }
