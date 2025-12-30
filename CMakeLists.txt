@@ -54,10 +54,12 @@ set(PHYSICS_FILES
         ${PROJECT_SOURCE_DIR}/include/physics/body.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/scene.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/intersect.hpp
+        ${PROJECT_SOURCE_DIR}/include/physics/broad-phase.hpp
         ${PROJECT_SOURCE_DIR}/src/core.cpp
         ${PROJECT_SOURCE_DIR}/src/scene.cpp
         ${PROJECT_SOURCE_DIR}/src/intersect.cpp
         ${PROJECT_SOURCE_DIR}/src/shape.cpp
+        ${PROJECT_SOURCE_DIR}/src/broad-phase.cpp
         ${PROJECT_SOURCE_DIR}/src/body.cpp)
 add_library(physics ${PHYSICS_FILES})
 target_link_libraries(physics PRIVATE physics_options physics_warnings opal)
@@ -88,4 +90,4 @@ if (PHYSICS_BUILD_SAMPLES)
     target_compile_features(physics_sample_spheres PRIVATE cxx_std_20)
     target_include_directories(physics_sample_spheres PRIVATE ${PROJECT_SOURCE_DIR}/samples)
 
-endif()
+endif ()

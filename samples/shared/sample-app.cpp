@@ -11,7 +11,11 @@ SampleApp::SampleApp()
     m_graphics_context = Opal::New<Rndr::GraphicsContext>(
         Opal::GetDefaultAllocator(), Rndr::GraphicsContextDesc{.enable_debug_layer = true, .window_handle = m_window->GetNativeHandle()});
     m_swap_chain = Opal::New<Rndr::SwapChain>(Opal::GetDefaultAllocator(), m_graphics_context,
-                                              Rndr::SwapChainDesc{.width = 1920, .height = 1080, .enable_vsync = false});
+                                              Rndr::SwapChainDesc{.width = 1920,
+                                                                  .height = 1080,
+                                                                  .depth_stencil_format = Rndr::PixelFormat::D32_FLOAT_S8_UINT,
+                                                                  .use_depth_stencil = true,
+                                                                  .enable_vsync = false});
 
     // Setup input handling
     Rndr::InputSystem& input_system = m_rndr_app->GetInputSystemChecked();
@@ -65,6 +69,7 @@ void SampleApp::Run()
     while (!m_window->IsClosed())
     {
         const Rndr::f64 start_seconds = Opal::GetSeconds();
+        Opal::GetScratchAllocator()->Reset();
         m_rndr_app->ProcessSystemEvents(delta_seconds);
         m_player_controller->Tick(delta_seconds);
         ConditionallySimulateFrame(delta_seconds);
@@ -106,12 +111,16 @@ void SampleApp::RenderFrame(Physics::f32 delta_seconds)
     cmd_list.CmdBindSwapChainFrameBuffer(m_swap_chain);
     cmd_list.CmdClearAll(Rndr::Colors::k_black);
     m_grid_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
+
     m_grid_renderer->Render(delta_seconds, cmd_list);
     for (const auto& body : m_scene.GetBodies())
     {
         DrawBody(body);
     }
     m_shape_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
+    m_shape_renderer->SetCameraPosition(m_player_controller->GetCameraPosition());
+    m_shape_renderer->AddDirectionalLight(Rndr::Vector3f(1, 1, 1), Rndr::Colors::k_white);
+    m_shape_renderer->AddDirectionalLight(Rndr::Vector3f(-1, -1, -1), Rndr::Colors::k_pink);
     m_shape_renderer->Render(delta_seconds, cmd_list);
     RenderImGui(delta_seconds, cmd_list);
     cmd_list.CmdPresent(m_swap_chain);
@@ -164,7 +173,7 @@ void SampleApp::DrawBody(const Physics::Body& body)
         {
             const Physics::SphereShape* sphere = static_cast<Physics::SphereShape*>(body.shape);
             mat *= Opal::Scale(sphere->GetRadius());
-            if (sphere->GetRadius() > 100.0f)
+            if (sphere->GetRadius() > 10.0f)
             {
                 m_shape_renderer->DrawSphere(mat, m_default_material, 40, 40, 128, 128);
             }

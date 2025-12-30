@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "physics/broad-phase.hpp"
 #include "physics/intersect.hpp"
 
 void Physics::Scene::Update(f32 delta_seconds)
@@ -19,31 +20,28 @@ void Physics::Scene::Update(f32 delta_seconds)
         body.ApplyImpulseLinear(gravity_impulse);
     }
 
+    const Opal::DynamicArray<CollisionPair> collision_pairs = BroadPhase(m_bodies, delta_seconds);
+
+    // Narrow phase
     Opal::DynamicArray<Contact> contacts;
-    for (i32 i = 0; i < m_bodies.GetSize(); i++)
+    for (const CollisionPair& pair : collision_pairs)
     {
-        for (i32 j = i + 1; j < m_bodies.GetSize(); j++)
+        Body& a = m_bodies[pair.a];
+        Body& b = m_bodies[pair.b];
+        if (0 == a.inverse_mass && 0 == b.inverse_mass)
         {
-            Body& a = m_bodies[i];
-            Body& b = m_bodies[j];
-            if (0 == a.inverse_mass && 0 == b.inverse_mass)
-            {
-                continue;
-            }
-            Contact contact;
-            if (Intersect(a, b, delta_seconds, contact))
-            {
-                contacts.PushBack(std::move(contact));
-            }
+            continue;
+        }
+        Contact contact;
+        if (Intersect(a, b, delta_seconds, contact))
+        {
+            contacts.PushBack(std::move(contact));
         }
     }
 
     if (contacts.GetSize() > 1)
     {
-        std::ranges::sort(contacts, [](const Contact& a, const Contact& b)
-        {
-            return a.time_of_impact <= b.time_of_impact;
-        });
+        std::ranges::sort(contacts, [](const Contact& a, const Contact& b) { return a.time_of_impact <= b.time_of_impact; });
     }
 
     f32 accumulated_time = 0;
