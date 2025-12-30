@@ -54,6 +54,7 @@ set(PHYSICS_FILES
         ${PROJECT_SOURCE_DIR}/include/physics/body.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/scene.hpp
         ${PROJECT_SOURCE_DIR}/include/physics/intersect.hpp
+        ${PROJECT_SOURCE_DIR}/src/core.cpp
         ${PROJECT_SOURCE_DIR}/src/scene.cpp
         ${PROJECT_SOURCE_DIR}/src/intersect.cpp
         ${PROJECT_SOURCE_DIR}/src/shape.cpp

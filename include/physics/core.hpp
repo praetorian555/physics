@@ -4,6 +4,7 @@
 
 #include "opal/defines.h"
 #include "opal/math-base.h"
+#include "opal/math/bounds3.h"
 #include "opal/math/point3.h"
 #include "opal/math/quaternion.h"
 #include "opal/types.h"
@@ -39,6 +40,10 @@ using Vector3r = Opal::Vector3<real>;
 using Quatr = Opal::Quaternion<real>;
 using Matrix4x4r = Opal::Matrix4x4<real>;
 using Matrix3x3r = Opal::Matrix3x3<real>;
+using Bounds3r = Opal::Bounds3<real>;
+
+Point3r VectorToPoint(const Vector3r& vector);
+Vector3r PointToVector(const Point3r& point);
 
 }  // namespace Physics
 
