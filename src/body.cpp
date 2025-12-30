@@ -81,7 +81,6 @@ void Physics::Body::Update(real delta_seconds)
     position += linear_velocity * delta_seconds;
 
     const Vector3r com_world = GetCenterOfMassWorldSpace();
-    const Vector3r r = position - com_world;
 
     // Account for internal torque (precession)
     // T = T_external + omega x I * omega
@@ -96,10 +95,10 @@ void Physics::Body::Update(real delta_seconds)
     // Update orientation
     const Vector3r delta_angle = angular_velocity * delta_seconds;
     const Quatr delta_orientation = Quatr::FromAxisAngleRadians(delta_angle, static_cast<real>(Opal::Length(delta_angle)));
-    orientation = delta_orientation * orientation;
-    orientation = Opal::Normalize(orientation);
+    orientation = Opal::Normalize(delta_orientation * orientation);
 
     // Update position
     // TODO: From what I see in textbooks precession should not affect the position of the center of mass
+    //const Vector3r r = position - com_world;
     //position = com_world + delta_orientation * r;
 }

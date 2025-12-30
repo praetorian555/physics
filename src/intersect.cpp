@@ -25,14 +25,14 @@ bool Physics::Intersect(Body& a, Body& b, f32 delta_seconds, Contact& contact)
             b.Update(contact.time_of_impact);
             contact.point_on_a_local_space = a.WorldSpaceToBodySpace(contact.point_on_a_world_space);
             contact.point_on_b_local_space = b.WorldSpaceToBodySpace(contact.point_on_b_world_space);
-            contact.normal = Opal::Normalize(a.position - b.position);
+            contact.normal = Opal::Normalize(b.position - a.position);
 
             // Undo the simulation until the time of impact
             a.Update(-contact.time_of_impact);
             b.Update(-contact.time_of_impact);
 
             // Calculate the separation distance
-            const Vector3r ab = a.position - b.position;
+            const Vector3r ab = b.position - a.position;
             contact.separation_distance = static_cast<real>(Opal::Length(ab)) - (sphere_a->GetRadius() + sphere_b->GetRadius());
             return true;
         }
@@ -67,10 +67,10 @@ void Physics::ResolveContact(Contact& contact)
     const Vector3r va = a.linear_velocity + Opal::Cross(a.angular_velocity, ra);
     const Vector3r vb = b.linear_velocity + Opal::Cross(b.angular_velocity, rb);
     const Vector3r vab = va - vb;
-    const real impulse_scalar = -(PHYSICS_CONST(1.0) + elasticity) * Dot(vab, n) / (a.inverse_mass + b.inverse_mass + angular_factor);
+    const real impulse_scalar = (PHYSICS_CONST(1.0) + elasticity) * Opal::Dot(vab, n) / (a.inverse_mass + b.inverse_mass + angular_factor);
     const Vector3r impulse = impulse_scalar * n;
-    a.ApplyImpulse(impulse, contact.point_on_a_world_space);
-    b.ApplyImpulse(-impulse, contact.point_on_b_world_space);
+    a.ApplyImpulse(-impulse, contact.point_on_a_world_space);
+    b.ApplyImpulse(impulse, contact.point_on_b_world_space);
 
     // Apply friction impulse
     const real friction = a.friction * b.friction;
@@ -85,10 +85,15 @@ void Physics::ResolveContact(Contact& contact)
     a.ApplyImpulse(-friction_impulse, contact.point_on_a_world_space);
     b.ApplyImpulse(friction_impulse, contact.point_on_b_world_space);
 
-    // Move bodies so they don't penetrate one another
-    const Vector3r dist = contact.point_on_b_world_space - contact.point_on_a_world_space;
-    a.position += dist * a.inverse_mass / (a.inverse_mass + b.inverse_mass);
-    b.position -= dist * b.inverse_mass / (b.inverse_mass + a.inverse_mass);
+    // Move bodies so they don't penetrate one another.
+    // When are using continuous collision detection, only time the interpenetration can happen is if this is the case at the start
+    // of the frame.
+    if (0.0f == contact.time_of_impact)
+    {
+        const Vector3r dist = contact.point_on_b_world_space - contact.point_on_a_world_space;
+        a.position += dist * a.inverse_mass / (a.inverse_mass + b.inverse_mass);
+        b.position -= dist * b.inverse_mass / (b.inverse_mass + a.inverse_mass);
+    }
 }
 
 bool Physics::RaySphereIntersect(const Vector3r& ray_start, const Vector3r& ray_direction, const Vector3r& sphere_center,
@@ -97,9 +102,9 @@ bool Physics::RaySphereIntersect(const Vector3r& ray_start, const Vector3r& ray_
     const Vector3r m = sphere_center - ray_start;
     const real a = Opal::Dot(ray_direction, ray_direction);
     const real b = Opal::Dot(m, ray_direction);
-    const real c = Opal::Dot(m, m) - sphere_radius * sphere_radius;
-    const real delta = b * b - a * c;
-    const real inverse_a = PHYSICS_CONST(1.0) / delta;
+    const real c = Opal::Dot(m, m) - (sphere_radius * sphere_radius);
+    const real delta = (b * b) - (a * c);
+    const real inverse_a = PHYSICS_CONST(1.0) / a;
     if (delta < 0)
     {
         // No real solutions
@@ -128,7 +133,7 @@ bool Physics::SphereSphereDynamic(const SphereShape* shape_a, const SphereShape*
     {
         // Ray is too short, just check if spheres intersect
         const Vector3r ab = position_b - position_a;
-        real radius = shape_a->GetRadius() + shape_b->GetRadius() + k_kinda_small_number;
+        const real radius = shape_a->GetRadius() + shape_b->GetRadius() + k_kinda_small_number;
         if (Opal::LengthSquared(ab) > radius * radius)
         {
             // Spheres don't intersect
