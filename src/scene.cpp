@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "physics/broad-phase.hpp"
+#include "physics/contact.hpp"
 #include "physics/intersect.hpp"
 
 void Physics::Scene::Update(f32 delta_seconds)

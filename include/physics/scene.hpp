@@ -3,7 +3,7 @@
 #include "opal/container/dynamic-array.h"
 
 #include "physics/body.hpp"
-#include "physics/intersect.hpp"
+#include "physics/contact.hpp"
 
 namespace Physics
 {
