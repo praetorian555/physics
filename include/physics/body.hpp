@@ -31,6 +31,9 @@ struct Body
     void ApplyImpulse(const Vector3r& impulse, const Vector3r& world_point);
 
     void Update(real delta_seconds);
+
+private:
+    void LimitAngularVelocity();
 };
 
 }  // namespace Physics
