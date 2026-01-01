@@ -1,6 +1,6 @@
 #include "physics/shapes/box-shape.hpp"
 
-void Physics::BoxShape::Build(const Opal::ArrayView<Vector3r>& vertices)
+void Physics::BoxShape::Build(Opal::ArrayView<Vector3r> vertices)
 {
     m_bounds = Bounds3r(Point3r::Zero());
     for (const auto& vertex : vertices)

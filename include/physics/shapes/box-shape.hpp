@@ -10,7 +10,7 @@ namespace Physics
 struct BoxShape : Shape
 {
     ~BoxShape() override = default;
-    void Build(const Opal::ArrayView<Vector3r>& vertices) override;
+    void Build(Opal::ArrayView<Vector3r> vertices) override;
     [[nodiscard]] ShapeType GetType() const override { return ShapeType::Box; }
     [[nodiscard]] Matrix3x3r GetInertiaTensor() const override;
     [[nodiscard]] Bounds3r GetBounds() const override;

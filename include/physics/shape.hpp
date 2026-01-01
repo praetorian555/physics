@@ -17,7 +17,7 @@ enum class ShapeType : u8
 struct Shape
 {
     virtual ~Shape() = default;
-    virtual void Build(const Opal::ArrayView<Vector3r>& vertices);
+    virtual void Build(Opal::ArrayView<Vector3r> vertices);
     [[nodiscard]] virtual ShapeType GetType() const = 0;
     [[nodiscard]] virtual Vector3r GetCenterOfMass() const { return m_center_mass; }
     [[nodiscard]] virtual Matrix3x3r GetInertiaTensor() const = 0;
