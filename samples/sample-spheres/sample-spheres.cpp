@@ -1,5 +1,3 @@
-#include "opal/rng.h"
-
 #include "shared/sample-app.hpp"
 
 #include "physics/shapes/sphere-shape.hpp"

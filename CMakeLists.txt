@@ -88,14 +88,21 @@ if (PHYSICS_BUILD_SAMPLES)
         FetchContent_MakeAvailable(rndr)
     endif ()
 
-    add_executable(physics_sample_spheres
+    add_library(shared
             samples/shared/player-controller.hpp
             samples/shared/player-controller.cpp
             samples/shared/sample-app.hpp
-            samples/shared/sample-app.cpp
+            samples/shared/sample-app.cpp)
+    target_link_libraries(shared PUBLIC physics rndr physics_options physics_warnings)
+    target_compile_features(shared PUBLIC cxx_std_20)
+    target_include_directories(shared PUBLIC ${PROJECT_SOURCE_DIR}/samples)
+
+    add_executable(physics_sample_spheres
             samples/sample-spheres/sample-spheres.cpp)
-    target_link_libraries(physics_sample_spheres PRIVATE physics rndr physics_options physics_warnings)
-    target_compile_features(physics_sample_spheres PRIVATE cxx_std_20)
-    target_include_directories(physics_sample_spheres PRIVATE ${PROJECT_SOURCE_DIR}/samples)
+    target_link_libraries(physics_sample_spheres PRIVATE shared)
+
+    add_executable(physics_sample_sandbox
+        samples/sample-sandbox/sample-sandbox.cpp)
+    target_link_libraries(physics_sample_sandbox PRIVATE shared)
 
 endif ()

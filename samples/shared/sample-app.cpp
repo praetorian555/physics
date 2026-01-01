@@ -2,6 +2,7 @@
 
 #include "opal/paths.h"
 #include "opal/time.h"
+#include "physics/shapes/box-shape.hpp"
 
 #include "physics/shapes/sphere-shape.hpp"
 
@@ -183,6 +184,14 @@ void SampleApp::DrawBody(const Physics::Body& body)
             {
                 m_shape_renderer->DrawSphere(mat, m_default_material);
             }
+            break;
+        }
+        case Physics::ShapeType::Box:
+        {
+            const Physics::BoxShape* box = static_cast<Physics::BoxShape*>(body.shape);
+            const Physics::Vector3r extent = box->GetExtent();
+            mat *= Opal::Scale(extent.x, extent.y, extent.z);
+            m_shape_renderer->DrawCube(mat, m_default_material);
             break;
         }
         default:

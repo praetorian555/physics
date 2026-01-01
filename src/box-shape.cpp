@@ -18,6 +18,7 @@ void Physics::BoxShape::Build(Opal::ArrayView<Vector3r> vertices)
     m_vertices.PushBack(Vector3r(m_bounds.max.x, m_bounds.min.y, m_bounds.max.z));
     m_vertices.PushBack(Vector3r(m_bounds.max.x, m_bounds.max.y, m_bounds.min.z));
 
+    m_extent = Opal::Extent(m_bounds);
     m_center_mass = PointToVector((m_bounds.min + PointToVector(m_bounds.max)) * PHYSICS_CONST(0.5));
 }
 

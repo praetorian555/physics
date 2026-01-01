@@ -19,8 +19,11 @@ struct BoxShape : Shape
                                            f32 bias) const override;
     [[nodiscard]] real GetFastestLinearSpeed(const Vector3r& angular_velocity, const Vector3r& direction) const override;
 
+    Vector3r GetExtent() const { return m_extent; }
+
 private:
     Opal::DynamicArray<Vector3r> m_vertices;
+    Vector3r m_extent;
     Bounds3r m_bounds;
 };
 
