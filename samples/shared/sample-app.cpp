@@ -3,6 +3,8 @@
 #include "opal/paths.h"
 #include "opal/time.h"
 
+#include "physics/shapes/sphere-shape.hpp"
+
 SampleApp::SampleApp()
 {
     m_rndr_app = Rndr::Application::Create({.enable_input_system = true});
