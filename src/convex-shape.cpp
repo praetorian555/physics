@@ -243,7 +243,7 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
     }
 
     out_hull_points.PushBack(point);
-    const Physics::i32 new_point_idx =static_cast<Physics::i32>(out_hull_points.GetSize()) - 1;
+    const Physics::i32 new_point_idx = static_cast<Physics::i32>(out_hull_points.GetSize()) - 1;
 
     // Add new triangles where each one is made out of one unique edge and a new point.
     for (const Edge& unique_edge : unique_edges)
@@ -323,6 +323,96 @@ void BuildConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::DynamicA
     ExpandConvexHull(vertices, out_hull_points, out_triangles);
 }
 
+bool IsExternal(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles, const Physics::Vector3r& point)
+{
+    for (const Triangle& triangle : triangles)
+    {
+        const Physics::Vector3r& a = hull_points[triangle.a];
+        const Physics::Vector3r& b = hull_points[triangle.b];
+        const Physics::Vector3r& c = hull_points[triangle.c];
+        const Physics::real distance = FindDistanceFromTriangle(point, a, b, c);
+        if (distance > 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+Physics::Vector3r CalculateCenterOfMass(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles,
+                                        Physics::i32 sample_count = 100)
+{
+    Physics::Bounds3r bounds(Physics::Point3r::Zero());
+    for (const Physics::Vector3r& point : hull_points)
+    {
+        bounds = Opal::Union(bounds, Physics::VectorToPoint(point));
+    }
+    Physics::Vector3r center_of_mass = Physics::Vector3r::Zero();
+    Physics::i32 points_inside_count = 0;
+    const Physics::Vector3r delta = Opal::Extent(bounds) / sample_count;
+    for (Physics::real x = bounds.min.x; x < bounds.max.x; x += delta.x)
+    {
+        for (Physics::real y = bounds.min.y; y < bounds.max.y; y += delta.y)
+        {
+            for (Physics::real z = bounds.min.z; z < bounds.max.z; z += delta.z)
+            {
+                const Physics::Vector3r point(x, y, z);
+                if (IsExternal(hull_points, triangles, point))
+                {
+                    continue;
+                }
+                center_of_mass += point;
+                ++points_inside_count;
+            }
+        }
+    }
+    return center_of_mass / static_cast<Physics::real>(points_inside_count);
+}
+
+Physics::Matrix3x3r CalculateInertiaTensor(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles,
+                                           const Physics::Vector3r& center_mass, Physics::i32 sample_count = 100)
+{
+    Physics::Bounds3r bounds(Physics::Point3r::Zero());
+    for (const Physics::Vector3r& point : hull_points)
+    {
+        bounds = Opal::Union(bounds, Physics::VectorToPoint(point));
+    }
+    Physics::Matrix3x3r tensor(0);
+    Physics::i32 points_inside_count = 0;
+    const Physics::Vector3r delta = Opal::Extent(bounds) / sample_count;
+    for (Physics::real x = bounds.min.x; x < bounds.max.x; x += delta.x)
+    {
+        for (Physics::real y = bounds.min.y; y < bounds.max.y; y += delta.y)
+        {
+            for (Physics::real z = bounds.min.z; z < bounds.max.z; z += delta.z)
+            {
+                Physics::Vector3r point(x, y, z);
+                if (IsExternal(hull_points, triangles, point))
+                {
+                    continue;
+                }
+                point -= center_mass;
+
+                tensor(0, 0) += (point.y * point.y) + (point.z * point.z);
+                tensor(1, 1) += (point.x * point.x) + (point.z * point.z);
+                tensor(2, 2) += (point.x * point.y) + (point.z * point.z);
+
+                tensor(0, 1) += PHYSICS_CONST(-1) * point.x * point.y;
+                tensor(0, 2) += PHYSICS_CONST(-1) * point.x * point.z;
+                tensor(1, 2) += PHYSICS_CONST(-1) * point.y * point.z;
+
+                tensor(1, 0) += PHYSICS_CONST(-1) * point.x * point.y;
+                tensor(2, 0) += PHYSICS_CONST(-1) * point.x * point.z;
+                tensor(2, 1) += PHYSICS_CONST(-1) * point.y * point.z;
+
+                ++points_inside_count;
+            }
+        }
+    }
+    tensor *= (PHYSICS_CONST(1) / static_cast<Physics::real>(points_inside_count));
+    return tensor;
+}
+
 }  // namespace
 
 Physics::ConvexShape::ConvexShape(Opal::ArrayView<Vector3r> vertices)
@@ -330,9 +420,26 @@ Physics::ConvexShape::ConvexShape(Opal::ArrayView<Vector3r> vertices)
     ConvexShape::Build(vertices);
 }
 
-void Physics::ConvexShape::Build(Opal::ArrayView<Vector3r> vertices) {}
+void Physics::ConvexShape::Build(Opal::ArrayView<Vector3r> vertices)
+{
+    Opal::DynamicArray<Vector3r> hull_points;
+    Opal::DynamicArray<Triangle> triangles;
+    BuildConvexHull(vertices, hull_points, triangles);
+    m_vertices = hull_points;
 
-Physics::Matrix3x3r Physics::ConvexShape::GetInertiaTensor() const {}
+    m_bounds = Bounds3r(Point3r::Zero());
+    for (const Vector3r& vertex : m_vertices)
+    {
+        m_bounds = Opal::Union(m_bounds, VectorToPoint(vertex));
+    }
+    m_center_mass = CalculateCenterOfMass(hull_points, triangles);
+    m_inertia_tensor = CalculateInertiaTensor(hull_points, triangles, m_center_mass);
+}
+
+Physics::Matrix3x3r Physics::ConvexShape::GetInertiaTensor() const
+{
+    return m_inertia_tensor;
+}
 
 Physics::Bounds3r Physics::ConvexShape::GetBounds() const
 {
@@ -363,6 +470,19 @@ Physics::Bounds3r Physics::ConvexShape::GetBounds(const Vector3r& position, cons
 Physics::Vector3r Physics::ConvexShape::Support(const Vector3r& direction, const Vector3r& position, const Quatr& orientation,
                                                 f32 bias) const
 {
+    Vector3r max_point = Vector3r::Zero();
+    real max_distance = Opal::k_neg_inf_float;
+    for (const auto& vertex : m_vertices)
+    {
+        const Vector3r& point = position + orientation * vertex;
+        const real distance = Opal::Dot(point, direction);
+        if (distance > max_distance)
+        {
+            max_distance = distance;
+            max_point = point;
+        }
+    }
+    return max_point + Opal::Normalize(direction) * bias;
 }
 
 Physics::real Physics::ConvexShape::GetFastestLinearSpeed(const Vector3r& angular_velocity, const Vector3r& direction) const
