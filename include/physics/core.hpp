@@ -7,6 +7,7 @@
 #include "opal/math/bounds3.h"
 #include "opal/math/point3.h"
 #include "opal/math/quaternion.h"
+#include "opal/math/vector2.h"
 #include "opal/types.h"
 
 namespace Physics
@@ -35,6 +36,7 @@ using real = Opal::f64;
 using real = Opal::f32;
 #endif
 
+using Vector2r = Opal::Vector2<real>;
 using Point3r = Opal::Point3<real>;
 using Vector3r = Opal::Vector3<real>;
 using Quatr = Opal::Quaternion<real>;

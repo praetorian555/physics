@@ -32,6 +32,7 @@ public:
     void AddBody(Physics::Body body);
     void DrawBody(const Physics::Body& body);
     void SetPhysicsUpdateInterval(Physics::f32 interval) { m_physics_update_interval = interval; }
+    void AddMesh(Physics::Shape* shape, Rndr::Mesh mesh);
 
 protected:
     Opal::Ref<Rndr::Application> m_rndr_app;
@@ -42,6 +43,8 @@ protected:
     Opal::Ref<Rndr::GridRenderer> m_grid_renderer;
     Opal::Ref<Rndr::Shape3DRenderer> m_shape_renderer;
     Opal::Ref<const Rndr::Material> m_default_material;
+
+    Opal::HashMap<Physics::Shape*, Rndr::Mesh> m_meshes;
 
     bool m_is_paused = false;
     bool m_advance_frame = false;

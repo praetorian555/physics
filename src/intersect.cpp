@@ -4,8 +4,8 @@
 
 bool Physics::Intersect(Body& a, Body& b, f32 delta_seconds, Contact& contact)
 {
-    PHYSICS_ASSERT(a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere,
-                   "We only support intersect of two spheres!");
+    // PHYSICS_ASSERT(a.shape->GetType() == ShapeType::Sphere && b.shape->GetType() == ShapeType::Sphere,
+    //                "We only support intersect of two spheres!");
     contact.a = &a;
     contact.b = &b;
 

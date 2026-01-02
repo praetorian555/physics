@@ -5,13 +5,6 @@
 namespace
 {
 
-struct Triangle
-{
-    Physics::i32 a;
-    Physics::i32 b;
-    Physics::i32 c;
-};
-
 Physics::i32 FindPointFurthestInDirection(Opal::ArrayView<Physics::Vector3r> vertices, const Physics::Vector3r& direction)
 {
     Physics::i32 idx = 0;
@@ -83,7 +76,7 @@ Physics::Vector3r FindPointFurthestFromTriangle(Opal::ArrayView<Physics::Vector3
 }
 
 void BuildTetrahedron(Opal::ArrayView<Physics::Vector3r> vertices, Opal::DynamicArray<Physics::Vector3r>& out_hull_points,
-                      Opal::DynamicArray<Triangle>& out_triangles)
+                      Opal::DynamicArray<Physics::Triangle>& out_triangles)
 {
     Opal::InPlaceArray<Physics::Vector3r, 4> points;
     Physics::i32 idx = FindPointFurthestInDirection(vertices, Physics::Vector3r(1, 0, 0));
@@ -110,7 +103,7 @@ void BuildTetrahedron(Opal::ArrayView<Physics::Vector3r> vertices, Opal::Dynamic
     out_triangles.PushBack({.a = 1, .b = 0, .c = 3});
 }
 
-void RemoveInternalPoints(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles,
+void RemoveInternalPoints(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Physics::Triangle> triangles,
                           Opal::DynamicArray<Physics::Vector3r>& points_to_check)
 {
     // Remove any points that are inside the hull
@@ -118,7 +111,7 @@ void RemoveInternalPoints(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::
     {
         const Physics::Vector3r& point = points_to_check[point_idx];
         bool is_external = false;
-        for (const Triangle& triangle : triangles)
+        for (const Physics::Triangle& triangle : triangles)
         {
             const Physics::Vector3r& a = hull_points[triangle.a];
             const Physics::Vector3r& b = hull_points[triangle.b];
@@ -167,7 +160,7 @@ struct Edge
     bool operator==(const Edge& other) const { return (a == other.a && b == other.b) || (a == other.b && b == other.a); }
 };
 
-bool IsEdgeUnique(Opal::ArrayView<Triangle> triangles, Opal::ArrayView<Physics::i32> facing_triangle_indices,
+bool IsEdgeUnique(Opal::ArrayView<Physics::Triangle> triangles, Opal::ArrayView<Physics::i32> facing_triangle_indices,
                   Physics::i32 triangle_index_to_ignore, const Edge& edge)
 {
     for (const Physics::i32 idx_of_idx : facing_triangle_indices)
@@ -177,7 +170,7 @@ bool IsEdgeUnique(Opal::ArrayView<Triangle> triangles, Opal::ArrayView<Physics::
         {
             continue;
         }
-        const Triangle& triangle = triangles[facing_triangle_idx];
+        const Physics::Triangle& triangle = triangles[facing_triangle_idx];
         Opal::InPlaceArray<Edge, 3> edges;
         edges[0].a = triangle.a;
         edges[0].b = triangle.b;
@@ -197,13 +190,13 @@ bool IsEdgeUnique(Opal::ArrayView<Triangle> triangles, Opal::ArrayView<Physics::
 }
 
 void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector3r>& out_hull_points,
-              Opal::DynamicArray<Triangle>& out_triangles)
+              Opal::DynamicArray<Physics::Triangle>& out_triangles)
 {
     // Find all triangles facing the given point.
     Opal::DynamicArray<Physics::i32> facing_triangle_indices(Opal::GetScratchAllocator());
     for (Physics::i32 triangle_idx = 0; triangle_idx < out_triangles.GetSize(); ++triangle_idx)
     {
-        const Triangle& triangle = out_triangles[triangle_idx];
+        const Physics::Triangle& triangle = out_triangles[triangle_idx];
         const Physics::Vector3r& a = out_hull_points[triangle.a];
         const Physics::Vector3r& b = out_hull_points[triangle.b];
         const Physics::Vector3r& c = out_hull_points[triangle.c];
@@ -219,7 +212,7 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
     for (const Physics::i32 idx_of_idx : facing_triangle_indices)
     {
         const Physics::i32 facing_triangle_idx = facing_triangle_indices[idx_of_idx];
-        const Triangle& facing_triangle = out_triangles[facing_triangle_idx];
+        const Physics::Triangle& facing_triangle = out_triangles[facing_triangle_idx];
         Opal::InPlaceArray<Edge, 3> edges;
         edges[0].a = facing_triangle.a;
         edges[0].b = facing_triangle.b;
@@ -248,17 +241,17 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
     // Add new triangles where each one is made out of one unique edge and a new point.
     for (const Edge& unique_edge : unique_edges)
     {
-        const Triangle triangle{.a = unique_edge.a, .b = unique_edge.b, .c = new_point_idx};
+        const Physics::Triangle triangle{.a = unique_edge.a, .b = unique_edge.b, .c = new_point_idx};
         out_triangles.PushBack(triangle);
     }
 }
 
-void RemoveUnreferencedVertices(Opal::DynamicArray<Physics::Vector3r>& out_hull_points, Opal::ArrayView<Triangle> triangles)
+void RemoveUnreferencedVertices(Opal::DynamicArray<Physics::Vector3r>& out_hull_points, Opal::ArrayView<Physics::Triangle> triangles)
 {
     for (Physics::i32 point_idx = 0; point_idx < out_hull_points.GetSize(); ++point_idx)
     {
         bool is_point_used = false;
-        for (const Triangle& triangle : triangles)
+        for (const Physics::Triangle& triangle : triangles)
         {
             if (triangle.a == point_idx || triangle.b == point_idx || triangle.c == point_idx)
             {
@@ -270,7 +263,7 @@ void RemoveUnreferencedVertices(Opal::DynamicArray<Physics::Vector3r>& out_hull_
         {
             continue;
         }
-        for (Triangle& triangle : triangles)
+        for (Physics::Triangle& triangle : triangles)
         {
             if (triangle.a > point_idx)
             {
@@ -291,7 +284,7 @@ void RemoveUnreferencedVertices(Opal::DynamicArray<Physics::Vector3r>& out_hull_
 }
 
 void ExpandConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::DynamicArray<Physics::Vector3r>& out_hull_points,
-                      Opal::DynamicArray<Triangle>& out_triangles)
+                      Opal::DynamicArray<Physics::Triangle>& out_triangles)
 {
     Opal::DynamicArray<Physics::Vector3r> external_vertices(Opal::GetScratchAllocator());
     external_vertices.Append(vertices);
@@ -311,21 +304,10 @@ void ExpandConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::Dynamic
     RemoveUnreferencedVertices(out_hull_points, out_triangles);
 }
 
-void BuildConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::DynamicArray<Physics::Vector3r>& out_hull_points,
-                     Opal::DynamicArray<Triangle>& out_triangles)
+bool IsExternal(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Physics::Triangle> triangles,
+                const Physics::Vector3r& point)
 {
-    if (vertices.GetSize() < 4)
-    {
-        throw Opal::Exception("Not enough vertices to build a convex hull");
-    }
-
-    BuildTetrahedron(vertices, out_hull_points, out_triangles);
-    ExpandConvexHull(vertices, out_hull_points, out_triangles);
-}
-
-bool IsExternal(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles, const Physics::Vector3r& point)
-{
-    for (const Triangle& triangle : triangles)
+    for (const Physics::Triangle& triangle : triangles)
     {
         const Physics::Vector3r& a = hull_points[triangle.a];
         const Physics::Vector3r& b = hull_points[triangle.b];
@@ -339,7 +321,7 @@ bool IsExternal(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<
     return false;
 }
 
-Physics::Vector3r CalculateCenterOfMass(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles,
+Physics::Vector3r CalculateCenterOfMass(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Physics::Triangle> triangles,
                                         Physics::i32 sample_count = 100)
 {
     Physics::Bounds3r bounds(Physics::Point3r::Zero());
@@ -369,7 +351,7 @@ Physics::Vector3r CalculateCenterOfMass(Opal::ArrayView<Physics::Vector3r> hull_
     return center_of_mass / static_cast<Physics::real>(points_inside_count);
 }
 
-Physics::Matrix3x3r CalculateInertiaTensor(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Triangle> triangles,
+Physics::Matrix3x3r CalculateInertiaTensor(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::ArrayView<Physics::Triangle> triangles,
                                            const Physics::Vector3r& center_mass, Physics::i32 sample_count = 100)
 {
     Physics::Bounds3r bounds(Physics::Point3r::Zero());
@@ -432,8 +414,8 @@ void Physics::ConvexShape::Build(Opal::ArrayView<Vector3r> vertices)
     {
         m_bounds = Opal::Union(m_bounds, VectorToPoint(vertex));
     }
-    m_center_mass = CalculateCenterOfMass(hull_points, triangles);
-    m_inertia_tensor = CalculateInertiaTensor(hull_points, triangles, m_center_mass);
+    m_center_mass = CalculateCenterOfMass(hull_points, triangles, 10);
+    m_inertia_tensor = CalculateInertiaTensor(hull_points, triangles, m_center_mass, 10);
 }
 
 Physics::Matrix3x3r Physics::ConvexShape::GetInertiaTensor() const
@@ -496,4 +478,16 @@ Physics::real Physics::ConvexShape::GetFastestLinearSpeed(const Vector3r& angula
         max_speed = Opal::Max(max_speed, speed);
     }
     return max_speed;
+}
+
+void Physics::BuildConvexHull(Opal::ArrayView<Vector3r> vertices, Opal::DynamicArray<Vector3r>& out_hull_points,
+                              Opal::DynamicArray<Triangle>& out_triangles)
+{
+    if (vertices.GetSize() < 4)
+    {
+        throw Opal::Exception("Not enough vertices to build a convex hull");
+    }
+
+    BuildTetrahedron(vertices, out_hull_points, out_triangles);
+    ExpandConvexHull(vertices, out_hull_points, out_triangles);
 }

@@ -3,6 +3,7 @@
 #include "opal/paths.h"
 #include "opal/time.h"
 #include "physics/shapes/box-shape.hpp"
+#include "physics/shapes/convex-shape.hpp"
 
 #include "physics/shapes/sphere-shape.hpp"
 
@@ -194,9 +195,20 @@ void SampleApp::DrawBody(const Physics::Body& body)
             m_shape_renderer->DrawCube(mat, m_default_material);
             break;
         }
+        case Physics::ShapeType::Convex:
+        {
+            const Rndr::Mesh& mesh = m_meshes.GetValue(body.shape);
+            m_shape_renderer->DrawMesh(mesh, mat, m_default_material);
+            break;
+        }
         default:
         {
             throw Opal::Exception("Invalid shape type");
         }
     }
+}
+
+void SampleApp::AddMesh(Physics::Shape* shape, Rndr::Mesh mesh)
+{
+    m_meshes.Insert(shape, std::move(mesh));
 }
