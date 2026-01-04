@@ -39,6 +39,7 @@ using real = Opal::f32;
 using Vector2r = Opal::Vector2<real>;
 using Point3r = Opal::Point3<real>;
 using Vector3r = Opal::Vector3<real>;
+using Vector4r = Opal::Vector4<real>;
 using Quatr = Opal::Quaternion<real>;
 using Matrix4x4r = Opal::Matrix4x4<real>;
 using Matrix3x3r = Opal::Matrix3x3<real>;
