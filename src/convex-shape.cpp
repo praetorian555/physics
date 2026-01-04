@@ -8,7 +8,7 @@ namespace
 Physics::i32 FindPointFurthestInDirection(Opal::ArrayView<Physics::Vector3r> vertices, const Physics::Vector3r& direction)
 {
     Physics::i32 idx = 0;
-    Physics::real max_distance = 0;
+    Physics::real max_distance = static_cast<Physics::real>(Opal::k_neg_inf_double);
     for (Physics::i32 vert_idx = 0; vert_idx < vertices.GetSize(); ++vert_idx)
     {
         const auto& vertex = vertices[vert_idx];
@@ -61,7 +61,7 @@ Physics::Vector3r FindPointFurthestFromTriangle(Opal::ArrayView<Physics::Vector3
                                                 const Physics::Vector3r& b, const Physics::Vector3r& c)
 {
     Physics::i32 idx = 0;
-    Physics::real max_distance = 0;
+    Physics::real max_distance = static_cast<Physics::real>(Opal::k_neg_inf_double);
     for (Physics::i32 vert_idx = 0; vert_idx < vertices.GetSize(); ++vert_idx)
     {
         const auto& vertex = vertices[vert_idx];
@@ -87,7 +87,7 @@ void BuildTetrahedron(Opal::ArrayView<Physics::Vector3r> vertices, Opal::Dynamic
     points[3] = FindPointFurthestFromTriangle(vertices, points[0], points[1], points[2]);
 
     // Do this check to make sure all faces are CCW.
-    const Physics::real distance = FindDistanceFromTriangle(points[0], points[1], points[2], points[3]);
+    const Physics::real distance = FindDistanceFromTriangle(points[3], points[0], points[1], points[2]);
     if (distance > 0)
     {
         std::swap(points[0], points[1]);
@@ -123,7 +123,7 @@ void RemoveInternalPoints(Opal::ArrayView<Physics::Vector3r> hull_points, Opal::
                 break;
             }
         }
-        if (is_external)
+        if (!is_external)
         {
             points_to_check.Erase(points_to_check.begin() + point_idx);
             --point_idx;
@@ -163,9 +163,8 @@ struct Edge
 bool IsEdgeUnique(Opal::ArrayView<Physics::Triangle> triangles, Opal::ArrayView<Physics::i32> facing_triangle_indices,
                   Physics::i32 triangle_index_to_ignore, const Edge& edge)
 {
-    for (const Physics::i32 idx_of_idx : facing_triangle_indices)
+    for (const Physics::i32 facing_triangle_idx : facing_triangle_indices)
     {
-        const Physics::i32 facing_triangle_idx = facing_triangle_indices[idx_of_idx];
         if (facing_triangle_idx == triangle_index_to_ignore)
         {
             continue;
@@ -194,7 +193,7 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
 {
     // Find all triangles facing the given point.
     Opal::DynamicArray<Physics::i32> facing_triangle_indices(Opal::GetScratchAllocator());
-    for (Physics::i32 triangle_idx = 0; triangle_idx < out_triangles.GetSize(); ++triangle_idx)
+    for (Physics::i32 triangle_idx = static_cast<Physics::i32>(out_triangles.GetSize()) - 1; triangle_idx >= 0; --triangle_idx)
     {
         const Physics::Triangle& triangle = out_triangles[triangle_idx];
         const Physics::Vector3r& a = out_hull_points[triangle.a];
@@ -209,9 +208,8 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
 
     // Among the facing triangles find all edges that are unique. These will be used to make new triangles.
     Opal::DynamicArray<Edge> unique_edges(Opal::GetScratchAllocator());
-    for (const Physics::i32 idx_of_idx : facing_triangle_indices)
+    for (const Physics::i32 facing_triangle_idx : facing_triangle_indices)
     {
-        const Physics::i32 facing_triangle_idx = facing_triangle_indices[idx_of_idx];
         const Physics::Triangle& facing_triangle = out_triangles[facing_triangle_idx];
         Opal::InPlaceArray<Edge, 3> edges;
         edges[0].a = facing_triangle.a;
@@ -230,9 +228,9 @@ void AddPoint(const Physics::Vector3r& point, Opal::DynamicArray<Physics::Vector
     }
 
     // Remove all facing indices.
-    for (Physics::i32 i = 0; i < unique_edges.GetSize(); ++i)
+    for (const Physics::i32 facing_triangle_idx : facing_triangle_indices)
     {
-        out_triangles.Erase(out_triangles.begin() + facing_triangle_indices[i]);
+        out_triangles.Erase(out_triangles.begin() + facing_triangle_idx);
     }
 
     out_hull_points.PushBack(point);
@@ -291,6 +289,8 @@ void ExpandConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::Dynamic
 
     RemoveInternalPoints(out_hull_points, out_triangles, external_vertices);
 
+    // const int max_steps = 3;
+    // int steps = 0;
     while (!external_vertices.IsEmpty())
     {
         const Physics::i32 point_idx = FindPointFurthestInDirection(external_vertices, external_vertices[0]);
@@ -300,6 +300,7 @@ void ExpandConvexHull(Opal::ArrayView<Physics::Vector3r> vertices, Opal::Dynamic
         AddPoint(point, out_hull_points, out_triangles);
         // We added a new point, with new triangles, check again if some of the remaining points are inside the convex hull
         RemoveInternalPoints(out_hull_points, out_triangles, external_vertices);
+        // steps++;
     }
     RemoveUnreferencedVertices(out_hull_points, out_triangles);
 }

@@ -26,6 +26,8 @@ struct ConvexShape : Shape
     [[nodiscard]] Vector3r Support(const Vector3r& direction, const Vector3r& position, const Quatr& orientation, f32 bias) const override;
     [[nodiscard]] real GetFastestLinearSpeed(const Vector3r& angular_velocity, const Vector3r& direction) const override;
 
+    const Opal::DynamicArray<Vector3r>& GetVertices() const { return m_vertices; }
+
 private:
     Opal::DynamicArray<Vector3r> m_vertices;
     Bounds3r m_bounds;

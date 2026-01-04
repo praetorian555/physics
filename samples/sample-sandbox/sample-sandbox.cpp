@@ -95,7 +95,7 @@ public:
             Rndr::Mesh diamond_mesh = BuildDiamondMesh(diamond_vertices);
             Physics::Body body;
             body.position = Physics::Vector3r(0, 10, 0);
-            body.orientation = Physics::Quatr::Identity();
+            body.orientation = Physics::Quatr::FromAxisAngleDegrees(Physics::Vector3r(1, 0, 0), -90);
             body.linear_velocity = Physics::Vector3r(0, 0, 0);
             body.angular_velocity = Physics::Vector3r(0, 0, 0);
             body.inverse_mass = 1.0f;
@@ -208,8 +208,8 @@ public:
             mesh.vertices.Append(Opal::AsBytes(vertex_b));
             mesh.vertices.Append(Opal::AsBytes(vertex_c));
             mesh.indices.Append(Opal::AsBytes(idx));
-            mesh.indices.Append(Opal::AsBytes(idx_2));
             mesh.indices.Append(Opal::AsBytes(idx_1));
+            mesh.indices.Append(Opal::AsBytes(idx_2));
         }
         mesh.index_count = static_cast<Physics::i32>(mesh.indices.GetSize() / sizeof(Physics::i32));
         mesh.vertex_count = static_cast<Physics::i32>(mesh.vertices.GetSize() / sizeof(Vertex));
