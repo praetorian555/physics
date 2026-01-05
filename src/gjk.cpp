@@ -4,6 +4,7 @@
 
 Physics::Vector2r Physics::SignedVolume1D(const Vector3r& start, const Vector3r& end)
 {
+    PHYSICS_ASSERT(!Opal::IsEqual(start, end, PHYSICS_CONST(0.000001)), "Line segment must not have 0 length");
     const Vector3r line = end - start;
     const Vector3r start_to_origin = Vector3r::Zero() - start;
     const Vector3r projected_vector = start + (Opal::Dot(start_to_origin, line) * line) / Opal::LengthSquared(line);
@@ -56,6 +57,8 @@ bool IsSameSign(Physics::real a, Physics::real b)
 Physics::Vector3r Physics::SignedVolume2D(const Vector3r& a, const Vector3r& b, const Vector3r& c)
 {
     const Vector3r normal = Opal::Cross(b - a, c - a);
+    PHYSICS_ASSERT(Opal::LengthSquared(normal) > PHYSICS_CONST(0.000001) * PHYSICS_CONST(0.000001),
+                   "Point of the triangle must not be colinear");
     const Vector3r projected_origin = (Opal::Dot(a, normal) * normal) / Opal::LengthSquared(normal);
 
     // Find the axis with the greatest projected area
