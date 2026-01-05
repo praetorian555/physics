@@ -275,3 +275,157 @@ TEST_CASE("SignedVolume2D - Reconstructed point is closest to origin", "[GJK]")
     REQUIRE(closest[2] == Catch::Approx(0.0f));
 }
 
+TEST_CASE("SignedVolume3D - Origin inside tetrahedron", "[GJK]")
+{
+    const Vector3r a(1.0f, -1.0f, -1.0f);
+    const Vector3r b(-1.0f, -1.0f, -1.0f);
+    const Vector3r c(0.0f, 1.0f, 0.0f);
+    const Vector3r d(0.0f, -1.0f, 1.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] + result[1] + result[2] + result[3] == Catch::Approx(1.0f));
+    REQUIRE(result[0] > 0.0f);
+    REQUIRE(result[1] > 0.0f);
+    REQUIRE(result[2] > 0.0f);
+    REQUIRE(result[3] > 0.0f);
+}
+
+TEST_CASE("SignedVolume3D - Origin at vertex a", "[GJK]")
+{
+    const Vector3r a(0.0f, 0.0f, 0.0f);
+    const Vector3r b(2.0f, 0.0f, 0.0f);
+    const Vector3r c(1.0f, 2.0f, 0.0f);
+    const Vector3r d(1.0f, 1.0f, 2.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(1.0f));
+    REQUIRE(result[1] == Catch::Approx(0.0f));
+    REQUIRE(result[2] == Catch::Approx(0.0f));
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin at vertex b", "[GJK]")
+{
+    const Vector3r a(-2.0f, 0.0f, 0.0f);
+    const Vector3r b(0.0f, 0.0f, 0.0f);
+    const Vector3r c(-1.0f, 2.0f, 0.0f);
+    const Vector3r d(-1.0f, 1.0f, 2.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(0.0f));
+    REQUIRE(result[1] == Catch::Approx(1.0f));
+    REQUIRE(result[2] == Catch::Approx(0.0f));
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin at vertex c", "[GJK]")
+{
+    const Vector3r a(-1.0f, -2.0f, 0.0f);
+    const Vector3r b(1.0f, -2.0f, 0.0f);
+    const Vector3r c(0.0f, 0.0f, 0.0f);
+    const Vector3r d(0.0f, -1.0f, 2.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(0.0f));
+    REQUIRE(result[1] == Catch::Approx(0.0f));
+    REQUIRE(result[2] == Catch::Approx(1.0f));
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin at vertex d", "[GJK]")
+{
+    const Vector3r a(-1.0f, -1.0f, -2.0f);
+    const Vector3r b(1.0f, -1.0f, -2.0f);
+    const Vector3r c(0.0f, 1.0f, -2.0f);
+    const Vector3r d(0.0f, 0.0f, 0.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(0.0f));
+    REQUIRE(result[1] == Catch::Approx(0.0f));
+    REQUIRE(result[2] == Catch::Approx(0.0f));
+    REQUIRE(result[3] == Catch::Approx(1.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin closest to face abc", "[GJK]")
+{
+    const Vector3r a(-1.0f, -1.0f, 0.0f);
+    const Vector3r b(1.0f, -1.0f, 0.0f);
+    const Vector3r c(0.0f, 1.0f, 0.0f);
+    const Vector3r d(0.0f, 0.0f, -5.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] + result[1] + result[2] + result[3] == Catch::Approx(1.0f));
+    REQUIRE(result[0] > 0.0f);
+    REQUIRE(result[1] > 0.0f);
+    REQUIRE(result[2] > 0.0f);
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin closest to face bcd", "[GJK]")
+{
+    const Vector3r a(0.0f, 0.0f, 10.0f);
+    const Vector3r b(2.0f, 0.0f, 2.0f);
+    const Vector3r c(0.0f, 2.0f, 2.0f);
+    const Vector3r d(-1.0f, -1.0f, 2.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] + result[1] + result[2] + result[3] == Catch::Approx(1.0f));
+    REQUIRE(result[0] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin outside closest to edge", "[GJK]")
+{
+    const Vector3r a(-1.0f, 0.0f, 5.0f);
+    const Vector3r b(1.0f, 0.0f, 5.0f);
+    const Vector3r c(0.0f, 5.0f, 5.0f);
+    const Vector3r d(0.0f, 0.0f, 10.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] + result[1] + result[2] + result[3] == Catch::Approx(1.0f));
+    REQUIRE(result[0] == Catch::Approx(0.5f));
+    REQUIRE(result[1] == Catch::Approx(0.5f));
+    REQUIRE(result[2] == Catch::Approx(0.0f));
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Origin outside closest to vertex", "[GJK]")
+{
+    const Vector3r a(1.0f, 1.0f, 1.0f);
+    const Vector3r b(3.0f, 1.0f, 1.0f);
+    const Vector3r c(2.0f, 3.0f, 1.0f);
+    const Vector3r d(2.0f, 2.0f, 3.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(1.0f));
+    REQUIRE(result[1] == Catch::Approx(0.0f));
+    REQUIRE(result[2] == Catch::Approx(0.0f));
+    REQUIRE(result[3] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Barycentric coordinates sum to 1", "[GJK]")
+{
+    const Vector3r a(-2.0f, 1.0f, 3.0f);
+    const Vector3r b(1.0f, -2.0f, 1.0f);
+    const Vector3r c(3.0f, 2.0f, -1.0f);
+    const Vector3r d(0.0f, 3.0f, 2.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] + result[1] + result[2] + result[3] == Catch::Approx(1.0f));
+}
+
+TEST_CASE("SignedVolume3D - Reconstructed point is closest to origin when inside", "[GJK]")
+{
+    const Vector3r a(1.0f, 0.0f, -1.0f);
+    const Vector3r b(-1.0f, 0.0f, -1.0f);
+    const Vector3r c(0.0f, 1.0f, -1.0f);
+    const Vector3r d(0.0f, 0.0f, 1.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    const Vector3r closest = a * result[0] + b * result[1] + c * result[2] + d * result[3];
+    REQUIRE(closest[0] == Catch::Approx(0.0f));
+    REQUIRE(closest[1] == Catch::Approx(0.0f));
+    REQUIRE(closest[2] == Catch::Approx(0.0f));
+}
+
+TEST_CASE("SignedVolume3D - Symmetric tetrahedron with origin at centroid", "[GJK]")
+{
+    const Vector3r a(1.0f, 1.0f, 1.0f);
+    const Vector3r b(-1.0f, -1.0f, 1.0f);
+    const Vector3r c(-1.0f, 1.0f, -1.0f);
+    const Vector3r d(1.0f, -1.0f, -1.0f);
+    const Vector4r result = SignedVolume3D(a, b, c, d);
+    REQUIRE(result[0] == Catch::Approx(0.25f));
+    REQUIRE(result[1] == Catch::Approx(0.25f));
+    REQUIRE(result[2] == Catch::Approx(0.25f));
+    REQUIRE(result[3] == Catch::Approx(0.25f));
+}
+

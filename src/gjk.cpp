@@ -49,7 +49,7 @@ namespace
 
 bool IsSameSign(Physics::real a, Physics::real b)
 {
-    return (a > 0 && b > 0) || (a < 0 && b < 0);
+    return (a >= 0 && b >= 0) || (a <= 0 && b <= 0);
 }
 
 }  // namespace
@@ -131,6 +131,52 @@ Physics::Vector3r Physics::SignedVolume2D(const Vector3r& a, const Vector3r& b, 
             barycentric_coordinates[i] = 0;
             barycentric_coordinates[j] = lambda_edge[0];
             barycentric_coordinates[k] = lambda_edge[1];
+        }
+    }
+    return barycentric_coordinates;
+}
+
+Physics::Vector4r Physics::SignedVolume3D(const Vector3r& a, const Vector3r& b, const Vector3r& c, const Vector3r& d)
+{
+    const Matrix4x4r m = Matrix4x4r::FromRows({a.x, b.x, c.x, d.x}, {a.y, b.y, c.y, d.y}, {a.z, b.z, c.z, d.z}, {1, 1, 1, 1});
+
+    Vector4r cofactors;
+    cofactors[0] = Opal::Cofactor(m, 3, 0);
+    cofactors[1] = Opal::Cofactor(m, 3, 1);
+    cofactors[2] = Opal::Cofactor(m, 3, 2);
+    cofactors[3] = Opal::Cofactor(m, 3, 3);
+
+    const real m_det = cofactors[0] + cofactors[1] + cofactors[2] + cofactors[3];
+    PHYSICS_ASSERT(!Opal::IsEqual(m_det, PHYSICS_CONST(0), PHYSICS_CONST(0.0000001)), "Determinant can't be zero");
+
+    if (IsSameSign(m_det, cofactors[0]) && IsSameSign(m_det, cofactors[1]) && IsSameSign(m_det, cofactors[2]) &&
+        IsSameSign(m_det, cofactors[3]))
+    {
+        return cofactors / m_det;
+    }
+
+    // If we are here, we need to project the origin onto the faces and determine the closest point.
+    real distance = 1e10;
+    Vector4r barycentric_coordinates = Vector4r::Zero();
+    for (i32 i = 0; i < 4; i++)
+    {
+        const i32 j = (i + 1) % 4;
+        const i32 k = (i + 2) % 4;
+
+        Opal::InPlaceArray<Vector3r, 4> face_points;
+        face_points[0] = a;
+        face_points[1] = b;
+        face_points[2] = c;
+        face_points[3] = d;
+
+        const Vector3r lambdas = SignedVolume2D(face_points[i], face_points[j], face_points[k]);
+        const Vector3r point = face_points[i] * lambdas[0] + face_points[j] * lambdas[1] + face_points[k] * lambdas[2];
+        if (Opal::LengthSquared(point) < distance)
+        {
+            distance = Opal::LengthSquared(point);
+            barycentric_coordinates[i] = lambdas[0];
+            barycentric_coordinates[j] = lambdas[1];
+            barycentric_coordinates[k] = lambdas[2];
         }
     }
     return barycentric_coordinates;
