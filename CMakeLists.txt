@@ -10,10 +10,12 @@ project(
 option(PHYSICS_HARDENING "Enable address sanitizer" ON)
 option(PHYSICS_REAL_AS_DOUBLE "Use double-precision floating point numbers" OFF)
 option(PHYSICS_BUILD_SAMPLES "Build sample projects" ON)
+option(PHYSICS_BUILD_TESTS "Build tests" ON)
 
 message(STATUS "PHYSICS_HARDENING ${PHYSICS_HARDENING}")
 message(STATUS "PHYSICS_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE}")
 message(STATUS "PHYSICS_BUILD_SAMPLES ${PHYSICS_BUILD_SAMPLES}")
+message(STATUS "PHYSICS_BUILD_TESTS" ${PHYSICS_BUILD_TESTS})
 
 # Don't use C++ 20 modules
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
@@ -108,3 +110,20 @@ if (PHYSICS_BUILD_SAMPLES)
     target_link_libraries(physics_sample_sandbox PRIVATE shared)
 
 endif ()
+
+if (PHYSICS_BUILD_TESTS)
+
+    set(PHYSICS_TEST_FILES
+            test/catch2-helper.hpp
+            test/gjk-test.cpp
+            third-party/catch2/src/catch_amalgamated.cpp)
+    add_executable(physics_test ${PHYSICS_TEST_FILES})
+    target_include_directories(physics_test PRIVATE third-party/catch2/include)
+    target_include_directories(physics_test PRIVATE third-party/catch2/include/catch2)
+    target_link_libraries(physics_test physics)
+    target_link_libraries(physics_test physics_warnings)
+    target_link_libraries(physics_test physics_options)
+    target_compile_definitions(physics_test PRIVATE CATCH_AMALGAMATED_CUSTOM_MAIN)
+    target_compile_definitions(physics_test PRIVATE cxx_std_20)
+
+endif()
