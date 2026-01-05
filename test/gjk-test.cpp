@@ -428,4 +428,3 @@ TEST_CASE("SignedVolume3D - Symmetric tetrahedron with origin at centroid", "[GJ
     REQUIRE(result[2] == Catch::Approx(0.25f));
     REQUIRE(result[3] == Catch::Approx(0.25f));
 }
-
