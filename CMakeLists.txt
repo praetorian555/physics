@@ -74,7 +74,7 @@ set(PHYSICS_FILES
         ${PROJECT_SOURCE_DIR}/src/gjk.cpp
         ${PROJECT_SOURCE_DIR}/src/body.cpp)
 add_library(physics ${PHYSICS_FILES})
-target_link_libraries(physics PRIVATE physics_options physics_warnings opal)
+target_link_libraries(physics PUBLIC physics_options physics_warnings opal)
 target_compile_features(physics PRIVATE cxx_std_20)
 target_include_directories(physics PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(physics PRIVATE ${PROJECT_SOURCE_DIR}/samples)
@@ -115,14 +115,13 @@ if (PHYSICS_BUILD_TESTS)
 
     set(PHYSICS_TEST_FILES
             test/catch2-helper.hpp
+            test/main.cpp
             test/gjk-test.cpp
             third-party/catch2/src/catch_amalgamated.cpp)
     add_executable(physics_test ${PHYSICS_TEST_FILES})
     target_include_directories(physics_test PRIVATE third-party/catch2/include)
     target_include_directories(physics_test PRIVATE third-party/catch2/include/catch2)
     target_link_libraries(physics_test physics)
-    target_link_libraries(physics_test physics_warnings)
-    target_link_libraries(physics_test physics_options)
     target_compile_definitions(physics_test PRIVATE CATCH_AMALGAMATED_CUSTOM_MAIN)
     target_compile_definitions(physics_test PRIVATE cxx_std_20)
 
