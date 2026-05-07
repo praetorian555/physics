@@ -63,7 +63,7 @@ void Physics::Scene::Update(f32 delta_seconds)
         ResolveContact(contact);
         accumulated_time += delta_time;
 #ifdef OPAL_DEBUG
-        m_last_simulation_frame_contacts.PushBack(contact);
+        m_last_simulation_frame_contacts.PushBack(std::move(contact));
 #endif
     }
 

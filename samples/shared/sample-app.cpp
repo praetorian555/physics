@@ -1,69 +1,64 @@
 #include "shared/sample-app.hpp"
 
-#include "opal/paths.h"
 #include "opal/time.h"
+
 #include "physics/shapes/box-shape.hpp"
 #include "physics/shapes/convex-shape.hpp"
-
 #include "physics/shapes/sphere-shape.hpp"
 
+#include "rndr/canvas/vertex-layout.hpp"
+#include "rndr/colors.hpp"
+#include "rndr/generic-window.hpp"
+
+namespace
+{
+constexpr Rndr::i32 k_screen_width = 1920;
+constexpr Rndr::i32 k_screen_height = 1080;
+}  // namespace
+
 SampleApp::SampleApp()
+    : m_rndr_app(Rndr::Application::Create({.enable_input_system = true})),
+      m_window(m_rndr_app->CreateGenericWindow({.width = k_screen_width, .height = k_screen_height, .name = "Physics Sample"})),
+      m_context(Rndr::Canvas::Context::Init(m_window.Clone(), {.vsync_enabled = false})),
+      m_player_controller(Opal::MakeScoped<PlayerController>(
+          Opal::GetDefaultAllocator(), *m_rndr_app, k_screen_width, k_screen_height,
+          Rndr::FlyCameraDesc{.start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}},
+          10.0f, 0.005f, 0.005f)),
+      m_grid_renderer(Opal::Ref<Rndr::Canvas::Context>{&m_context}),
+      m_pbr_renderer(Opal::Ref<Rndr::Canvas::Context>{&m_context})
 {
-    m_rndr_app = Rndr::Application::Create({.enable_input_system = true});
-    m_window = m_rndr_app->CreateGenericWindow({.width = 1920, .height = 1080, .name = "Spheres Sample"});
-    m_rndr_app->EnableHighPrecisionCursorMode(true, m_window.Get());
-    m_graphics_context = Opal::New<Rndr::GraphicsContext>(
-        Opal::GetDefaultAllocator(), Rndr::GraphicsContextDesc{.enable_debug_layer = true, .window_handle = m_window->GetNativeHandle()});
-    m_swap_chain = Opal::New<Rndr::SwapChain>(Opal::GetDefaultAllocator(), m_graphics_context,
-                                              Rndr::SwapChainDesc{.width = 1920,
-                                                                  .height = 1080,
-                                                                  .depth_stencil_format = Rndr::PixelFormat::D32_FLOAT_S8_UINT,
-                                                                  .use_depth_stencil = true,
-                                                                  .enable_vsync = false});
+    m_default_material.albedo_color = Rndr::Vector4f{0.7f, 0.7f, 0.75f, 1.0f};
+    m_default_material.roughness = Rndr::Vector4f{0.5f, 0.5f, 0.0f, 0.0f};
+    m_default_material.metallic_factor = 0.1f;
 
-    // Setup input handling
-    Rndr::InputSystem& input_system = m_rndr_app->GetInputSystemChecked();
-    Rndr::InputContext& input_context = input_system.GetCurrentContext();
-    input_context.AddAction("Toggle movement controls",
-                            {Rndr::InputBinding::CreateKeyboardButtonBinding(
-                                Rndr::InputPrimitive::F1, Rndr::InputTrigger::ButtonReleased,
-                                [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { ToggleMovementControls(); })});
-    input_context.AddAction("Pause Simulation",
-                            {Rndr::InputBinding::CreateKeyboardButtonBinding(
-                                Rndr::InputPrimitive::P, Rndr::InputTrigger::ButtonReleased,
-                                [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { PauseSimulation(); })});
-    input_context.AddAction("Reset Simulation",
-                            {Rndr::InputBinding::CreateKeyboardButtonBinding(
-                                Rndr::InputPrimitive::R, Rndr::InputTrigger::ButtonReleased,
-                                [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { ResetSimulation(); })});
-    input_context.AddAction("Advance Simulation",
-                            {Rndr::InputBinding::CreateKeyboardButtonBinding(
-                                Rndr::InputPrimitive::N, Rndr::InputTrigger::ButtonReleased,
-                                [this](Rndr::InputPrimitive, Rndr::InputTrigger, Rndr::f32, bool) { AdvanceSimulationFrame(); })});
+    Rndr::InputContext& input_context = m_rndr_app->GetInputSystemChecked().GetCurrentContext();
+    auto on_release = [](auto fn)
+    { return [fn](Rndr::Trigger trigger, bool) { if (trigger == Rndr::Trigger::Released) fn(); }; };
+    input_context.AddAction("Toggle movement controls")
+        .OnButton(on_release([this] { ToggleMovementControls(); }))
+        .Bind(Rndr::Key::F1, Rndr::Trigger::Released);
+    input_context.AddAction("Pause Simulation")
+        .OnButton(on_release([this] { PauseSimulation(); }))
+        .Bind(Rndr::Key::P, Rndr::Trigger::Released);
+    input_context.AddAction("Reset Simulation")
+        .OnButton(on_release([this] { ResetSimulation(); }))
+        .Bind(Rndr::Key::R, Rndr::Trigger::Released);
+    input_context.AddAction("Advance Simulation")
+        .OnButton(on_release([this] { AdvanceSimulationFrame(); }))
+        .Bind(Rndr::Key::N, Rndr::Trigger::Released);
 
-    const Rndr::FlyCameraDesc fly_camera_desc{
-        .start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}};
-    m_player_controller =
-        New<PlayerController>(Opal::GetDefaultAllocator(), m_rndr_app, 1920, 1080, fly_camera_desc, 10.0f, 0.005f, 0.005f);
-
-    const Rndr::RendererBaseDesc renderer_desc{.graphics_context = Opal::Ref{&m_graphics_context}, .swap_chain = Opal::Ref{&m_swap_chain}};
-    const Opal::Ref<Rndr::FrameBuffer> default_framebuffer{nullptr};
-    m_grid_renderer = Opal::New<Rndr::GridRenderer>(Opal::GetDefaultAllocator(), "Grid Renderer", renderer_desc, default_framebuffer);
-    m_shape_renderer = Opal::New<Rndr::Shape3DRenderer>(Opal::GetDefaultAllocator(), "Shape Renderer", renderer_desc, default_framebuffer);
-    Rndr::MaterialDesc material_desc{.albedo_texture_path = Opal::Paths::Combine(RNDR_CORE_ASSETS_DIR, "default-texture.png")};
-    m_default_material = Opal::New<Rndr::Material>(Opal::GetDefaultAllocator(), m_graphics_context, material_desc);
+    m_rndr_app->on_window_resize.Bind(
+        [this](const Rndr::GenericWindow& w, Rndr::i32 width, Rndr::i32 height)
+        {
+            if (m_window.GetPtr() == &w)
+            {
+                m_context.Resize(width, height);
+                m_player_controller->SetScreenSize(width, height);
+            }
+        });
 }
 
-SampleApp::~SampleApp()
-{
-    Opal::Delete<Rndr::Shape3DRenderer>(Opal::GetDefaultAllocator(), m_shape_renderer.GetPtr());
-    Opal::Delete<Rndr::GridRenderer>(Opal::GetDefaultAllocator(), m_grid_renderer.GetPtr());
-    Opal::Delete<PlayerController>(Opal::GetDefaultAllocator(), m_player_controller.GetPtr());
-    Opal::Delete<Rndr::GraphicsContext>(Opal::GetDefaultAllocator(), m_graphics_context.GetPtr());
-    Opal::Delete<Rndr::SwapChain>(Opal::GetDefaultAllocator(), m_swap_chain.GetPtr());
-    m_rndr_app->DestroyGenericWindow(m_window.GetPtr());
-    m_rndr_app->Destroy();
-}
+SampleApp::~SampleApp() = default;
 
 void SampleApp::Run()
 {
@@ -109,42 +104,37 @@ void SampleApp::ConditionallySimulateFrame(Physics::f32 delta_seconds)
     }
 }
 
-void SampleApp::RenderFrame(Physics::f32 delta_seconds)
+void SampleApp::RenderFrame(Physics::f32)
 {
-    Rndr::CommandList cmd_list{m_graphics_context};
-    cmd_list.CmdBindSwapChainFrameBuffer(m_swap_chain);
-    cmd_list.CmdClearAll(Rndr::Colors::k_black);
-    m_grid_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
+    const Rndr::Matrix4x4f view = m_player_controller->GetViewTransform();
+    const Rndr::Matrix4x4f projection = m_player_controller->GetProjectionTransform();
 
-    m_grid_renderer->Render(delta_seconds, cmd_list);
+    Rndr::Canvas::DrawList draw_list;
+    draw_list.SetRenderTarget(m_context);
+    draw_list.Clear({0.0f, 0.0f, 0.0f, 1.0f}, 1.0f);
+
+    m_grid_renderer.Render(draw_list, view, projection);
+
+    m_pbr_renderer.BeginFrame();
+    m_pbr_renderer.SetViewProjection(projection * view);
+    m_pbr_renderer.SetCameraPosition(m_player_controller->GetCameraPosition());
+    m_pbr_renderer.AddDirectionalLight(Rndr::Vector3f(1, 1, 1), Rndr::Colors::k_white);
+    m_pbr_renderer.AddDirectionalLight(Rndr::Vector3f(-1, -1, -1), Rndr::Colors::k_pink);
     for (const auto& body : m_scene.GetBodies())
     {
         DrawBody(body);
     }
-    m_shape_renderer->SetTransforms(m_player_controller->GetViewTransform(), m_player_controller->GetProjectionTransform());
-    m_shape_renderer->SetCameraPosition(m_player_controller->GetCameraPosition());
-    m_shape_renderer->AddDirectionalLight(Rndr::Vector3f(1, 1, 1), Rndr::Colors::k_white);
-    m_shape_renderer->AddDirectionalLight(Rndr::Vector3f(-1, -1, -1), Rndr::Colors::k_pink);
-    m_shape_renderer->Render(delta_seconds, cmd_list);
-    RenderImGui(delta_seconds, cmd_list);
-    cmd_list.CmdPresent(m_swap_chain);
-    m_graphics_context->SubmitCommandList(cmd_list);
+    m_pbr_renderer.Render(draw_list);
+
+    draw_list.Execute();
+    m_context.Present();
 }
 
 void SampleApp::ToggleMovementControls()
 {
-    const Rndr::CursorPositionMode mode = m_rndr_app->GetCursorPositionMode();
-    if (mode == Rndr::CursorPositionMode::Normal)
-    {
-        m_rndr_app->ShowCursor(false);
-        m_rndr_app->SetCursorPositionMode(Rndr::CursorPositionMode::ResetToCenter);
-    }
-    else
-    {
-        m_rndr_app->ShowCursor(true);
-        m_rndr_app->SetCursorPositionMode(Rndr::CursorPositionMode::Normal);
-    }
-    m_player_controller->Enable(!m_player_controller->IsEnabled());
+    const bool enabled = !m_player_controller->IsEnabled();
+    m_rndr_app->ShowCursor(!enabled);
+    m_player_controller->Enable(enabled);
 }
 
 void SampleApp::PauseSimulation()
@@ -176,15 +166,10 @@ void SampleApp::DrawBody(const Physics::Body& body)
         case Physics::ShapeType::Sphere:
         {
             const Physics::SphereShape* sphere = static_cast<Physics::SphereShape*>(body.shape);
-            mat *= Opal::Scale(sphere->GetRadius());
-            if (sphere->GetRadius() > 10.0f)
-            {
-                m_shape_renderer->DrawSphere(mat, m_default_material, 40, 40, 128, 128);
-            }
-            else
-            {
-                m_shape_renderer->DrawSphere(mat, m_default_material);
-            }
+            const Physics::real r = sphere->GetRadius();
+            mat *= Opal::Scale(r);
+            const bool large = r > 10.0f;
+            m_pbr_renderer.DrawSphere(mat, m_default_material, 1.0f, 1.0f, large ? 64 : 32, large ? 64 : 32);
             break;
         }
         case Physics::ShapeType::Box:
@@ -192,13 +177,15 @@ void SampleApp::DrawBody(const Physics::Body& body)
             const Physics::BoxShape* box = static_cast<Physics::BoxShape*>(body.shape);
             const Physics::Vector3r extent = box->GetExtent();
             mat *= Opal::Scale(extent.x, extent.y, extent.z);
-            m_shape_renderer->DrawCube(mat, m_default_material);
+            m_pbr_renderer.DrawCube(mat, m_default_material);
             break;
         }
         case Physics::ShapeType::Convex:
         {
-            const Rndr::Mesh& mesh = m_meshes.GetValue(body.shape);
-            m_shape_renderer->DrawMesh(mesh, mat, m_default_material);
+            const Rndr::Canvas::Mesh& mesh = m_meshes.GetValue(body.shape);
+            char key_buf[32];
+            std::snprintf(key_buf, sizeof(key_buf), "convex_%p", static_cast<const void*>(body.shape));
+            m_pbr_renderer.DrawMesh(Opal::StringUtf8(key_buf), mesh, mat, m_default_material);
             break;
         }
         default:
@@ -208,7 +195,7 @@ void SampleApp::DrawBody(const Physics::Body& body)
     }
 }
 
-void SampleApp::AddMesh(Physics::Shape* shape, Rndr::Mesh mesh)
+void SampleApp::AddMesh(Physics::Shape* shape, Rndr::Canvas::Mesh mesh)
 {
     m_meshes.Insert(shape, std::move(mesh));
 }

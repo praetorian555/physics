@@ -408,7 +408,7 @@ void Physics::ConvexShape::Build(Opal::ArrayView<Vector3r> vertices)
     Opal::DynamicArray<Vector3r> hull_points;
     Opal::DynamicArray<Triangle> triangles;
     BuildConvexHull(vertices, hull_points, triangles);
-    m_vertices = hull_points;
+    m_vertices = hull_points.Clone();
 
     m_bounds = Bounds3r(Point3r::Zero());
     for (const Vector3r& vertex : m_vertices)

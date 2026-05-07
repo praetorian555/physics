@@ -3,6 +3,8 @@
 #include "physics/shapes/box-shape.hpp"
 #include "physics/shapes/convex-shape.hpp"
 
+#include "rndr/canvas/vertex-layout.hpp"
+
 #include "shared/sample-app.hpp"
 
 class SandboxSampleApp : public SampleApp
@@ -20,7 +22,7 @@ public:
             body.elasticity = 0.5f;
             body.friction = 0.5f;
             auto vertices = GetBoxVertices(Physics::Vector3r(100, 1, 50), Physics::Vector3r(0, 0, 0));
-            Opal::ScopePtr<Physics::BoxShape> shape(Opal::GetDefaultAllocator());
+            Opal::ScopePtr<Physics::BoxShape> shape = Opal::MakeScoped<Physics::BoxShape>(Opal::GetDefaultAllocator());
             shape->Build(vertices);
             body.shape = shape.Get();
             m_shapes.PushBack(std::move(shape));
@@ -36,7 +38,7 @@ public:
             body.elasticity = 0.5f;
             body.friction = 0.5f;
             auto vertices = GetBoxVertices(Physics::Vector3r(1, 5, 50), Physics::Vector3r(0, 0, 0));
-            Opal::ScopePtr<Physics::BoxShape> shape(Opal::GetDefaultAllocator());
+            Opal::ScopePtr<Physics::BoxShape> shape = Opal::MakeScoped<Physics::BoxShape>(Opal::GetDefaultAllocator());
             shape->Build(vertices);
             body.shape = shape.Get();
             m_shapes.PushBack(std::move(shape));
@@ -52,7 +54,7 @@ public:
             body.elasticity = 0.5f;
             body.friction = 0.5f;
             auto vertices = GetBoxVertices(Physics::Vector3r(1, 5, 50), Physics::Vector3r(0, 0, 0));
-            Opal::ScopePtr<Physics::BoxShape> shape(Opal::GetDefaultAllocator());
+            Opal::ScopePtr<Physics::BoxShape> shape = Opal::MakeScoped<Physics::BoxShape>(Opal::GetDefaultAllocator());
             shape->Build(vertices);
             body.shape = shape.Get();
             m_shapes.PushBack(std::move(shape));
@@ -68,7 +70,7 @@ public:
             body.elasticity = 0.5f;
             body.friction = 0.5f;
             auto vertices = GetBoxVertices(Physics::Vector3r(100, 5, 1), Physics::Vector3r(0, 0, 0));
-            Opal::ScopePtr<Physics::BoxShape> shape(Opal::GetDefaultAllocator());
+            Opal::ScopePtr<Physics::BoxShape> shape = Opal::MakeScoped<Physics::BoxShape>(Opal::GetDefaultAllocator());
             shape->Build(vertices);
             body.shape = shape.Get();
             m_shapes.PushBack(std::move(shape));
@@ -84,7 +86,7 @@ public:
             body.elasticity = 0.5f;
             body.friction = 0.5f;
             auto vertices = GetBoxVertices(Physics::Vector3r(100, 5, 1), Physics::Vector3r(0, 0, 0));
-            Opal::ScopePtr<Physics::BoxShape> shape(Opal::GetDefaultAllocator());
+            Opal::ScopePtr<Physics::BoxShape> shape = Opal::MakeScoped<Physics::BoxShape>(Opal::GetDefaultAllocator());
             shape->Build(vertices);
             body.shape = shape.Get();
             m_shapes.PushBack(std::move(shape));
@@ -92,7 +94,7 @@ public:
         }
         {
             auto diamond_vertices = GetDiamondVertices();
-            Rndr::Mesh diamond_mesh = BuildDiamondMesh(diamond_vertices);
+            Rndr::Canvas::Mesh diamond_mesh = BuildDiamondMesh(diamond_vertices);
             Physics::Body body;
             body.position = Physics::Vector3r(0, 10, 0);
             body.orientation = Physics::Quatr::FromAxisAngleDegrees(Physics::Vector3r(1, 0, 0), -90);
@@ -101,7 +103,8 @@ public:
             body.inverse_mass = 1.0f;
             body.elasticity = 0.5f;
             body.friction = 0.5f;
-            Opal::ScopePtr<Physics::ConvexShape> shape(Opal::GetDefaultAllocator(), diamond_vertices);
+            Opal::ScopePtr<Physics::ConvexShape> shape =
+                Opal::MakeScoped<Physics::ConvexShape>(Opal::GetDefaultAllocator(), diamond_vertices);
             body.shape = shape.Get();
             AddMesh(body.shape, std::move(diamond_mesh));
             m_shapes.PushBack(std::move(shape));
@@ -170,7 +173,7 @@ public:
         return out;
     }
 
-    static Rndr::Mesh BuildDiamondMesh(Opal::ArrayView<Physics::Vector3r> vertices)
+    static Rndr::Canvas::Mesh BuildDiamondMesh(Opal::ArrayView<Physics::Vector3r> vertices)
     {
         Opal::DynamicArray<Physics::Vector3r> hull_points;
         Opal::DynamicArray<Physics::Triangle> hull_triangles;
@@ -178,45 +181,44 @@ public:
 
         struct Vertex
         {
-            Physics::Vector3r position;
-            Physics::Vector3r normal;
-            Physics::Vector2r uv;
+            Rndr::Vector3f position;
+            Rndr::Vector3f normal;
+            Rndr::Vector2f uv;
         };
 
-        Rndr::Mesh mesh;
+        Opal::DynamicArray<Vertex> mesh_vertices;
+        Opal::DynamicArray<Rndr::u32> mesh_indices;
         for (const Physics::Triangle& triangle : hull_triangles)
         {
             const Physics::Vector3r& a = hull_points[triangle.a];
             const Physics::Vector3r& b = hull_points[triangle.b];
             const Physics::Vector3r& c = hull_points[triangle.c];
-            const Physics::Vector3r ab = b - a;
-            const Physics::Vector3r ac = c - a;
-            const Physics::Vector3r normal = Opal::Normalize(Opal::Cross(ab, ac));
+            const Physics::Vector3r normal = Opal::Normalize(Opal::Cross(b - a, c - a));
             const Physics::Vector2r a_uv(0.5f + (std::atan2(a.z, a.x) / (2 * Opal::k_pi_float)),
                                          (0.5f - std::asin(a.y)) / Opal::k_pi_float);
             const Physics::Vector2r b_uv(0.5f + (std::atan2(b.z, b.x) / (2 * Opal::k_pi_float)),
                                          (0.5f - std::asin(b.y)) / Opal::k_pi_float);
             const Physics::Vector2r c_uv(0.5f + (std::atan2(c.z, c.x) / (2 * Opal::k_pi_float)),
                                          (0.5f - std::asin(c.y)) / Opal::k_pi_float);
-            const Vertex vertex_a{.position = a, .normal = normal, .uv = a_uv};
-            const Vertex vertex_b{.position = b, .normal = normal, .uv = b_uv};
-            const Vertex vertex_c{.position = c, .normal = normal, .uv = c_uv};
-            const Physics::i32 idx = static_cast<Physics::i32>(mesh.vertices.GetSize() / sizeof(Vertex));
-            const Physics::i32 idx_1 = idx + 1;
-            const Physics::i32 idx_2 = idx + 2;
-            mesh.vertices.Append(Opal::AsBytes(vertex_a));
-            mesh.vertices.Append(Opal::AsBytes(vertex_b));
-            mesh.vertices.Append(Opal::AsBytes(vertex_c));
-            mesh.indices.Append(Opal::AsBytes(idx));
-            mesh.indices.Append(Opal::AsBytes(idx_1));
-            mesh.indices.Append(Opal::AsBytes(idx_2));
+            const Rndr::u32 base = static_cast<Rndr::u32>(mesh_vertices.GetSize());
+            mesh_vertices.PushBack({a, normal, a_uv});
+            mesh_vertices.PushBack({b, normal, b_uv});
+            mesh_vertices.PushBack({c, normal, c_uv});
+            mesh_indices.PushBack(base);
+            mesh_indices.PushBack(base + 1);
+            mesh_indices.PushBack(base + 2);
         }
-        mesh.index_count = static_cast<Physics::i32>(mesh.indices.GetSize() / sizeof(Physics::i32));
-        mesh.vertex_count = static_cast<Physics::i32>(mesh.vertices.GetSize() / sizeof(Vertex));
-        mesh.index_size = 4;
-        mesh.vertex_size = sizeof(Vertex);
-        mesh.name = "Diamond";
-        return mesh;
+
+        Rndr::Canvas::VertexLayout layout;
+        layout.Add(Rndr::Canvas::Attrib::Position, Rndr::Canvas::Format::Float3);
+        layout.Add(Rndr::Canvas::Attrib::Normal, Rndr::Canvas::Format::Float3);
+        layout.Add(Rndr::Canvas::Attrib::UV, Rndr::Canvas::Format::Float2);
+
+        const Opal::ArrayView<const Rndr::u8> vertex_bytes(
+            reinterpret_cast<const Rndr::u8*>(mesh_vertices.GetData()), mesh_vertices.GetSize() * sizeof(Vertex));
+        const Opal::ArrayView<const Rndr::u8> index_bytes(
+            reinterpret_cast<const Rndr::u8*>(mesh_indices.GetData()), mesh_indices.GetSize() * sizeof(Rndr::u32));
+        return Rndr::Canvas::Mesh(layout, vertex_bytes, index_bytes, "Diamond");
     }
 
 private:

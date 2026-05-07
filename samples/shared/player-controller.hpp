@@ -2,13 +2,14 @@
 
 #include "rndr/application.hpp"
 #include "rndr/fly-camera.hpp"
+#include "rndr/input-system.hpp"
 #include "rndr/types.hpp"
 
 class PlayerController
 {
 public:
     PlayerController(Rndr::Application& app, Rndr::i32 screen_width, Rndr::i32 screen_height, const Rndr::FlyCameraDesc& camera_desc,
-                      Rndr::f32 move_speed, Rndr::f32 yaw_speed, Rndr::f32 pitch_speed);
+                     Rndr::f32 move_speed, Rndr::f32 yaw_speed, Rndr::f32 pitch_speed);
     ~PlayerController() = default;
 
     void Enable(bool enable);
@@ -31,13 +32,6 @@ public:
     void Tick(Rndr::f32 delta_seconds);
 
 private:
-    void HandleLookVertical(Rndr::InputPrimitive, Rndr::f32 axis_value);
-    void HandleLookVerticalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool);
-    void HandleLookHorizontal(Rndr::InputPrimitive, Rndr::f32 axis_value);
-    void HandleLookHorizontalButton(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool);
-    void HandleMoveForward(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool);
-    void HandleMoveRight(Rndr::InputPrimitive, Rndr::InputTrigger trigger, Rndr::f32 value, bool);
-
     Rndr::FlyCamera m_fly_camera;
     Rndr::InputContext m_input_context;
     Rndr::f32 m_move_speed = 10.0f;

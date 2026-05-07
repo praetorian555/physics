@@ -26,7 +26,7 @@ public:
                 body.inverse_mass = 1.0f;
                 body.elasticity = 0.5f;
                 body.friction = 0.5f;
-                Opal::ScopePtr<Physics::SphereShape> sphere(allocator, radius);
+                Opal::ScopePtr<Physics::SphereShape> sphere = Opal::MakeScoped<Physics::SphereShape>(allocator, radius);
                 body.shape = sphere.Get();
                 AddBody(body);
                 m_shapes.PushBack(std::move(sphere));
@@ -47,7 +47,7 @@ public:
                 ground.inverse_mass = 0.0f;
                 ground.elasticity = 0.99f;
                 ground.friction = 0.5f;
-                Opal::ScopePtr<Physics::SphereShape> ground_sphere(allocator, radius);
+                Opal::ScopePtr<Physics::SphereShape> ground_sphere = Opal::MakeScoped<Physics::SphereShape>(allocator, radius);
                 ground.shape = ground_sphere.Get();
                 AddBody(ground);
                 m_shapes.PushBack(std::move(ground_sphere));

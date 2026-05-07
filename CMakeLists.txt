@@ -4,7 +4,7 @@ project(
         PHYSICS
         VERSION 0.1.0
         DESCRIPTION "3D Physics Engine with C++"
-        LANGUAGES CXX)
+        LANGUAGES C CXX)
 
 # Library options
 option(PHYSICS_HARDENING "Enable address sanitizer" ON)
@@ -15,7 +15,7 @@ option(PHYSICS_BUILD_TESTS "Build tests" ON)
 message(STATUS "PHYSICS_HARDENING ${PHYSICS_HARDENING}")
 message(STATUS "PHYSICS_REAL_AS_DOUBLE ${PHYSICS_REAL_AS_DOUBLE}")
 message(STATUS "PHYSICS_BUILD_SAMPLES ${PHYSICS_BUILD_SAMPLES}")
-message(STATUS "PHYSICS_BUILD_TESTS" ${PHYSICS_BUILD_TESTS})
+message(STATUS "PHYSICS_BUILD_TESTS ${PHYSICS_BUILD_TESTS}")
 
 # Don't use C++ 20 modules
 set(CMAKE_CXX_SCAN_FOR_MODULES 0)
@@ -40,6 +40,7 @@ if (PHYSICS_HARDENING)
 endif ()
 
 include(FetchContent)
+include(cmake/cpm.cmake)
 if (NOT TARGET opal)
     FetchContent_Declare(
             opal
@@ -82,14 +83,13 @@ target_include_directories(physics PRIVATE ${PROJECT_SOURCE_DIR}/samples)
 if (PHYSICS_BUILD_SAMPLES)
 
     if (NOT TARGET rndr)
-        FetchContent_Declare(
-                rndr
+        set(RNDR_HARDENING ${PHYSICS_HARDENING} CACHE BOOL "" FORCE)
+        set(RNDR_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+        CPMAddPackage(
+                NAME rndr
                 GIT_REPOSITORY https://github.com/praetorian555/rndr
                 GIT_TAG master
         )
-        set(RNDR_HARDENING ${PHYSICS_HARDENING} CACHE BOOL "" FORCE)
-        set(RNDR_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
-        FetchContent_MakeAvailable(rndr)
     endif ()
 
     add_library(shared
