@@ -4,7 +4,7 @@ PlayerController::PlayerController(Rndr::Application& app, Rndr::i32 screen_widt
                                      const Rndr::FlyCameraDesc& camera_desc, Rndr::f32 move_speed, Rndr::f32 yaw_speed,
                                      Rndr::f32 pitch_speed)
     : m_fly_camera(screen_width, screen_height, camera_desc),
-      m_input_context("Example Controller Input Context"),
+      m_input_context("Player Controller Input Context"),
       m_move_speed(move_speed),
       m_yaw_speed(yaw_speed),
       m_pitch_speed(pitch_speed)

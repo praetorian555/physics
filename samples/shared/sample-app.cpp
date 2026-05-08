@@ -22,18 +22,29 @@ SampleApp::SampleApp()
       m_context(Rndr::Canvas::Context::Init(m_window.Clone(), {.vsync_enabled = false})),
       m_player_controller(Opal::MakeScoped<PlayerController>(
           Opal::GetDefaultAllocator(), *m_rndr_app, k_screen_width, k_screen_height,
-          Rndr::FlyCameraDesc{.start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}},
-          10.0f, 0.005f, 0.005f)),
+          Rndr::FlyCameraDesc{.start_position = {0.0f, 10.0f, 0.0f}, .start_yaw_radians = 0, .projection_desc = {.far = 1000.0f}}, 10.0f,
+          0.005f, 0.005f)),
       m_grid_renderer(Opal::Ref<Rndr::Canvas::Context>{&m_context}),
       m_pbr_renderer(Opal::Ref<Rndr::Canvas::Context>{&m_context})
 {
+    m_window->EnableHighPrecisionCursorMode(true);
+
     m_default_material.albedo_color = Rndr::Vector4f{0.7f, 0.7f, 0.75f, 1.0f};
     m_default_material.roughness = Rndr::Vector4f{0.5f, 0.5f, 0.0f, 0.0f};
     m_default_material.metallic_factor = 0.1f;
 
-    Rndr::InputContext& input_context = m_rndr_app->GetInputSystemChecked().GetCurrentContext();
+    m_scratch_allocator = Opal::MakeScoped<Opal::LinearAllocator>(nullptr, "Scratch Allocator");
+    Opal::PushScratchAllocator(m_scratch_allocator.Get());
+
+    Rndr::InputContext& input_context = m_rndr_app->GetInputSystemChecked().GetContextByName("Default");
     auto on_release = [](auto fn)
-    { return [fn](Rndr::Trigger trigger, bool) { if (trigger == Rndr::Trigger::Released) fn(); }; };
+    {
+        return [fn](Rndr::Trigger trigger, bool)
+        {
+            if (trigger == Rndr::Trigger::Released)
+                fn();
+        };
+    };
     input_context.AddAction("Toggle movement controls")
         .OnButton(on_release([this] { ToggleMovementControls(); }))
         .Bind(Rndr::Key::F1, Rndr::Trigger::Released);
@@ -46,6 +57,9 @@ SampleApp::SampleApp()
     input_context.AddAction("Advance Simulation")
         .OnButton(on_release([this] { AdvanceSimulationFrame(); }))
         .Bind(Rndr::Key::N, Rndr::Trigger::Released);
+    input_context.AddAction("Exit")
+        .OnButton(on_release([this] { m_window->RequestClose(); }))
+        .Bind(Rndr::Key::Escape, Rndr::Trigger::Released);
 
     m_rndr_app->on_window_resize.Bind(
         [this](const Rndr::GenericWindow& w, Rndr::i32 width, Rndr::i32 height)
@@ -135,6 +149,9 @@ void SampleApp::ToggleMovementControls()
     const bool enabled = !m_player_controller->IsEnabled();
     m_rndr_app->ShowCursor(!enabled);
     m_player_controller->Enable(enabled);
+    const Rndr::CursorPositionMode mode = m_window->GetCursorPositionMode();
+    m_window->SetCursorPositionMode(mode == Rndr::CursorPositionMode::Normal ? Rndr::CursorPositionMode::ResetToCenter
+                                                                             : Rndr::CursorPositionMode::Normal);
 }
 
 void SampleApp::PauseSimulation()

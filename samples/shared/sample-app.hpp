@@ -41,6 +41,7 @@ protected:
     Opal::Ref<Rndr::GenericWindow> m_window;
     Rndr::Canvas::Context m_context;
     Opal::ScopePtr<PlayerController> m_player_controller;
+    Opal::ScopePtr<Opal::LinearAllocator> m_scratch_allocator;
     Rndr::Canvas::GridRenderer m_grid_renderer;
     Rndr::Canvas::PbrRenderer m_pbr_renderer;
     Rndr::Canvas::PbrMaterialDesc m_default_material;
