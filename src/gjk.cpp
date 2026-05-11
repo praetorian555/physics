@@ -47,6 +47,15 @@ Physics::Vector2r Physics::SignedVolume1D(const Vector3r& start, const Vector3r&
 namespace
 {
 
+/**
+ * @brief Check whether two scalars share the same sign, treating zero as matching either sign.
+ * @param a First scalar.
+ * @param b Second scalar.
+ * @return True if both values are non-negative or both are non-positive, false otherwise.
+ * @example
+ *     bool same = IsSameSign(-2.0f, -0.5f);  // true
+ *     bool diff = IsSameSign(-1.0f, 1.0f);   // false
+ */
 bool IsSameSign(Physics::real a, Physics::real b)
 {
     return (a >= 0 && b >= 0) || (a <= 0 && b <= 0);
@@ -111,7 +120,7 @@ Physics::Vector3r Physics::SignedVolume2D(const Vector3r& a, const Vector3r& b, 
     }
 
     // If we are here, we need to project the origin onto the edges and determine the closest point.
-    real distance = 1e10;
+    real distance = PHYSICS_CONST(1e10);
     Vector3r barycentric_coordinates(1, 0, 0);
     for (i32 i = 0; i < 3; ++i)
     {
@@ -156,7 +165,7 @@ Physics::Vector4r Physics::SignedVolume3D(const Vector3r& a, const Vector3r& b, 
     }
 
     // If we are here, we need to project the origin onto the faces and determine the closest point.
-    real distance = 1e10;
+    real distance = PHYSICS_CONST(1e10);
     Vector4r barycentric_coordinates = Vector4r::Zero();
     for (i32 i = 0; i < 4; i++)
     {
@@ -180,4 +189,239 @@ Physics::Vector4r Physics::SignedVolume3D(const Vector3r& a, const Vector3r& b, 
         }
     }
     return barycentric_coordinates;
+}
+
+Physics::Point Physics::Support(const Body& body_a, const Body& body_b, const Vector3r& direction, const real bias)
+{
+    PHYSICS_ASSERT(body_a.shape != nullptr, "Shape of body A cannot be null");
+    PHYSICS_ASSERT(body_b.shape != nullptr, "Shape of body B cannot be null");
+    PHYSICS_ASSERT(Opal::LengthSquared(direction) > 0.0f, "Direction vector cannot be zero");
+
+    Point out;
+    out.point_on_body_a = body_a.shape->Support(direction, body_a.position, body_b.orientation, bias);
+    out.point_on_body_b = body_b.shape->Support(-1 * direction, body_b.position, body_b.orientation, bias);
+    out.point_on_mink_diff = out.point_on_body_a - out.point_on_body_b;
+    return out;
+}
+
+namespace
+{
+/**
+ * @brief Check whether a candidate support point is already present in the simplex.
+ * @param simplex_points Current simplex points; only their `point_on_mink_diff` is compared.
+ * @param new_point Candidate support point to test for duplication.
+ * @return True if any existing simplex point lies within 1e-6 (squared distance) of new_point on the
+ *         Minkowski difference, false otherwise.
+ * @example
+ *     if (HasPoint(simplex_points, candidate)) { break; }  // GJK has converged.
+ */
+bool HasPoint(const Opal::InPlaceArray<Physics::Point, 4>& simplex_points, const Physics::Point& new_point)
+{
+    constexpr Physics::real k_precision = PHYSICS_CONST(1e-6);
+    for (Physics::i32 i = 0; i < 4; i++)
+    {
+        const Physics::Vector3r delta = simplex_points[i].point_on_mink_diff - new_point.point_on_mink_diff;
+        if (Opal::LengthSquared(delta) < k_precision * k_precision)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @brief Reduce a GJK simplex to its sub-simplex closest to the origin and compute the next search direction.
+ * @param simplex_points Current simplex (2, 3, or 4 points) on the Minkowski difference.
+ * @param num_points Number of valid entries in simplex_points; must be 2, 3, or 4.
+ * @param out_new_direction Output direction from the simplex's closest feature toward the origin.
+ * @param out_lambdas Output barycentric weights of the origin's projection; entries past num_points are unset.
+ * @return True if the origin coincides with the simplex's closest point (squared distance < 1e-8),
+ *         indicating intersection; false otherwise.
+ * @pre num_points must be 2, 3, or 4. Cases outside this range leave outputs unset.
+ * @example
+ *     Vector3r dir; Vector4r lambdas;
+ *     if (SimplexSignedVolumes(simplex_points, num_points, dir, lambdas)) {
+ *         // Origin is inside the simplex; shapes intersect.
+ *     }
+ */
+bool SimplexSignedVolumes(const Opal::InPlaceArray<Physics::Point, 4>& simplex_points, Physics::i32 num_points,
+                          Physics::Vector3r& out_new_direction, Physics::Vector4r& out_lambdas)
+{
+    PHYSICS_ASSERT((num_points == 2) || (num_points == 3) || (num_points == 4), "Number of points must be 2, 3 or 4");
+
+    using namespace Physics;
+    constexpr real k_epsilon_sq = PHYSICS_CONST(1e-4) * PHYSICS_CONST(1e-4);
+    bool does_intersect = false;
+    switch (num_points)
+    {
+        case 2:
+        {
+            Vector2r lambdas = SignedVolume1D(simplex_points[0].point_on_mink_diff, simplex_points[1].point_on_mink_diff);
+            out_new_direction = Vector3r::Zero();
+            for (i32 i = 0; i < num_points; i++)
+            {
+                out_new_direction += simplex_points[i].point_on_mink_diff * lambdas[i];
+            }
+            // Point towards the origin
+            out_new_direction *= -1;
+            does_intersect = Opal::LengthSquared(out_new_direction) < k_epsilon_sq;
+            out_lambdas[0] = lambdas[0];
+            out_lambdas[1] = lambdas[1];
+            break;
+        }
+        case 3:
+        {
+            Vector3r lambdas = SignedVolume2D(simplex_points[0].point_on_mink_diff, simplex_points[1].point_on_mink_diff,
+                                              simplex_points[2].point_on_mink_diff);
+            out_new_direction = Vector3r::Zero();
+            for (i32 i = 0; i < num_points; i++)
+            {
+                out_new_direction += simplex_points[i].point_on_mink_diff * lambdas[i];
+            }
+            // Point towards the origin
+            out_new_direction *= -1;
+            does_intersect = Opal::LengthSquared(out_new_direction) < k_epsilon_sq;
+            out_lambdas[0] = lambdas[0];
+            out_lambdas[1] = lambdas[1];
+            out_lambdas[2] = lambdas[2];
+            break;
+        }
+        case 4:
+        {
+            Vector4r lambdas = SignedVolume3D(simplex_points[0].point_on_mink_diff, simplex_points[1].point_on_mink_diff,
+                                              simplex_points[2].point_on_mink_diff, simplex_points[3].point_on_mink_diff);
+            out_new_direction = Vector3r::Zero();
+            for (i32 i = 0; i < num_points; i++)
+            {
+                out_new_direction += simplex_points[i].point_on_mink_diff * lambdas[i];
+            }
+            // Point towards the origin
+            out_new_direction *= -1;
+            does_intersect = Opal::LengthSquared(out_new_direction) < k_epsilon_sq;
+            out_lambdas[0] = lambdas[0];
+            out_lambdas[1] = lambdas[1];
+            out_lambdas[2] = lambdas[2];
+            out_lambdas[3] = lambdas[3];
+            break;
+        }
+    }
+    return does_intersect;
+}
+
+/**
+ * @brief Compact a simplex by removing points whose barycentric weight is exactly zero.
+ * @param in_out_points Simplex points; surviving entries are moved to the front, the rest zeroed.
+ * @param in_out_lambdas Matching barycentric weights; surviving entries are moved to the front, the rest set to zero.
+ * @return Number of surviving points (those with non-zero lambda), in the range [0, 4].
+ * @example
+ *     // After SimplexSignedVolumes drops a vertex (lambda == 0), shrink the simplex:
+ *     const i32 num_points = SortValids(simplex_points, lambdas);
+ */
+Physics::i32 SortValids(Opal::InPlaceArray<Physics::Point, 4>& in_out_points, Physics::Vector4r& in_out_lambdas)
+{
+    using namespace Physics;
+    bool valids[4] = {false, false, false, false};
+    for (i32 i = 0; i < 4; i++)
+    {
+        valids[i] = true;
+        if (in_out_lambdas[i] == 0.0f)
+        {
+            valids[i] = false;
+        }
+    }
+
+    Vector4r valid_lambdas = Vector4r::Zero();
+    i32 valid_count = 0;
+    Opal::InPlaceArray<Point, 4> valid_points;
+    memset(&valid_points, 0, sizeof(valid_points));
+    for (i32 i = 0; i < 4; i++)
+    {
+        if (valids[i])
+        {
+            valid_points[valid_count] = in_out_points[i];
+            valid_lambdas[valid_count] = in_out_lambdas[i];
+            valid_count++;
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        in_out_points[i] = valid_points[i];
+        in_out_lambdas[i] = valid_lambdas[i];
+    }
+    return valid_count;
+}
+
+}  // namespace
+
+bool Physics::IntersectGJK(const Body& body_a, const Body& body_b)
+{
+    // GJK intersection test.
+    //
+    // Two convex shapes A and B intersect iff their Minkowski difference A - B = { a - b : a in A, b in B }
+    // contains the origin. GJK searches for the origin inside this set without ever building it explicitly,
+    // using only the support function (the point on A - B the furthest along a query direction).
+    //
+    // The algorithm maintains a simplex (1 to 4 points) of support points on A - B and iteratively refines it:
+    //   1. Seed the simplex with a support point in an arbitrary direction. The next search direction is the
+    //      vector from that point toward the origin.
+    //   2. Each iteration, query a new support point in the current direction. If it is not strictly past the
+    //      origin along that direction (dot < 0), the origin lies outside A - B and the shapes are disjoint.
+    //   3. Add the new point to the simplex and reduce it to the sub-simplex closest to the origin via
+    //      SimplexSignedVolumes. That routine returns the barycentric weights of the origin's projection
+    //      onto the simplex's closest feature and the next search direction (from that feature toward the origin).
+    //   4. If the search direction's squared length stops decreasing, or the new support is a duplicate, we
+    //      have converged without enclosing the origin: the shapes are disjoint.
+    //   5. SortValids compacts the simplex by dropping vertices whose barycentric weight is zero (they lie
+    //      outside the closest feature) and returns the surviving count. If all four points survive, the
+    //      origin is enclosed by the tetrahedron and the shapes intersect.
+    //
+    // Termination: each iteration either encloses the origin, proves separation, or strictly decreases the
+    // distance from the simplex to the origin, so the loop is finite for non-degenerate convex inputs.
+
+    PHYSICS_ASSERT(body_a.shape != nullptr, "Shape of body A cannot be null");
+    PHYSICS_ASSERT(body_b.shape != nullptr, "Shape of body B cannot be null");
+
+    constexpr Vector3r k_origin(0, 0, 0);
+    i32 num_points = 1;
+    Opal::InPlaceArray<Point, 4> simplex_points;
+    real closest_distance = Opal::k_inf_float;
+    bool does_contain_origin = false;
+
+    simplex_points[0] = Support(body_a, body_b, Vector3r(1, 1, 1), 0);
+    Vector3r new_direction = -1 * simplex_points[0].point_on_mink_diff;
+    do
+    {
+        const Point new_point = Support(body_a, body_b, new_direction, 0);
+        if (HasPoint(simplex_points, new_point))
+        {
+            break;
+        }
+        simplex_points[num_points++] = new_point;
+
+        // If this new point hasn't moved pass the origin, then the origin can't be in the set, so no collision.
+        if (Opal::Dot(new_direction, new_point.point_on_mink_diff - k_origin) < 0)
+        {
+            break;
+        }
+
+        Vector4r lambdas;
+        does_contain_origin = SimplexSignedVolumes(simplex_points, num_points, new_direction, lambdas);
+        if (does_contain_origin)
+        {
+            break;
+        }
+
+        // If we are not getting closer to the origin there is no intersection so exit early
+        const real distance = Opal::LengthSquared(new_direction);
+        if (distance >= closest_distance)
+        {
+            break;
+        }
+        closest_distance = distance;
+
+        num_points = SortValids(simplex_points, lambdas);
+        does_contain_origin = (num_points == 4);
+    } while (!does_contain_origin);
+    return does_contain_origin;
 }

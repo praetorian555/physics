@@ -1,5 +1,6 @@
 #pragma once
 
+#include "physics/body.hpp"
 #include "physics/core.hpp"
 
 namespace Physics
@@ -57,4 +58,36 @@ Vector3r SignedVolume2D(const Vector3r& a, const Vector3r& b, const Vector3r& c)
  */
 Vector4r SignedVolume3D(const Vector3r& a, const Vector3r& b, const Vector3r& c, const Vector3r& d);
 
-}
+struct Point
+{
+    Vector3r point_on_mink_diff;
+    Vector3r point_on_body_a;
+    Vector3r point_on_body_b;
+};
+
+/**
+ * @brief Compute a support point on the Minkowski difference of two bodies in the given direction. Support point is a point furthest
+ * along the direction on the minkowski difference of the shapes.
+ * @param body_a First body. Must have a valid shape.
+ * @param body_b Second body. Must have a valid shape.
+ * @param direction Search direction in world space. Need not be normalized, but must be non-zero.
+ * @param bias Outward expansion applied to each shape's support, used to avoid degenerate
+ *             configurations. Pass 0 for the exact support.
+ * @return A Point containing the support on body_a (in direction), the support on body_b
+ *         (in -direction), and their difference on the Minkowski difference (point_on_body_a - point_on_body_b).
+ * @pre body_a.shape and body_b.shape must be non-null.
+ * @pre direction must be non-zero.
+ */
+Point Support(const Body& body_a, const Body& body_b, const Vector3r& direction, real bias);
+
+/**
+ * @brief Test whether two convex bodies intersect using the Gilbert-Johnson-Keerthi algorithm.
+ * @param body_a First body. Must have a valid convex shape.
+ * @param body_b Second body. Must have a valid convex shape.
+ * @return True if the bodies' shapes overlap (the Minkowski difference contains the origin),
+ *         false otherwise. Touching-only configurations are not guaranteed to report as intersecting.
+ * @pre a.shape and b.shape must be non-null and represent convex geometry.
+ */
+bool IntersectGJK(const Body& body_a, const Body& body_b);
+
+}  // namespace Physics
