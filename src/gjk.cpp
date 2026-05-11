@@ -198,8 +198,9 @@ Physics::Point Physics::Support(const Body& body_a, const Body& body_b, const Ve
     PHYSICS_ASSERT(Opal::LengthSquared(direction) > 0.0f, "Direction vector cannot be zero");
 
     Point out;
-    out.point_on_body_a = body_a.shape->Support(direction, body_a.position, body_b.orientation, bias);
-    out.point_on_body_b = body_b.shape->Support(-1 * direction, body_b.position, body_b.orientation, bias);
+    const Vector3r normalized_direction = Opal::Normalize(direction);
+    out.point_on_body_a = body_a.shape->Support(normalized_direction, body_a.position, body_b.orientation, bias);
+    out.point_on_body_b = body_b.shape->Support(-1 * normalized_direction, body_b.position, body_b.orientation, bias);
     out.point_on_mink_diff = out.point_on_body_a - out.point_on_body_b;
     return out;
 }

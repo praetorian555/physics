@@ -1,8 +1,51 @@
 #include "catch2-helper.hpp"
 
 #include "physics/gjk.hpp"
+#include "physics/shapes/box-shape.hpp"
+#include "physics/shapes/sphere-shape.hpp"
 
 using namespace Physics;
+
+namespace
+{
+Body MakeSphereBody(SphereShape& shape, const Vector3r& position)
+{
+    Body body;
+    body.position = position;
+    body.orientation = Quatr::Identity();
+    body.linear_velocity = Vector3r::Zero();
+    body.angular_velocity = Vector3r::Zero();
+    body.inverse_mass = 1.0f;
+    body.elasticity = 1.0f;
+    body.friction = 0.0f;
+    body.shape = &shape;
+    return body;
+}
+
+Opal::DynamicArray<Vector3r> MakeBoxVertices(const Vector3r& size)
+{
+    return Opal::DynamicArray<Vector3r>{
+        Vector3r(-size.x / 2, -size.y / 2, -size.z / 2), Vector3r(size.x / 2, -size.y / 2, -size.z / 2),
+        Vector3r(-size.x / 2, size.y / 2, -size.z / 2),  Vector3r(size.x / 2, size.y / 2, -size.z / 2),
+        Vector3r(-size.x / 2, -size.y / 2, size.z / 2),  Vector3r(size.x / 2, -size.y / 2, size.z / 2),
+        Vector3r(-size.x / 2, size.y / 2, size.z / 2),   Vector3r(size.x / 2, size.y / 2, size.z / 2),
+    };
+}
+
+Body MakeBoxBody(BoxShape& shape, const Vector3r& position, const Quatr& orientation = Quatr::Identity())
+{
+    Body body;
+    body.position = position;
+    body.orientation = orientation;
+    body.linear_velocity = Vector3r::Zero();
+    body.angular_velocity = Vector3r::Zero();
+    body.inverse_mass = 1.0f;
+    body.elasticity = 1.0f;
+    body.friction = 0.0f;
+    body.shape = &shape;
+    return body;
+}
+}  // namespace
 
 TEST_CASE("SignedVolume1D - Origin projects to middle of segment", "[GJK]")
 {
@@ -427,4 +470,134 @@ TEST_CASE("SignedVolume3D - Symmetric tetrahedron with origin at centroid", "[GJ
     REQUIRE(result[1] == Catch::Approx(0.25f));
     REQUIRE(result[2] == Catch::Approx(0.25f));
     REQUIRE(result[3] == Catch::Approx(0.25f));
+}
+
+TEST_CASE("IntersectGJK - Coincident spheres intersect", "[GJK]")
+{
+    SphereShape shape_a(1.0f);
+    SphereShape shape_b(1.0f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(0, 0, 0));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Overlapping spheres intersect", "[GJK]")
+{
+    SphereShape shape_a(1.0f);
+    SphereShape shape_b(1.0f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(1.5f, 0, 0));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Disjoint spheres do not intersect", "[GJK]")
+{
+    SphereShape shape_a(1.0f);
+    SphereShape shape_b(1.0f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(5, 0, 0));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Spheres separated along Y axis do not intersect", "[GJK]")
+{
+    SphereShape shape_a(0.5f);
+    SphereShape shape_b(0.5f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(0, 3, 0));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Spheres separated along Z axis do not intersect", "[GJK]")
+{
+    SphereShape shape_a(0.5f);
+    SphereShape shape_b(0.5f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(0, 0, 3));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Sphere fully contained inside larger sphere intersects", "[GJK]")
+{
+    SphereShape shape_a(5.0f);
+    SphereShape shape_b(0.5f);
+    const Body body_a = MakeSphereBody(shape_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeSphereBody(shape_b, Vector3r(1, 1, 1));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Sphere and box overlap", "[GJK]")
+{
+    SphereShape sphere(1.0f);
+    BoxShape box;
+    auto vertices = MakeBoxVertices(Vector3r(2, 2, 2));
+    box.Build(Opal::ArrayView<Vector3r>(vertices.GetData(), vertices.GetSize()));
+    const Body body_a = MakeSphereBody(sphere, Vector3r(1.5f, 0, 0));
+    const Body body_b = MakeBoxBody(box, Vector3r(0, 0, 0));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Sphere and box disjoint", "[GJK]")
+{
+    SphereShape sphere(0.5f);
+    BoxShape box;
+    auto vertices = MakeBoxVertices(Vector3r(2, 2, 2));
+    box.Build(Opal::ArrayView<Vector3r>(vertices.GetData(), vertices.GetSize()));
+    const Body body_a = MakeSphereBody(sphere, Vector3r(5, 0, 0));
+    const Body body_b = MakeBoxBody(box, Vector3r(0, 0, 0));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Overlapping boxes intersect", "[GJK]")
+{
+    BoxShape box_a;
+    BoxShape box_b;
+    auto vertices_a = MakeBoxVertices(Vector3r(2, 2, 2));
+    auto vertices_b = MakeBoxVertices(Vector3r(2, 2, 2));
+    box_a.Build(Opal::ArrayView<Vector3r>(vertices_a.GetData(), vertices_a.GetSize()));
+    box_b.Build(Opal::ArrayView<Vector3r>(vertices_b.GetData(), vertices_b.GetSize()));
+    const Body body_a = MakeBoxBody(box_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeBoxBody(box_b, Vector3r(1.5f, 0, 0));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Disjoint boxes do not intersect", "[GJK]")
+{
+    BoxShape box_a;
+    BoxShape box_b;
+    auto vertices_a = MakeBoxVertices(Vector3r(2, 2, 2));
+    auto vertices_b = MakeBoxVertices(Vector3r(2, 2, 2));
+    box_a.Build(Opal::ArrayView<Vector3r>(vertices_a.GetData(), vertices_a.GetSize()));
+    box_b.Build(Opal::ArrayView<Vector3r>(vertices_b.GetData(), vertices_b.GetSize()));
+    const Body body_a = MakeBoxBody(box_a, Vector3r(0, 0, 0));
+    const Body body_b = MakeBoxBody(box_b, Vector3r(5, 0, 0));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Rotated box overlaps neighbor", "[GJK]")
+{
+    BoxShape box_a;
+    BoxShape box_b;
+    auto vertices_a = MakeBoxVertices(Vector3r(2, 2, 2));
+    auto vertices_b = MakeBoxVertices(Vector3r(2, 2, 2));
+    box_a.Build(Opal::ArrayView<Vector3r>(vertices_a.GetData(), vertices_a.GetSize()));
+    box_b.Build(Opal::ArrayView<Vector3r>(vertices_b.GetData(), vertices_b.GetSize()));
+    const Quatr rotation = Quatr::FromAxisAngleRadians(Vector3r(0, 0, 1), Opal::k_pi_float / 4.0f);
+    const Body body_a = MakeBoxBody(box_a, Vector3r(0, 0, 0), rotation);
+    const Body body_b = MakeBoxBody(box_b, Vector3r(2.2f, 0, 0));
+    REQUIRE(IntersectGJK(body_a, body_b));
+}
+
+TEST_CASE("IntersectGJK - Rotated box clears axis-aligned neighbor", "[GJK]")
+{
+    BoxShape box_a;
+    BoxShape box_b;
+    auto vertices_a = MakeBoxVertices(Vector3r(2, 2, 2));
+    auto vertices_b = MakeBoxVertices(Vector3r(2, 2, 2));
+    box_a.Build(Opal::ArrayView<Vector3r>(vertices_a.GetData(), vertices_a.GetSize()));
+    box_b.Build(Opal::ArrayView<Vector3r>(vertices_b.GetData(), vertices_b.GetSize()));
+    const Quatr rotation = Quatr::FromAxisAngleRadians(Vector3r(0, 0, 1), Opal::k_pi_float / 4.0f);
+    const Body body_a = MakeBoxBody(box_a, Vector3r(0, 0, 0), rotation);
+    const Body body_b = MakeBoxBody(box_b, Vector3r(6.0f, 0, 0));
+    REQUIRE_FALSE(IntersectGJK(body_a, body_b));
 }
